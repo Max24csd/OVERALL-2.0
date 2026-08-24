@@ -1,0 +1,12 @@
+<section class="report-section">
+  <div class="section-bar">{{ titulo }}</div>
+  <div class="report-photo-grid">
+    {% for foto in fotos %}
+      <article class="report-photo photo-item">
+        <img src="{{ foto.imagen.url }}" alt="{{ foto.titulo|default:'Fotografía de inspección' }}">
+        {% if foto.titulo %}<h3>{{ foto.titulo }}</h3>{% endif %}
+        {% if foto.descripcion %}<p>{{ foto.descripcion }}</p>{% endif %}
+      </article>
+    {% empty %}<p class="empty-photo-note">No se registraron fotografías en esta sección.</p>{% endfor %}
+  </div>
+</section>

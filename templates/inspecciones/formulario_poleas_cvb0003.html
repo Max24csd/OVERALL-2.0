@@ -1,0 +1,1022 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>
+        Poleas {{ inspeccion.faja.tag }}
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/app.css' %}"
+    >
+
+    <style>
+        :root {
+            --poleas-navy: #0d3564;
+            --poleas-blue: #0c5fa8;
+            --poleas-line: #b7c7d9;
+            --poleas-light: #f5f8fc;
+            --poleas-green: #00a651;
+            --poleas-yellow: #f4d400;
+            --poleas-red: #d62828;
+            --poleas-gray: #64748b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        .poleas-page {
+            width: min(1520px, calc(100% - 28px));
+            margin: 20px auto 110px;
+        }
+
+        .poleas-topbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            min-height: 66px;
+            padding: 10px 18px;
+            background: #071b35;
+            color: #ffffff;
+            box-shadow: 0 6px 20px rgba(15, 35, 62, 0.16);
+        }
+
+        .poleas-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .poleas-brand img {
+            width: 44px;
+            height: 44px;
+            object-fit: contain;
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 4px;
+        }
+
+        .poleas-brand strong,
+        .poleas-brand span {
+            display: block;
+        }
+
+        .poleas-brand span {
+            margin-top: 2px;
+            font-size: 12px;
+            opacity: 0.78;
+        }
+        .poleas-diagrama-seccion {
+    margin: 14px 0;
+    border: 1px solid #b7c7d9;
+    background: #ffffff;
+}
+
+.poleas-diagrama-titulo {
+    padding: 10px 12px;
+    background: #123e70;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 800;
+    text-align: center;
+}
+
+.poleas-diagrama-contenedor {
+    padding: 12px;
+    background: #ffffff;
+}
+
+.poleas-diagrama-contenedor img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 430px;
+    object-fit: contain;
+}
+
+        .poleas-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .poleas-document {
+            background: #ffffff;
+            border: 1px solid #c7d3e0;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(15, 35, 62, 0.10);
+        }
+
+        .poleas-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 24px;
+            padding: 22px 24px;
+            border-bottom: 1px solid var(--poleas-line);
+            background: linear-gradient(180deg, #ffffff, #f8fbff);
+        }
+
+        .poleas-heading h1 {
+            margin: 0;
+            color: #10223e;
+            font-size: clamp(22px, 2.2vw, 34px);
+        }
+
+        .poleas-heading p {
+            margin: 6px 0 0;
+            color: #5d6f86;
+        }
+
+        .poleas-cover {
+            padding: 14px;
+            background: #ffffff;
+        }
+
+        .poleas-cover-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.25fr) minmax(360px, 0.75fr);
+            gap: 12px;
+        }
+
+        .poleas-data-table {
+            display: grid;
+            grid-template-columns: 150px 1fr 150px 1fr;
+            border-top: 1px solid var(--poleas-line);
+            border-left: 1px solid var(--poleas-line);
+        }
+
+        .poleas-data-table > div {
+            min-height: 48px;
+            padding: 9px 10px;
+            border-right: 1px solid var(--poleas-line);
+            border-bottom: 1px solid var(--poleas-line);
+            display: flex;
+            align-items: center;
+        }
+
+        .poleas-data-table .label {
+            background: #eef4fa;
+            color: var(--poleas-navy);
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .poleas-data-table .value {
+            background: #ffffff;
+            color: #10223e;
+        }
+
+        .poleas-data-table input,
+        .poleas-data-table select {
+            width: 100%;
+            min-height: 34px;
+            border: 1px solid #b8c7d8;
+            border-radius: 6px;
+            padding: 5px 8px;
+            background: #ffffff;
+            color: #10223e;
+        }
+
+        .condition-cell {
+            grid-column: 2 / 5;
+            padding: 6px 10px !important;
+        }
+        .ceramic-pulley-note {
+    margin: 16px 0;
+    padding: 18px;
+    border: 1px solid #e3b341;
+    border-radius: 8px;
+    background: #fff8df;
+    color: #6b4f00;
+    text-align: center;
+}
+
+.ceramic-pulley-note strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 16px;
+}
+
+.ceramic-pulley-note p {
+    margin: 0;
+    font-size: 13px;
+}
+
+        .condition-control {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            min-width: 190px;
+            min-height: 36px;
+            padding-left: 38px;
+            border-radius: 999px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(15, 35, 62, 0.14);
+        }
+
+        .condition-control::before {
+            content: "";
+            position: absolute;
+            left: 14px;
+            width: 10px;
+            height: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.25);
+            z-index: 2;
+        }
+
+        .condition-control select {
+            width: 100%;
+            min-height: 36px;
+            border: 0;
+            border-radius: 999px;
+            padding: 0 40px 0 6px;
+            background: transparent;
+            color: inherit;
+            font-weight: 800;
+            text-align: center;
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+
+        .condition-control select option {
+            background: #ffffff;
+            color: #10223e;
+        }
+
+        .condition-normal {
+            background: var(--poleas-green);
+            color: #ffffff;
+        }
+
+        .condition-precaucion,
+        .condition-alerta {
+            background: var(--poleas-yellow);
+            color: #111827;
+        }
+
+        .condition-critico {
+            background: var(--poleas-red);
+            color: #ffffff;
+        }
+
+        .condition-no-medido {
+            background: var(--poleas-gray);
+            color: #ffffff;
+        }
+
+        .poleas-main-photo {
+            min-height: 320px;
+            border: 1px solid var(--poleas-line);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f3f6fa;
+        }
+
+        .poleas-main-photo img {
+            width: 100%;
+            height: 100%;
+            min-height: 320px;
+            object-fit: cover;
+        }
+
+        .poleas-text-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            margin-top: 12px;
+            border-top: 1px solid var(--poleas-line);
+            border-left: 1px solid var(--poleas-line);
+        }
+
+        .poleas-text-card {
+            border-right: 1px solid var(--poleas-line);
+            border-bottom: 1px solid var(--poleas-line);
+            background: #ffffff;
+        }
+
+        .poleas-text-card h3 {
+            margin: 0;
+            padding: 8px 10px;
+            background: var(--poleas-navy);
+            color: #ffffff;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .poleas-text-card textarea {
+            width: 100%;
+            min-height: 120px;
+            border: 0;
+            resize: vertical;
+            padding: 10px;
+            font-family: inherit;
+        }
+
+        .poleas-section-title {
+            margin: 14px 0 0;
+            padding: 8px 12px;
+            background: var(--poleas-navy);
+            color: #ffffff;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .poleas-diagram {
+            border: 1px solid var(--poleas-line);
+            border-top: 0;
+            padding: 10px;
+            background: #ffffff;
+        }
+
+        .poleas-diagram img {
+            display: block;
+            width: 100%;
+            height: 230px;
+            object-fit: contain;
+        }
+
+        .poleas-tabs {
+            position: sticky;
+            top: 66px;
+            z-index: 40;
+            display: flex;
+            gap: 8px;
+            padding: 10px 14px;
+            overflow-x: auto;
+            border-top: 1px solid var(--poleas-line);
+            border-bottom: 1px solid var(--poleas-line);
+            background: #eef4fa;
+        }
+
+        .poleas-tabs a {
+            flex: 0 0 auto;
+            padding: 9px 16px;
+            border: 1px solid #c2cfdd;
+            border-radius: 8px;
+            background: #ffffff;
+            color: var(--poleas-navy);
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .polea-block {
+            padding: 18px 14px;
+            border-bottom: 1px solid var(--poleas-line);
+        }
+
+        .polea-block:last-of-type {
+            border-bottom: 0;
+        }
+
+        .polea-title {
+            margin: 0 0 12px;
+            padding: 9px 12px;
+            background: var(--poleas-navy);
+            color: #ffffff;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .polea-fields {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .polea-field label {
+            display: block;
+            margin-bottom: 5px;
+            color: #4f6480;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .polea-field input,
+        .polea-field select,
+        .polea-field textarea {
+            width: 100%;
+            min-height: 38px;
+            border: 1px solid #bfd0e1;
+            border-radius: 7px;
+            padding: 7px 9px;
+            background: #ffffff;
+        }
+
+        .polea-table-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--poleas-line);
+        }
+
+        .polea-measurement-table {
+            width: 100%;
+            min-width: 1050px;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        .polea-measurement-table th,
+        .polea-measurement-table td {
+            border: 1px solid var(--poleas-line);
+            padding: 5px;
+            text-align: center;
+        }
+
+        .polea-measurement-table th {
+            background: #dfeaf5;
+            color: #10223e;
+            font-size: 11px;
+        }
+
+        .polea-measurement-table input {
+            width: 100%;
+            min-width: 70px;
+            min-height: 34px;
+            border: 1px solid #b8c7d8;
+            border-radius: 5px;
+            padding: 4px 6px;
+            text-align: center;
+            background: #ffffff;
+        }
+
+        .polea-subtitle {
+            margin: 16px 0 8px;
+            color: #10223e;
+            font-size: 17px;
+        }
+
+        .polea-photo-formset {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 12px;
+        }
+
+        .polea-photo-form {
+            padding: 12px;
+            border: 1px solid var(--poleas-line);
+            border-radius: 9px;
+            background: var(--poleas-light);
+        }
+
+        .existing-photo-preview img {
+            display: block;
+            width: 100%;
+            max-height: 260px;
+            object-fit: contain;
+            margin-top: 10px;
+            border: 1px solid var(--poleas-line);
+            background: #ffffff;
+        }
+
+        .delete-photo-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            color: #b42318;
+            font-weight: 700;
+        }
+
+        .photo-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .photo-card {
+            margin: 0;
+            border: 1px solid var(--poleas-line);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #ffffff;
+        }
+
+        .photo-card img {
+            display: block;
+            width: 100%;
+            height: 220px;
+            object-fit: contain;
+            background: #f3f6fa;
+        }
+
+        .photo-card figcaption {
+            padding: 9px;
+            border-top: 1px solid var(--poleas-line);
+        }
+
+        .photo-card p {
+            margin: 4px 0 0;
+        }
+
+        .poleas-sticky-actions {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 60;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.96);
+            border-top: 1px solid #c4d1df;
+            box-shadow: 0 -6px 22px rgba(15, 35, 62, 0.12);
+            backdrop-filter: blur(10px);
+        }
+
+        .poleas-sticky-actions .primary-button,
+        .poleas-sticky-actions .secondary-button {
+            min-width: 180px;
+        }
+
+        @media (max-width: 1100px) {
+            .poleas-cover-grid,
+            .poleas-text-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .poleas-data-table {
+                grid-template-columns: 140px 1fr;
+            }
+
+            .condition-cell {
+                grid-column: 2;
+            }
+
+            .polea-fields {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 680px) {
+            .poleas-page {
+                width: calc(100% - 14px);
+            }
+
+            .poleas-heading,
+            .poleas-topbar,
+            .poleas-sticky-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .polea-fields {
+                grid-template-columns: 1fr;
+            }
+
+            .poleas-sticky-actions .primary-button,
+            .poleas-sticky-actions .secondary-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body class="app-body">
+
+<header class="poleas-topbar">
+    <div class="poleas-brand">
+        <img
+            src="{% static 'inspecciones/faja/cvb0001/logo_overall.jpeg' %}"
+            alt="OverallSolutions"
+        >
+
+        <div>
+            <strong>OverallSolutions</strong>
+            <span>
+                Inspecciones › {{ inspeccion.faja.tag }} › Poleas
+            </span>
+        </div>
+    </div>
+
+    <div class="poleas-header-actions">
+        <a
+            class="secondary-button link-button"
+            href="{% url 'dashboard' %}"
+        >
+            Volver
+        </a>
+    </div>
+</header>
+
+<main class="poleas-page">
+
+    {% for message in messages %}
+        <div class="alert">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <form
+        method="post"
+        enctype="multipart/form-data"
+        class="poleas-document"
+    >
+        {% csrf_token %}
+        {% include "inspecciones/_workflow_controls_cvb0003.html" with workflow_section="header" %}
+
+        <section class="poleas-heading">
+            <div>
+                <h1>
+                    REPORTE DE INSPECCIÓN
+                    <span
+                        data-codigo-reporte-cvb0003
+                        data-tipo-reporte="POLEAS"
+                    >{{ inspeccion.codigo_reporte }}</span>
+                </h1>
+
+                <p>
+                    Ingeniería de Confiabilidad – Operaciones Procesos
+                </p>
+            </div>
+
+            <a
+                class="secondary-button link-button"
+                target="_blank"
+                href="{% url 'reporte_poleas' inspeccion.id %}"
+            >
+                Vista previa
+            </a>
+        </section>
+
+        {% include "inspecciones/_historial_cvb0003.html" with historiales=historiales_cvb0003 resumen_general=True %}
+
+        <section class="poleas-cover">
+
+            <div class="poleas-cover-grid">
+                <div class="poleas-data-table">
+
+                    <div class="label">CONDICIÓN</div>
+
+                    <div class="value condition-cell">
+                        <div class="condition-control condition-{{ inspeccion.condicion_general|lower }}">
+                            {{ formulario.condicion_general }}
+                        </div>
+                    </div>
+
+                    <div class="label">PLANTA</div>
+                    <div class="value">
+                        {{ inspeccion.planta|default:"Chancado" }}
+                    </div>
+
+                    <div class="label">PROCESO</div>
+                    <div class="value">
+                        {{ inspeccion.proceso|default:"Transporte de mineral" }}
+                    </div>
+
+                    <div class="label">EQUIPO</div>
+                    <div class="value">POLEAS</div>
+
+                    <div class="label">TAG</div>
+                    <div class="value">
+                        {{ inspeccion.faja.tag }}
+                    </div>
+
+                    <div class="label">ETAPA</div>
+                    <div class="value">
+                        {{ inspeccion.etapa|default:"Operaciones" }}
+                    </div>
+
+                    <div class="label">CONDICIÓN DEL EQUIPO</div>
+                    <div class="value">
+                        {{ formulario.condicion_equipo }}
+                        {{ formulario.condicion_equipo.errors }}
+                    </div>
+
+                    <div class="label">FECHA DE INSPECCIÓN</div>
+                    <div class="value">
+                        {{ formulario.fecha_inspeccion }}
+                        {{ formulario.fecha_inspeccion.errors }}
+                    </div>
+
+                    <div class="label">FECHA DE REPORTE</div>
+                    <div class="value">
+                        {{ formulario.fecha_reporte }}
+                        {{ formulario.fecha_reporte.errors }}
+                    </div>
+
+                    <div class="label">INSPECTOR DE CAMPO</div>
+                    <div class="value">
+                        {{ inspeccion.inspector.get_full_name|default:inspeccion.inspector.username }}
+                    </div>
+
+                    <div class="label">SUPERVISOR DE CAMPO</div>
+                    <div class="value">
+                        {{ inspeccion.supervisor.get_full_name|default:inspeccion.supervisor.username }}
+                    </div>
+
+                    <div class="label">ANALISTA QUE ELABORA</div>
+                    <div class="value">
+                        {{ inspeccion.analista.get_full_name|default:inspeccion.analista.username }}
+                    </div>
+
+                    <div class="label">ANALISTA QUE VALIDA</div>
+                    <div class="value">
+                        {{ inspeccion.analista.get_full_name|default:inspeccion.analista.username }}
+                    </div>
+                </div>
+
+                <div class="poleas-main-photo">
+                    <img
+                        src="{% static 'inspecciones/faja/cvb0001/planta_cvb0001.jpeg' %}"
+                        alt="Faja Overland CVB0001"
+                    >
+                </div>
+            </div>
+
+            <div class="poleas-text-grid">
+                <article class="poleas-text-card">
+                    <h3>CIRCUNSTANCIAS DE LA INSPECCIÓN</h3>
+                    {{ formulario.circunstancias }}
+                    {{ formulario.circunstancias.errors }}
+                </article>
+
+                <article class="poleas-text-card">
+                    <h3>ANTECEDENTES</h3>
+                    {{ formulario.antecedentes }}
+                    {{ formulario.antecedentes.errors }}
+                </article>
+
+                <article class="poleas-text-card">
+                    <h3>OBSERVACIONES</h3>
+                    {{ formulario.observaciones }}
+                    {{ formulario.observaciones.errors }}
+                </article>
+            </div>
+
+            <article class="poleas-text-card" style="margin-top:12px;border:1px solid var(--poleas-line);">
+                <h3>CONCLUSIONES Y RECOMENDACIONES</h3>
+                {{ formulario.recomendaciones }}
+                {{ formulario.recomendaciones.errors }}
+            </article>
+
+            <div class="poleas-section-title">
+                ESQUEMA DE UBICACIÓN DE POLEAS DE LA FAJA
+                {{ inspeccion.faja.tag }}
+            </div>
+
+
+<div class="poleas-diagrama-seccion">
+    <div class="poleas-diagrama-titulo">
+        ESQUEMA DE UBICACIÓN DE POLEAS DE LA FAJA 0220-CVB-003
+    </div>
+
+    <div class="poleas-diagrama-contenedor">
+        <img
+            src="{% static 'inspecciones/poleas/cvb0003/esquema_poleas_cvb0003.png' %}"
+            alt="Esquema real de ubicación de Poleas CVB0003"
+        >
+    </div>
+</div>
+        </section>
+
+        <nav class="poleas-tabs">
+            {% for b in bloques_poleas %}
+                <a href="#polea-{{ b.polea.numero }}">
+                    Polea {{ b.polea.numero }}
+                </a>
+            {% endfor %}
+        </nav>
+
+        {% for b in bloques_poleas %}
+            <section
+                class="polea-block"
+                id="polea-{{ b.polea.numero }}"
+            >
+                <h2 class="polea-title">
+                    POLEA #{{ b.polea.numero|stringformat:"02d" }}
+                </h2>
+
+                {{ b.mediciones_formset.management_form }}
+
+                {% if b.mediciones_formset.non_form_errors %}
+                    <div class="alert">
+                        {{ b.mediciones_formset.non_form_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="polea-fields">
+                    {% for field in b.formulario_polea %}
+                        <div class="polea-field">
+                            <label>{{ field.label }}</label>
+                            {{ field }}
+                            {{ field.errors }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                {% include "inspecciones/_historial_cvb0003.html" with historial=b.historial %}
+
+                <div class="normal-measurements">
+                {% if b.polea.numero != 4 and b.polea.numero != 5 %}
+                    <h3 class="polea-subtitle">
+                        Medición de espesores (mm)
+                    </h3>
+
+                    <div class="polea-table-wrap">
+                        <table class="polea-measurement-table">
+                            <thead>
+                                <tr>
+                                    <th>Punto</th>
+                                    <th>Posición</th>
+                                    <th>A</th>
+                                    <th>B</th>
+                                    <th>C</th>
+                                    <th>D</th>
+                                    <th>E</th>
+                                    <th>F</th>
+                                    <th>G</th>
+                                    <th>Mín.</th>
+                                    <th>Prom.</th>
+                                    <th>Observación</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for m in b.mediciones_formset %}
+                                    <tr>
+                                        {{ m.id }}
+                                        {{ m.punto }}
+                                        {{ m.orden }}
+
+                                        <td>{{ m.instance.punto }}</td>
+                                        <td>{{ m.posicion }}</td>
+                                        <td>{{ m.a }}</td>
+                                        <td>{{ m.b }}</td>
+                                        <td>{{ m.c }}</td>
+                                        <td>{{ m.d }}</td>
+                                        <td>{{ m.e }}</td>
+                                        <td>{{ m.f }}</td>
+                                        <td>{{ m.g }}</td>
+                                        <td>{{ m.instance.minimo|default:"-" }}</td>
+                                        <td>{{ m.instance.promedio|default:"-" }}</td>
+                                        <td>{{ m.observacion }}</td>
+                                    </tr>
+
+                                    {% if m.errors %}
+                                        <tr>
+                                            <td colspan="12">{{ m.errors }}</td>
+                                        </tr>
+                                    {% endif %}
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="12">
+                                            No hay mediciones configuradas.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    {% else %}
+
+    {# ================================================= #}
+    {# POLEAS CERÁMICAS 4 Y 5                            #}
+    {# Conservamos ocultos los formularios de medición   #}
+    {# para que el formset siga siendo válido al guardar #}
+    {# ================================================= #}
+
+    <div style="display:none;">
+        {% for m in b.mediciones_formset %}
+            {{ m.id }}
+            {{ m.punto }}
+            {{ m.orden }}
+            {{ m.posicion }}
+            {{ m.a }}
+            {{ m.b }}
+            {{ m.c }}
+            {{ m.d }}
+            {{ m.e }}
+            {{ m.f }}
+            {{ m.g }}
+            {{ m.observacion }}
+
+            {% if m.DELETE %}
+                {{ m.DELETE }}
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <div class="ceramic-pulley-note">
+        <strong>
+            Polea cerámica: no requiere medición de espesores por UT.
+        </strong>
+
+        <p>
+            Completa la condición, la observación visual,
+            las recomendaciones y el registro fotográfico.
+        </p>
+    </div>
+
+{% endif %}
+
+                <h3 class="polea-subtitle">
+                    Inspección visual y registro fotográfico
+                </h3>
+
+                {{ b.fotos_formset.management_form }}
+
+                {% if b.fotos_formset.non_form_errors %}
+                    <div class="alert">
+                        {{ b.fotos_formset.non_form_errors }}
+                    </div>
+                {% endif %}
+                </div>
+                {% if b.polea.numero == 4 or b.polea.numero == 5 %}
+                    {% include "inspecciones/_campana_polea_form.html" with campana_formsets=b.campana_formsets b=b material_label="CERÁMICA" lagging_label="LAGGING CERÁMICO" %}
+                {% else %}
+                    {% include "inspecciones/_campana_polea_form.html" with campana_formsets=b.campana_formsets b=b material_label="CAUCHO" lagging_label="LAGGING DE CAUCHO" %}
+                {% endif %}
+
+                <div class="polea-photo-formset">
+                    {% for foto in b.fotos_formset %}
+                        <article class="polea-photo-form">
+                            {{ foto.id }}
+
+                            <div class="polea-field">
+                                <label>Imagen</label>
+                                {{ foto.imagen }}
+                                {{ foto.imagen.errors }}
+                            </div>
+
+                            <div class="polea-field">
+                                <label>Descripción</label>
+                                {{ foto.descripcion }}
+                                {{ foto.descripcion.errors }}
+                            </div>
+
+                            {% if foto.instance.pk and foto.instance.imagen %}
+                                <div class="existing-photo-preview">
+                                    <img
+                                        src="{{ foto.instance.imagen.url }}"
+                                        alt="Fotografía guardada de Polea {{ b.polea.numero }}"
+                                    >
+                                </div>
+                            {% endif %}
+
+                            {% if foto.DELETE %}
+                                <div class="delete-photo-control">
+                                    {{ foto.DELETE }}
+                                    <label for="{{ foto.DELETE.id_for_label }}">
+                                        Eliminar fotografía
+                                    </label>
+                                </div>
+                            {% endif %}
+                        </article>
+                    {% empty %}
+                        <p>No hay formularios de fotografías disponibles.</p>
+                    {% endfor %}
+                </div>
+
+                {% if b.fotografias %}
+                    <div class="photo-preview-grid">
+                        {% for foto_guardada in b.fotografias %}
+                            <figure class="photo-card">
+                                {% if foto_guardada.imagen %}
+                                    <img
+                                        src="{{ foto_guardada.imagen.url }}"
+                                        alt="Inspección visual de Polea {{ b.polea.numero }}"
+                                    >
+                                {% endif %}
+
+                                <figcaption>
+                                    <p>
+                                        {{ foto_guardada.descripcion|default:"Sin descripción" }}
+                                    </p>
+                                </figcaption>
+                            </figure>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </section>
+        {% endfor %}
+
+        {% include "inspecciones/_workflow_controls_cvb0003.html" with workflow_section="actions" %}
+    </form>
+</main>
+
+{% include "inspecciones/_tipo_medicion_script.html" %}
+<script src="{% static 'inspecciones/reportes/cvb0003/historical_validation.js' %}"></script>
+<script src="{% static 'inspecciones/reportes/cvb0003/codigo_reporte.js' %}"></script>
+</body>
+</html>

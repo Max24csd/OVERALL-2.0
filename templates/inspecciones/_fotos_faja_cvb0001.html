@@ -1,0 +1,24 @@
+<section class="report-card photo-section">
+  <div class="section-bar">{{ titulo }}</div>
+  {{ formset.management_form }}
+  <div class="photo-grid">
+    {% for foto in formset %}
+      <article class="photo-card">
+        {{ foto.id }}
+        {% if foto.instance.pk and foto.instance.imagen %}
+          <img class="saved-photo" src="{{ foto.instance.imagen.url }}" alt="{{ foto.instance.titulo|default:'Fotografía de inspección' }}">
+        {% endif %}
+        <img class="new-photo-preview" alt="Vista previa" hidden>
+        <label>Fotografía {{ foto.imagen }}</label>
+        {{ foto.imagen.errors }}
+        <label>Título {{ foto.titulo }}</label>
+        {{ foto.titulo.errors }}
+        <label>Descripción u observación {{ foto.descripcion }}</label>
+        {{ foto.descripcion.errors }}
+        {% if foto.instance.pk %}
+          <label class="delete-photo">{{ foto.DELETE }} Eliminar esta imagen al guardar</label>
+        {% endif %}
+      </article>
+    {% endfor %}
+  </div>
+</section>

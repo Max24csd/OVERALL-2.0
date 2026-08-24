@@ -1,0 +1,23 @@
+<style>
+    .campaign-measurements { display: none; grid-column: 1 / -1; }
+    .campaign-phase + .campaign-phase { margin-top: 18px; }
+</style>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".shaft-block, .polea-block").forEach(function (block) {
+        const selector = block.querySelector(".tipo-medicion-selector");
+        if (!selector) return;
+        const actualizar = function () {
+            const campana = selector.value === "CAMPANA";
+            block.querySelectorAll(".normal-measurements").forEach(function (elemento) {
+                elemento.style.display = campana ? "none" : "";
+            });
+            block.querySelectorAll(".campaign-measurements").forEach(function (elemento) {
+                elemento.style.display = campana ? "block" : "none";
+            });
+        };
+        selector.addEventListener("change", actualizar);
+        actualizar();
+    });
+});
+</script>

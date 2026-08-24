@@ -1,0 +1,20 @@
+<div class="campaign-measurements">
+{% for fase, formset in campana_formsets %}
+<section class="campaign-phase">
+    <h3 class="polea-subtitle">{{ fase }} DE CAMPAÑA – {{ lagging_label }}</h3>
+    {{ formset.management_form }}
+    {% if formset.non_form_errors %}<div class="alert">{{ formset.non_form_errors }}</div>{% endif %}
+    <div class="polea-table-wrap">
+        <table class="polea-measurement-table">
+            <thead><tr><th>Punto</th><th>Posición</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th><th>G</th><th>Mín.</th><th>Prom.</th><th>Observación</th></tr></thead>
+            <tbody>
+            {% for m in formset %}
+                <tr>{{ m.id }}{{ m.punto }}{{ m.orden }}<td>{{ m.punto.value }}</td><td>{{ m.posicion }}</td><td>{{ m.a }}</td><td>{{ m.b }}</td><td>{{ m.c }}</td><td>{{ m.d }}</td><td>{{ m.e }}</td><td>{{ m.f }}</td><td>{{ m.g }}</td><td>{{ m.instance.minimo|default:"-" }}</td><td>{{ m.instance.promedio|default:"-" }}</td><td>{{ m.observacion }}</td></tr>
+                {% if m.errors %}<tr><td colspan="12">{{ m.errors }}</td></tr>{% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endfor %}
+</div>

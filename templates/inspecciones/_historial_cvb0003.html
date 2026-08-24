@@ -1,0 +1,110 @@
+<style>
+    .cvb3-history-overview,
+    .cvb3-history {
+        margin: 14px 0;
+        padding: 14px;
+        border: 2px solid #7892ad;
+        border-radius: 8px;
+        background: #f4f8fc;
+        color: #18324f;
+    }
+    .cvb3-history-overview h2 { margin: 0 0 10px; font-size: 18px; }
+    .cvb3-history-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 10px;
+    }
+    .cvb3-history-card {
+        padding: 10px;
+        border: 1px solid #b7c7d9;
+        border-radius: 6px;
+        background: #fff;
+    }
+    .cvb3-history-card strong { display: block; margin-bottom: 5px; }
+    .cvb3-history-meta { display: flex; flex-wrap: wrap; gap: 7px 18px; margin: 7px 0; }
+    .cvb3-history details { margin-top: 9px; }
+    .cvb3-history summary {
+        display: inline-block;
+        padding: 7px 12px;
+        border-radius: 5px;
+        background: #315d88;
+        color: #fff;
+        font-weight: 700;
+        cursor: pointer;
+    }
+    .cvb3-history-table-wrap { overflow-x: auto; margin: 10px 0; }
+    .cvb3-history-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .cvb3-history-table th,
+    .cvb3-history-table td { padding: 5px; border: 1px solid #cbd5e1; text-align: center; }
+    .cvb3-history-table th { background: #dfeaf5; }
+    .cvb3-live-summary { margin-top: 9px; padding: 8px; background: #e5eef7; font-weight: 700; }
+    .cvb3-history-hint { line-height: 1.2; }
+    input.cvb3-invalid { outline: 2px solid #b91c1c; background: #fff1f2; }
+</style>
+
+{% if resumen_general and historiales %}
+    {% with ultimo=historiales.0 %}
+    <section class="cvb3-history-overview" aria-label="Resumen del historial CVB003">
+        <h2>Última inspección: {{ ultimo.fecha|date:"d/m/Y" }}</h2>
+        <div class="cvb3-history-cards">
+            {% for item in historiales %}
+                <article class="cvb3-history-card">
+                    <strong>{{ item.componente }}</strong>
+                    <div>Tipo de medición: {{ item.tipo }}</div>
+                    <div>Mínimo anterior: {{ item.minimo|default_if_none:"-" }}{% if item.minimo is not None %} mm{% endif %}</div>
+                    <div>Promedio anterior: {{ item.promedio|default_if_none:"-" }}{% if item.promedio is not None %} mm{% endif %}</div>
+                    <a href="#historial-{{ item.componente|slugify }}">Ver historial</a>
+                </article>
+            {% endfor %}
+        </div>
+    </section>
+    {% endwith %}
+{% elif historial %}
+<aside
+    class="cvb3-history"
+    id="historial-{{ historial.componente|slugify }}"
+    data-historical-minimum="{{ historial.minimo|default_if_none:'' }}"
+>
+    <strong>Última inspección: {{ historial.fecha|date:"d/m/Y" }}</strong>
+    <span class="sr-only">Historial técnico anterior</span>
+    <div class="cvb3-history-meta">
+        <span>Componente: {{ historial.componente }}</span>
+        <span>Tipo de medición: {{ historial.tipo }}</span>
+        <span>Condición: {{ historial.condicion|default:"-" }}</span>
+        <span>Mínimo anterior: {{ historial.minimo|default_if_none:"-" }}{% if historial.minimo is not None %} mm{% endif %}</span>
+        <span>Promedio anterior: {{ historial.promedio|default_if_none:"-" }}{% if historial.promedio is not None %} mm{% endif %}</span>
+    </div>
+    <div class="cvb3-live-summary" aria-live="polite">
+        Mínimo anterior: {{ historial.minimo|default_if_none:"-" }} mm · Mínimo actual: - · Variación: -
+    </div>
+    <details>
+        <summary>Ver historial</summary>
+        <div class="cvb3-history-table-wrap">
+            <table class="cvb3-history-table">
+                <thead>
+                    <tr><th>Punto</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th><th>G</th><th>Mínimo</th><th>Promedio</th><th>Observación</th></tr>
+                </thead>
+                <tbody>
+                {% for fila in historial.filas %}
+                    <tr>
+                        <td>{{ fila.punto }}</td>
+                        {% for valor in fila.valores %}<td>{{ valor|default_if_none:"-" }}</td>{% endfor %}
+                        <td>{{ fila.minimo|default_if_none:"-" }}</td>
+                        <td>{{ fila.promedio|default_if_none:"-" }}</td>
+                        <td>{{ fila.observacion|default:"-" }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if historial.fotografias %}
+        <div>
+            Fotografías:
+            {% for foto in historial.fotografias %}
+                {% if foto.imagen %}<a href="{{ foto.imagen.url }}" target="_blank" rel="noopener">Ver {{ forloop.counter }}</a>{% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+    </details>
+</aside>
+{% endif %}

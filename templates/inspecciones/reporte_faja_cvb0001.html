@@ -1,0 +1,84 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{ inspeccion.codigo_reporte }} | Reporte CVB0001</title>
+  <link rel="stylesheet" href="{% static 'inspecciones/reportes/cvb0001/reporte_faja_cvb0001.css' %}">
+  <style>
+    :root{--excel-navy:#445a73;--excel-blue:#0070c0;--excel-green:#00b050;--excel-result:#a9b7c9;--excel-line:#111}
+    html,body{margin:0;background:#dfe5ec;font-family:Calibri,Arial,sans-serif;color:#111}
+    .report-sheet{width:min(1450px,calc(100% - 24px));margin:14px auto;background:#fff;padding:14px;border:1px solid #8997a5;box-shadow:0 3px 14px #0002}
+    .report-header{display:grid;grid-template-columns:190px 1fr 190px;min-height:78px;border:1px solid var(--excel-line);align-items:center}.report-header>div{height:100%;padding:8px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center}.report-header>div+div{border-left:1px solid var(--excel-line)}.report-header img{max-width:170px;max-height:62px;object-fit:contain}.report-header h1{margin:0;font-size:16px}.report-header p{margin:7px 0 0;font-size:11px;font-weight:700}
+    .condition-band{display:grid;grid-template-columns:205px 1fr;margin-top:8px;border:1px solid var(--excel-line);font-weight:700;text-align:center}.condition-band span{padding:8px}.condition-label{background:var(--excel-navy);color:#fff}.condition-value{background:var(--excel-green)}
+    .report-info{width:100%;border-collapse:collapse;margin:8px 0 0;table-layout:fixed}.report-info th,.report-info td{border:1px solid var(--excel-line);padding:7px;text-align:center}.report-info th{background:var(--excel-navy);color:#fff;font-size:11px}.report-info td{font-size:11px}
+    .report-section{margin-top:14px}.section-bar{padding:6px;border:1px solid var(--excel-line);background:var(--excel-navy);color:#fff;text-align:center;font-size:11px;font-weight:700}.table-scroll{width:100%;overflow-x:auto}.report-measure{width:100%;border-collapse:collapse;table-layout:fixed}.report-measure th,.report-measure td{box-sizing:border-box;border:1px solid var(--excel-line);padding:3px 2px;text-align:center;font-size:9px;overflow-wrap:anywhere}.report-measure th{background:var(--excel-blue);color:#fff}.report-measure .result{background:var(--excel-result);font-weight:700}.automatic-summary{margin:0;padding:12px;border:1px solid var(--excel-line);background:#fff;text-align:center;font-size:10px;font-weight:400;white-space:pre-line}
+    .report-photo-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:10px 0}.report-photo{border:1px solid #9aa8b7;padding:8px;break-inside:avoid}.report-photo img{display:block;width:100%;height:280px;object-fit:contain;background:#fff}.report-photo h3{margin:7px 0 4px;font-size:12px}.report-photo p{margin:0;white-space:pre-line;font-size:10px}.empty-photo-note{margin:8px 0;padding:8px;border:1px solid #ccd4dc;text-align:center}.cvb0001-reference-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;border:1px solid var(--excel-line);padding:10px}.cvb0001-reference-grid figure{margin:0;border:1px solid #9aa8b7;padding:6px;text-align:center;break-inside:avoid}.cvb0001-reference-grid img{display:block;width:100%;height:270px;object-fit:contain}.cvb0001-reference-grid figcaption{margin-top:6px;font-size:10px;font-weight:700}
+    .report-notes{margin-top:14px}.report-notes article{border:1px solid var(--excel-line);padding:10px;min-height:70px}.report-notes h2{margin:-10px -10px 10px;padding:6px;background:var(--excel-navy);color:#fff;text-align:center;font-size:11px}.toolbar{display:flex;justify-content:flex-end;gap:8px;margin:10px auto;width:min(1450px,calc(100% - 24px))}.toolbar a,.toolbar button{padding:9px 14px;border:1px solid #0a67b2;border-radius:4px;font:700 13px Calibri,Arial,sans-serif;text-decoration:none;cursor:pointer}.btn-export{background:#08783e;color:#fff}
+    @page{size:A4 landscape;margin:6mm}
+    @media print{
+      html,body{width:100%;margin:0!important;padding:0!important;background:#fff!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+      .no-print{display:none!important}.report-sheet{width:100%!important;max-width:none!important;margin:0!important;padding:0!important;border:0!important;box-shadow:none!important;transform:none!important;zoom:1!important}.table-scroll{overflow:visible!important}
+      table{width:100%!important;border-collapse:collapse!important;table-layout:fixed!important}thead{display:table-header-group}tfoot{display:table-footer-group}tr{break-inside:avoid!important;page-break-inside:avoid!important}
+      .report-header,.condition-band,.section-bar{break-after:avoid-page;page-break-after:avoid}.report-section,.measurement-section,.automatic-summary{break-inside:avoid-page;page-break-inside:avoid}.long-measurement-section{break-inside:auto;page-break-inside:auto}
+      .report-measure th,.report-measure td{font-size:7px!important;line-height:1.05!important;padding:2px 1px!important}.report-photo-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6mm!important;break-inside:auto}.report-photo{break-inside:avoid!important;page-break-inside:avoid!important;min-height:0!important}.report-photo img{width:100%!important;height:75mm!important;object-fit:contain!important;display:block!important}img{max-width:100%!important}.print-page-break{break-before:page;page-break-before:always}
+    }
+  </style>
+</head>
+<body>
+<div class="toolbar no-print">
+  <a class="btn btn-soft" href="{% url 'formulario_faja' inspeccion.id %}">Volver al formulario</a>
+  <a class="btn-export" href="{% url 'exportar_excel_cvb0001_exclusivo' inspeccion.id %}">Descargar Excel</a>
+  <button class="btn btn-primary" type="button" onclick="window.print()">Imprimir / Guardar PDF</button>
+</div>
+<main class="report-sheet">
+  <header class="report-header">
+    <div><img src="{% static 'inspecciones/faja/cvb0001/logo_overall.jpeg' %}" alt="OverallSolutions"></div>
+    <div><h1>REPORTE DE INSPECCIÓN {{ inspeccion.codigo_reporte }}</h1><p>Ingeniería de Confiabilidad – Operaciones Procesos</p></div>
+    <div><img src="{% static 'inspecciones/faja/cvb0001/logo_mmg_las_bambas.jpeg' %}" alt="MMG Las Bambas"></div>
+  </header>
+
+  <div class="condition-band"><span class="condition-label">CONDICIÓN</span><span class="condition-value">{{ inspeccion.get_condicion_general_display|upper }}</span></div>
+
+  <table class="report-info"><tbody>
+    <tr><th>PLANTA</th><td>{{ inspeccion.planta }}</td><th>PROCESO</th><td>{{ inspeccion.proceso }}</td></tr>
+    <tr><th>EQUIPO</th><td>{{ inspeccion.faja.nombre }}</td><th>TAG-NUMBER</th><td>{{ inspeccion.faja.tag }}</td></tr>
+    <tr><th>FECHA DE INSPECCIÓN</th><td>{{ inspeccion.fecha_inspeccion|date:"d/m/Y"|default:"—" }}</td><th>FECHA DE REPORTE</th><td>{{ inspeccion.fecha_reporte|date:"d/m/Y"|default:"—" }}</td></tr>
+    <tr><th>INSPECTOR DE CAMPO</th><td>{{ inspeccion.inspector_campo_nombre|default:"—" }}</td><th>SUPERVISOR DE CAMPO</th><td>{{ inspeccion.supervisor_campo_nombre|default:"—" }}</td></tr>
+    <tr><th>ANALISTA QUE ELABORA</th><td>{{ inspeccion.analista_elabora_nombre|default:"—" }}</td><th>ANALISTA QUE VALIDA</th><td>{{ inspeccion.analista_valida_nombre|default:"—" }}</td></tr>
+  </tbody></table>
+
+  <section class="report-section measurement-section">
+    <div class="section-bar">UBICACIÓN Y REFERENCIAS TÉCNICAS DE LA FAJA CVB0001</div>
+    <div class="cvb0001-reference-grid">
+      <figure><img src="{% static 'inspecciones/faja/cvb0001/planta_cvb0001.jpeg' %}" alt="Ubicación de la Faja Overland CVB0001"><figcaption>UBICACIÓN DE LA FAJA OVERLAND CVB0001</figcaption></figure>
+      <figure><img src="{% static 'inspecciones/faja/cvb0001/diagrama_cvb0001.png' %}" alt="Diagrama de ubicación CVB0001"><figcaption>DIAGRAMA DE UBICACIÓN CVB0001</figcaption></figure>
+      <figure><img src="{% static 'inspecciones/faja/cvb0001/puntos_top_cover.png' %}" alt="Puntos de medición Top Cover"><figcaption>PUNTOS DE MEDICIÓN DEL TOP COVER</figcaption></figure>
+      <figure><img src="{% static 'inspecciones/faja/cvb0001/corte_empalme.png' %}" alt="Corte seccional de empalme"><figcaption>CORTE SECCIONAL DE EMPALME</figcaption></figure>
+    </div>
+  </section>
+
+  {% include "inspecciones/_reporte_tabla_empalme_cvb0001.html" with filas=empalme_e01 nombre_empalme="E-01" bastidor="174" lado="TOP COVER" resumen=resumen_e01 extra_class="measurement-section" %}
+  {% include "inspecciones/_reporte_fotos_faja_cvb0001.html" with titulo="INSPECCIÓN VISUAL – EMPALME E-01 TOP COVER" fotos=fotos_e01 %}
+
+  {% include "inspecciones/_reporte_tabla_empalme_cvb0001.html" with filas=empalme_e02 nombre_empalme="E-02" bastidor="86-87" lado="BOTTOM COVER" resumen=resumen_e02 extra_class="measurement-section print-page-break" %}
+  {% include "inspecciones/_reporte_fotos_faja_cvb0001.html" with titulo="INSPECCIÓN VISUAL – EMPALME E-02 BOTTOM COVER" fotos=fotos_e02 %}
+
+  <section class="report-section measurement-section long-measurement-section print-page-break">
+    <div class="section-bar">PUNTOS DE MEDICIÓN / OTROS TRAMOS</div>
+    <div class="table-scroll"><table class="report-measure"><thead><tr><th>Tramo</th><th>Medición</th><th>Bastidor</th><th>Nominal</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th><th>G</th><th>Mín.</th><th>Prom.</th><th>Desgaste</th><th>% desgaste</th><th>% residual</th></tr></thead><tbody>
+      {% for fila in tramos %}<tr><td>{{ fila.seccion }}</td><td>{{ fila.punto }}</td><td>{{ fila.bastidor }}</td><td>{{ fila.espesor_nominal|default:"-" }}</td><td>{{ fila.a|default:"-" }}</td><td>{{ fila.b|default:"-" }}</td><td>{{ fila.c|default:"-" }}</td><td>{{ fila.d|default:"-" }}</td><td>{{ fila.e|default:"-" }}</td><td>{{ fila.f|default:"-" }}</td><td>{{ fila.g|default:"-" }}</td><td class="result">{{ fila.minimo|default:"-" }}</td><td class="result">{{ fila.promedio|default:"-" }}</td><td class="result">{{ fila.desgaste|default:"-" }}</td><td class="result">{{ fila.porcentaje_desgaste|default:"-" }}</td><td class="result">{{ fila.porcentaje_residual|default:"-" }}</td></tr>{% empty %}<tr><td colspan="16">No existen otros puntos de medición.</td></tr>{% endfor %}
+      <tr><th colspan="4">ESPESOR MÍNIMO (mm)</th><td>{{ resumen_tramos.minimos.a|floatformat:2|default:"-" }}</td><td>{{ resumen_tramos.minimos.b|floatformat:2|default:"-" }}</td><td>{{ resumen_tramos.minimos.c|floatformat:2|default:"-" }}</td><td>{{ resumen_tramos.minimos.d|floatformat:2|default:"-" }}</td><td>{{ resumen_tramos.minimos.e|floatformat:2|default:"-" }}</td><td>{{ resumen_tramos.minimos.f|floatformat:2|default:"-" }}</td><td>{{ resumen_tramos.minimos.g|floatformat:2|default:"-" }}</td><td colspan="5"></td></tr>
+      <tr><th colspan="4">ESPESOR PROMEDIO (mm)</th><td>{{ resumen_tramos.promedios.a|floatformat:2|default:"-" }}</td><td>{{ resumen_tramos.promedios.b|floatformat:2|default:"-" }}</td><td>{{ resumen_tramos.promedios.c|floatformat:2|default:"-" }}</td><td>{{ resumen_tramos.promedios.d|floatformat:2|default:"-" }}</td><td>{{ resumen_tramos.promedios.e|floatformat:2|default:"-" }}</td><td>{{ resumen_tramos.promedios.f|floatformat:2|default:"-" }}</td><td>{{ resumen_tramos.promedios.g|floatformat:2|default:"-" }}</td><td colspan="5"></td></tr>
+    </tbody></table></div>
+  </section>
+  {% include "inspecciones/_reporte_fotos_faja_cvb0001.html" with titulo="INSPECCIÓN VISUAL – PUNTOS DE MEDICIÓN" fotos=fotos_puntos %}
+
+  <section class="report-notes">
+    <article><h2>OBSERVACIONES</h2>{{ inspeccion.observaciones|default:"—"|linebreaksbr }}</article>
+    <article><h2>CONCLUSIONES Y RECOMENDACIONES</h2>{{ inspeccion.recomendaciones|default:"—"|linebreaksbr }}</article>
+  </section>
+</main>
+</body>
+</html>

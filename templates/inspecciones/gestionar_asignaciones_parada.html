@@ -1,0 +1,544 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Gestionar equipo | Overall Solutions</title>
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/app.css' %}"
+    >
+
+    <style>
+        body {
+            background: #f8fafc;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            color: #0f172a;
+        }
+
+        .page {
+            max-width: 1150px;
+            margin: 0 auto;
+            padding: 36px 24px 60px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .page-header h1 {
+            margin: 0 0 8px;
+            font-size: 30px;
+        }
+
+        .page-header p {
+            margin: 0;
+            color: #64748b;
+        }
+
+        .btn-back {
+            text-decoration: none;
+            background: #e2e8f0;
+            color: #0f172a;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card h2 {
+            margin-top: 0;
+            margin-bottom: 18px;
+            font-size: 20px;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .team-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 16px;
+            background: #f8fafc;
+        }
+
+        .team-role {
+            margin: 0 0 10px;
+            font-size: 12px;
+            font-weight: 800;
+            color: #475569;
+            text-transform: uppercase;
+        }
+
+        .team-person {
+            padding: 9px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .team-person:last-child {
+            border-bottom: 0;
+        }
+
+        .team-name {
+            font-weight: 700;
+        }
+
+        .team-meta {
+            margin-top: 3px;
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .form-group-full {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            min-height: 42px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 9px 11px;
+            box-sizing: border-box;
+            background: white;
+        }
+
+        textarea.form-control {
+            min-height: 90px;
+        }
+
+        .errorlist {
+            margin: 4px 0 0;
+            color: #b91c1c;
+            padding-left: 18px;
+        }
+
+        .form-help {
+            margin-top: 4px;
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+
+        .btn-primary {
+            border: 0;
+            background: #0b67b2;
+            color: white;
+            padding: 11px 18px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .message {
+            padding: 12px 14px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+        }
+
+        .message.success {
+            background: #ecfdf5;
+            color: #166534;
+        }
+
+        .message.error {
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        .history-table,
+        .inspections-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .history-table th,
+        .history-table td,
+        .inspections-table th,
+        .inspections-table td {
+            border-bottom: 1px solid #e2e8f0;
+            padding: 12px 10px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .history-table th,
+        .inspections-table th {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #64748b;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: #f1f5f9;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        @media (max-width: 900px) {
+            .team-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 650px) {
+            .team-grid,
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group-full {
+                grid-column: auto;
+            }
+
+            .page-header {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="page">
+
+    <div class="page-header">
+        <div>
+            <h1>Gestionar equipo de la parada</h1>
+
+            <p>
+                {{ parada.nombre|default:"Parada de Chancado" }}
+                · {{ parada.fecha_inicio|date:"d/m/Y" }}
+            </p>
+        </div>
+
+        <a
+            href="{% url 'dashboard' %}"
+            class="btn-back"
+        >
+            Volver al dashboard
+        </a>
+    </div>
+
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+
+    <div class="card">
+        <h2>Equipo actual</h2>
+
+        <div class="team-grid">
+
+            <div class="team-card">
+                <div class="team-role">Inspectores</div>
+
+                {% for acceso in equipos.Inspector %}
+                    <div class="team-person">
+                        <div class="team-name">
+                            {{ acceso.usuario.get_full_name|default:acceso.usuario.username }}
+                        </div>
+
+                        <div class="team-meta">
+                            @{{ acceso.usuario.username }}
+                            {% if acceso.usuario.perfil_sistema %}
+                                · {{ acceso.usuario.perfil_sistema.get_tipo_vinculo_display }}
+                            {% endif %}
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="team-meta">Sin inspectores.</div>
+                {% endfor %}
+            </div>
+
+
+            <div class="team-card">
+                <div class="team-role">Supervisores</div>
+
+                {% for acceso in equipos.Supervisor %}
+                    <div class="team-person">
+                        <div class="team-name">
+                            {{ acceso.usuario.get_full_name|default:acceso.usuario.username }}
+                        </div>
+
+                        <div class="team-meta">
+                            @{{ acceso.usuario.username }}
+                            {% if acceso.usuario.perfil_sistema %}
+                                · {{ acceso.usuario.perfil_sistema.get_tipo_vinculo_display }}
+                            {% endif %}
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="team-meta">Sin supervisores.</div>
+                {% endfor %}
+            </div>
+
+
+            <div class="team-card">
+                <div class="team-role">Analistas</div>
+
+                {% for acceso in equipos.Analista %}
+                    <div class="team-person">
+                        <div class="team-name">
+                            {{ acceso.usuario.get_full_name|default:acceso.usuario.username }}
+                        </div>
+
+                        <div class="team-meta">
+                            @{{ acceso.usuario.username }}
+                            {% if acceso.usuario.perfil_sistema %}
+                                · {{ acceso.usuario.perfil_sistema.get_tipo_vinculo_display }}
+                            {% endif %}
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="team-meta">Sin analistas.</div>
+                {% endfor %}
+            </div>
+
+
+            <div class="team-card">
+                <div class="team-role">Cliente</div>
+
+                {% for acceso in equipos.Cliente %}
+                    <div class="team-person">
+                        <div class="team-name">
+                            {{ acceso.usuario.get_full_name|default:acceso.usuario.username }}
+                        </div>
+
+                        <div class="team-meta">
+                            @{{ acceso.usuario.username }}
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="team-meta">Sin cliente.</div>
+                {% endfor %}
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="card">
+        <h2>Modificar equipo</h2>
+
+        <form method="post">
+            {% csrf_token %}
+
+            {{ form.non_field_errors }}
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label>{{ form.accion.label }}</label>
+                    {{ form.accion }}
+                    {{ form.accion.errors }}
+                </div>
+
+                <div class="form-group">
+                    <label>{{ form.rol.label }}</label>
+                    {{ form.rol }}
+                    {{ form.rol.errors }}
+                </div>
+
+                <div class="form-group form-group-full">
+                    <label>{{ form.usuario.label }}</label>
+                    {{ form.usuario }}
+                    {{ form.usuario.errors }}
+
+                    <div class="form-help">
+                        Para Cliente usa "Cambiar cliente".
+                        Para Inspector, Supervisor o Analista puedes agregar o quitar.
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>{{ form.fecha_inicio.label }}</label>
+                    {{ form.fecha_inicio }}
+                    {{ form.fecha_inicio.errors }}
+                </div>
+
+                <div class="form-group">
+                    <label>{{ form.fecha_fin.label }}</label>
+                    {{ form.fecha_fin }}
+                    {{ form.fecha_fin.errors }}
+                </div>
+
+                <div class="form-group form-group-full">
+                    <div class="form-help">
+                        Las fechas son obligatorias al agregar un usuario intermitente.
+                    </div>
+                </div>
+
+                <div class="form-group form-group-full">
+                    <label>{{ form.motivo.label }}</label>
+                    {{ form.motivo }}
+                    {{ form.motivo.errors }}
+                </div>
+
+            </div>
+
+            <div class="actions">
+                <button
+                    type="submit"
+                    class="btn-primary"
+                >
+                    Guardar cambio
+                </button>
+            </div>
+        </form>
+    </div>
+
+
+    <div class="card">
+        <h2>Reportes vinculados a la parada</h2>
+
+        <table class="inspections-table">
+            <thead>
+                <tr>
+                    <th>Equipo</th>
+                    <th>Tipo</th>
+                    <th>Estado</th>
+                    <th>Código</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for inspeccion in inspecciones_parada %}
+                    <tr>
+                        <td>{{ inspeccion.faja.tag }}</td>
+
+                        <td>{{ inspeccion.get_tipo_display }}</td>
+
+                        <td>
+                            <span class="status">
+                                {{ inspeccion.get_estado_display }}
+                            </span>
+                        </td>
+
+                        <td>{{ inspeccion.codigo_reporte }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4">
+                            No existen reportes asociados.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
+    <div class="card">
+        <h2>Historial de cambios</h2>
+
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Rol</th>
+                    <th>Anterior</th>
+                    <th>Nuevo</th>
+                    <th>Motivo</th>
+                    <th>Realizado por</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for cambio in historial %}
+                    <tr>
+                        <td>
+                            {{ cambio.fecha|date:"d/m/Y H:i" }}
+                        </td>
+
+                        <td>{{ cambio.rol }}</td>
+
+                        <td>
+                            {% if cambio.usuario_anterior %}
+                                {{ cambio.usuario_anterior.get_full_name|default:cambio.usuario_anterior.username }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if cambio.usuario_nuevo %}
+                                {{ cambio.usuario_nuevo.get_full_name|default:cambio.usuario_nuevo.username }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ cambio.motivo|default:"—" }}
+                        </td>
+
+                        <td>
+                            {{ cambio.cambiado_por.get_full_name|default:cambio.cambiado_por.username }}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6">
+                            Todavía no existen cambios de equipo.
+                        </td>
+                    </tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+</body>
+</html>

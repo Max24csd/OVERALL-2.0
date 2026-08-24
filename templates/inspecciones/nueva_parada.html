@@ -1,0 +1,552 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Nueva parada | Overall Solutions</title>
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/app.css' %}"
+    >
+
+    <style>
+        body {
+            margin: 0;
+            background: #f8fafc;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #0f172a;
+        }
+
+        .parada-page {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 24px 60px;
+        }
+
+        .parada-header {
+            margin-bottom: 28px;
+        }
+
+        .parada-header h1 {
+            margin: 0 0 6px;
+        }
+
+        .parada-header p {
+            margin: 0;
+            color: #64748b;
+        }
+
+        .parada-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 28px;
+            margin-bottom: 24px;
+        }
+
+        .parada-card h2 {
+            margin-top: 0;
+            margin-bottom: 8px;
+        }
+
+        .section-description {
+            margin: 0 0 22px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        .parada-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .form-group-full {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .form-control,
+        .parada-card input[type="text"],
+        .parada-card input[type="email"],
+        .parada-card input[type="password"],
+        .parada-card input[type="date"],
+        .parada-card input[type="datetime-local"],
+        .parada-card select,
+        .parada-card textarea {
+            width: 100%;
+            min-height: 42px;
+            padding: 9px 11px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: #fff;
+            box-sizing: border-box;
+        }
+
+        .parada-card textarea {
+            min-height: 90px;
+        }
+
+        .section-title {
+            grid-column: 1 / -1;
+            margin-top: 6px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+            font-weight: 800;
+            color: #334155;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
+        .multi-select-box {
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 10px 12px;
+            background: #fff;
+            max-height: 210px;
+            overflow-y: auto;
+        }
+
+        .multi-select-box > div,
+        .multi-select-box ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .multi-select-box label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 4px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .multi-select-box input[type="checkbox"] {
+            width: auto;
+            min-height: auto;
+            margin: 0;
+        }
+
+        .parada-info {
+            margin: 24px 0;
+            padding: 16px;
+            border-radius: 10px;
+            background: #eff6ff;
+            color: #1e3a5f;
+            line-height: 1.5;
+        }
+
+        .intermitente-info {
+            margin-bottom: 22px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            color: #475569;
+            line-height: 1.5;
+        }
+
+        .parada-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 28px;
+        }
+
+        .btn-secondary,
+        .btn-primary,
+        .btn-intermitente {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            padding: 0 18px;
+            border-radius: 8px;
+            text-decoration: none;
+            border: 0;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+
+        .btn-primary {
+            background: #0b67b2;
+            color: #fff;
+        }
+
+        .btn-intermitente {
+            background: #0f766e;
+            color: #fff;
+        }
+
+        .errorlist {
+            color: #b91c1c;
+            margin: 6px 0 0;
+            padding-left: 18px;
+        }
+
+        .message {
+            padding: 12px 14px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+        }
+
+        .message.success {
+            background: #ecfdf5;
+            color: #166534;
+        }
+
+        .message.error {
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        @media (max-width: 700px) {
+            .parada-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group-full,
+            .section-title {
+                grid-column: auto;
+            }
+
+            .parada-actions {
+                flex-direction: column-reverse;
+            }
+
+            .btn-secondary,
+            .btn-primary,
+            .btn-intermitente {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="parada-page">
+
+    <header class="parada-header">
+        <h1>Nueva parada</h1>
+
+        <p>
+            Programa una nueva parada de Chancado y asigna a todo el equipo.
+        </p>
+    </header>
+
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+
+    <div class="parada-card">
+
+        <h2>Datos de la parada</h2>
+
+        <p class="section-description">
+            Puedes seleccionar varios Inspectores, Supervisores y Analistas.
+            El Cliente continúa siendo único.
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <input
+                type="hidden"
+                name="accion"
+                value="crear_parada"
+            >
+
+            {{ form.non_field_errors }}
+
+            <div class="parada-grid">
+
+                <div class="section-title">
+                    Información general
+                </div>
+
+                <div class="form-group form-group-full">
+                    <label>{{ form.nombre.label }}</label>
+                    {{ form.nombre }}
+                    {{ form.nombre.errors }}
+                </div>
+
+                <div class="form-group">
+                    <label>{{ form.fecha_inicio.label }}</label>
+                    {{ form.fecha_inicio }}
+                    {{ form.fecha_inicio.errors }}
+                </div>
+
+                <div class="form-group">
+                    <label>{{ form.fecha_fin.label }}</label>
+                    {{ form.fecha_fin }}
+                    {{ form.fecha_fin.errors }}
+                </div>
+
+
+                <div class="section-title">
+                    Equipo de trabajo
+                </div>
+
+                <div class="form-group">
+                    <label>{{ form.inspectores.label }}</label>
+
+                    <div class="multi-select-box">
+                        {{ form.inspectores }}
+                    </div>
+
+                    {{ form.inspectores.errors }}
+                </div>
+
+                <div class="form-group">
+                    <label>{{ form.supervisores.label }}</label>
+
+                    <div class="multi-select-box">
+                        {{ form.supervisores }}
+                    </div>
+
+                    {{ form.supervisores.errors }}
+                </div>
+
+                <div class="form-group">
+                    <label>{{ form.analistas.label }}</label>
+
+                    <div class="multi-select-box">
+                        {{ form.analistas }}
+                    </div>
+
+                    {{ form.analistas.errors }}
+                </div>
+
+                <div class="form-group">
+                    <label>{{ form.cliente.label }}</label>
+                    {{ form.cliente }}
+                    {{ form.cliente.errors }}
+
+                    <small style="color:#64748b;">
+                        Solo se permite un Cliente por parada.
+                    </small>
+                </div>
+
+
+                <div class="section-title">
+                    Acceso temporal
+                </div>
+
+                <div class="form-group">
+                    <label>{{ form.acceso_inicio.label }}</label>
+                    {{ form.acceso_inicio }}
+                    {{ form.acceso_inicio.errors }}
+                </div>
+
+                <div class="form-group">
+                    <label>{{ form.acceso_fin.label }}</label>
+                    {{ form.acceso_fin }}
+                    {{ form.acceso_fin.errors }}
+                </div>
+
+                <div class="form-group form-group-full">
+                    <small style="color:#64748b;">
+                        Estos horarios se aplican a los integrantes
+                        intermitentes seleccionados. Los permanentes y
+                        contratados quedan registrados como integrantes
+                        de la parada según la vigencia correspondiente.
+                    </small>
+                </div>
+
+
+                <div class="section-title">
+                    Observaciones
+                </div>
+
+                <div class="form-group form-group-full">
+                    <label>{{ form.observaciones.label }}</label>
+                    {{ form.observaciones }}
+                    {{ form.observaciones.errors }}
+                </div>
+
+            </div>
+
+
+            <div class="parada-info">
+                Al crear la parada se generarán automáticamente
+                <strong>9 reportes en estado Borrador</strong>:
+                Faja, Poleas y Life Shaft para CVB001, CVB003 y CVB004.
+                Todos los integrantes seleccionados quedarán autorizados
+                para la misma parada según su rol.
+            </div>
+
+
+            <div class="parada-actions">
+
+                <a
+                    href="{% url 'dashboard' %}"
+                    class="btn-secondary"
+                >
+                    Cancelar
+                </a>
+
+                <button
+                    type="submit"
+                    class="btn-primary"
+                >
+                    Crear parada
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <div class="parada-card">
+
+        <h2>Personal intermitente</h2>
+
+        <p class="section-description">
+            Registra rápidamente a una persona que participará únicamente
+            durante una parada.
+        </p>
+
+
+        <div class="intermitente-info">
+            El usuario se creará como <strong>Intermitente</strong>.
+            Después podrás marcarlo junto con los demás integrantes del rol.
+            Solo podrá ingresar cuando tenga una parada asignada y se
+            encuentre dentro del horario autorizado.
+        </div>
+
+
+        <form method="post">
+            {% csrf_token %}
+
+            <input
+                type="hidden"
+                name="accion"
+                value="crear_intermitente"
+            >
+
+            {{ intermitente_form.non_field_errors }}
+
+            <div class="parada-grid">
+
+                <div class="form-group">
+                    <label>
+                        {{ intermitente_form.nombres_intermitente.label }}
+                    </label>
+
+                    {{ intermitente_form.nombres_intermitente }}
+                    {{ intermitente_form.nombres_intermitente.errors }}
+                </div>
+
+
+                <div class="form-group">
+                    <label>
+                        {{ intermitente_form.apellidos_intermitente.label }}
+                    </label>
+
+                    {{ intermitente_form.apellidos_intermitente }}
+                    {{ intermitente_form.apellidos_intermitente.errors }}
+                </div>
+
+
+                <div class="form-group">
+                    <label>
+                        {{ intermitente_form.username_intermitente.label }}
+                    </label>
+
+                    {{ intermitente_form.username_intermitente }}
+                    {{ intermitente_form.username_intermitente.errors }}
+                </div>
+
+
+                <div class="form-group">
+                    <label>
+                        {{ intermitente_form.email_intermitente.label }}
+                    </label>
+
+                    {{ intermitente_form.email_intermitente }}
+                    {{ intermitente_form.email_intermitente.errors }}
+                </div>
+
+
+                <div class="form-group form-group-full">
+                    <label>
+                        {{ intermitente_form.rol_intermitente.label }}
+                    </label>
+
+                    {{ intermitente_form.rol_intermitente }}
+                    {{ intermitente_form.rol_intermitente.errors }}
+                </div>
+
+
+                <div class="form-group">
+                    <label>
+                        {{ intermitente_form.password1_intermitente.label }}
+                    </label>
+
+                    {{ intermitente_form.password1_intermitente }}
+                    {{ intermitente_form.password1_intermitente.errors }}
+                </div>
+
+
+                <div class="form-group">
+                    <label>
+                        {{ intermitente_form.password2_intermitente.label }}
+                    </label>
+
+                    {{ intermitente_form.password2_intermitente }}
+                    {{ intermitente_form.password2_intermitente.errors }}
+                </div>
+
+            </div>
+
+
+            <div class="parada-actions">
+
+                <button
+                    type="submit"
+                    class="btn-intermitente"
+                >
+                    + Crear personal intermitente
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+</html>

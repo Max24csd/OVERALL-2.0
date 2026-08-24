@@ -1,0 +1,38 @@
+<div class="campaign-measurements">
+{% for fase, formset in campana_formsets %}
+<section class="campaign-phase">
+    <div class="shaft-title">{{ fase }} DE CAMPAÑA</div>
+    <div class="shaft-layout">
+        <table class="ut-static-table">
+            <caption>PARÁMETROS DE CALIBRACIÓN DEL EQUIPO UT</caption>
+            <tbody>
+                <tr><th>MARCA DEL EQUIPO</th><td>{{ b.life_shaft.marca_equipo|default:"OLYMPUS" }}</td></tr>
+                <tr><th>TIPO DE HAZ</th><td>{{ b.life_shaft.tipo_haz|default:"COMPLETA" }}</td></tr>
+                <tr><th>FRECUENCIA (MHz)</th><td>{{ b.life_shaft.frecuencia_mhz|default:"5 MHz" }}</td></tr>
+                <tr><th>ANCHO DE BANDA</th><td>{{ b.life_shaft.ancho_banda|default:"0.2 - 10 MHz" }}</td></tr>
+                <tr><th>AMORTIGUAMIENTO</th><td>{{ b.life_shaft.amortiguamiento|default:"50" }}</td></tr>
+                <tr><th>VELOCIDAD (m/s)</th><td>{{ b.life_shaft.velocidad_ms|default:"6079" }}</td></tr>
+                <tr><th>RETARDO (µs)</th><td>{{ b.life_shaft.retardo_us|default:"1.53" }}</td></tr>
+            </tbody>
+        </table>
+        <div>
+            <h3 class="shaft-subtitle" style="margin-top:0;">Medición de espesores (mm) – {{ fase }} DE CAMPAÑA</h3>
+            {{ formset.management_form }}
+            {% if formset.non_form_errors %}<div class="alert">{{ formset.non_form_errors }}</div>{% endif %}
+            <div class="shaft-table-wrap">
+                <table class="shaft-measurement-table">
+                    <caption>MEDICIÓN DE ESPESORES DEL LIFE SHAFT {{ b.life_shaft.numero }} – {{ fase }} DE CAMPAÑA</caption>
+                    <thead><tr><th>Punto</th><th>Ubicación</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th><th>G</th><th>Mín.</th><th>Prom.</th><th>Observación</th></tr></thead>
+                    <tbody>
+                    {% for m in formset %}
+                        <tr>{{ m.id }}{{ m.punto }}{{ m.orden }}<td>{{ m.punto.value }}</td><td>{{ m.ubicacion }}</td><td>{{ m.a }}</td><td>{{ m.b }}</td><td>{{ m.c }}</td><td>{{ m.d }}</td><td>{{ m.e }}</td><td>{{ m.f }}</td><td>{{ m.g }}</td><td>{{ m.instance.minimo|default:"-" }}</td><td>{{ m.instance.promedio|default:"-" }}</td><td>{{ m.observacion }}</td></tr>
+                        {% if m.errors %}<tr><td colspan="12">{{ m.errors }}</td></tr>{% endif %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endfor %}
+</div>

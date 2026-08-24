@@ -1,0 +1,269 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <title>Gestión de usuarios</title>
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/app.css' %}"
+    >
+
+    <style>
+        body {
+            margin: 0;
+            background: #eef3f8;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #10233d;
+        }
+
+        .users-page {
+            width: min(1250px, calc(100% - 32px));
+            margin: 28px auto;
+        }
+
+        .users-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .users-heading h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .users-heading p {
+            margin: 6px 0 0;
+            color: #64748b;
+        }
+
+        .new-user-button {
+            padding: 11px 18px;
+            border-radius: 7px;
+            background: #0868bf;
+            color: white;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .users-card {
+            overflow-x: auto;
+            background: white;
+            border: 1px solid #d5e0eb;
+            border-radius: 10px;
+            box-shadow: 0 8px 25px rgba(15, 35, 60, 0.08);
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+        }
+
+        .users-table th,
+        .users-table td {
+            padding: 13px 14px;
+            border-bottom: 1px solid #e3eaf1;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .users-table th {
+            background: #123d6c;
+            color: white;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .role-badge,
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .role-badge {
+            background: #e5f0fb;
+            color: #0b579b;
+        }
+
+        .status-active {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-inactive {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .edit-button,
+        .state-button {
+            padding: 7px 10px;
+            border-radius: 5px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .edit-button {
+            border: 1px solid #0868bf;
+            color: #0868bf;
+            text-decoration: none;
+            background: white;
+        }
+
+        .state-button {
+            border: 1px solid #c7d3df;
+            background: white;
+        }
+
+        .alert {
+            margin-bottom: 14px;
+            padding: 11px 14px;
+            background: white;
+            border: 1px solid #bfd2e5;
+            border-radius: 7px;
+        }
+    </style>
+</head>
+
+<body>
+<main class="users-page">
+
+    {% for message in messages %}
+        <div class="alert">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <header class="users-heading">
+        <div>
+            <h1>Gestión de usuarios</h1>
+            <p>
+                Crea inspectores, supervisores,
+                analistas, clientes y administradores.
+            </p>
+        </div>
+
+        <a
+            class="new-user-button"
+            href="{% url 'usuario_crear' %}"
+        >
+            + Crear usuario
+        </a>
+    </header>
+
+    <section class="users-card">
+        <table class="users-table">
+            <thead>
+                <tr>
+                    <th>Nombre completo</th>
+                    <th>Usuario</th>
+                    <th>Correo</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for usuario in usuarios %}
+                    <tr>
+                        <td>
+                            {{ usuario.get_full_name|default:"Sin nombre" }}
+                        </td>
+
+                        <td>
+                            {{ usuario.username }}
+                        </td>
+
+                        <td>
+                            {{ usuario.email|default:"-" }}
+                        </td>
+
+                        <td>
+                            <span class="role-badge">
+                                {% with grupo=usuario.groups.first %}
+                                    {% if usuario.is_superuser %}
+                                        Administrador
+                                    {% elif grupo %}
+                                        {{ grupo.name }}
+                                    {% else %}
+                                        Sin rol
+                                    {% endif %}
+                                {% endwith %}
+                            </span>
+                        </td>
+
+                        <td>
+                            {% if usuario.is_active %}
+                                <span class="status-badge status-active">
+                                    Activo
+                                </span>
+                            {% else %}
+                                <span class="status-badge status-inactive">
+                                    Inactivo
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <div class="user-actions">
+                                <a
+                                    class="edit-button"
+                                    href="{% url 'usuario_editar' usuario.id %}"
+                                >
+                                    Editar
+                                </a>
+
+                                <form
+                                    method="post"
+                                    action="{% url 'usuario_cambiar_estado' usuario.id %}"
+                                >
+                                    {% csrf_token %}
+
+                                    <button
+                                        class="state-button"
+                                        type="submit"
+                                    >
+                                        {% if usuario.is_active %}
+                                            Desactivar
+                                        {% else %}
+                                            Activar
+                                        {% endif %}
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6">
+                            No existen usuarios registrados.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</main>
+</body>
+</html>

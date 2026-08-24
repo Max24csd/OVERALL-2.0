@@ -1,0 +1,182 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reporte Life Shaft - {{ inspeccion.faja.tag }}</title>
+<style>
+:root{--navy:#173f6d;--blue:#0f75b9;--line:#111827;--soft:#8ea0b5;--gray:#d9d9d9;--light:#dceaf7;--orange:#f28c28;--green:#00a651;--yellow:#fff200;--red:#d62828}
+*{box-sizing:border-box}html,body{margin:0;background:#dfe6ee;font-family:Arial,Helvetica,sans-serif;color:#111827}body{padding:18px}
+.toolbar{width:210mm;max-width:100%;margin:0 auto 12px;display:flex;justify-content:flex-end;gap:10px}
+.toolbar a,.toolbar button{padding:9px 16px;border-radius:6px;font-weight:800;text-decoration:none;cursor:pointer}
+.back{background:#fff;border:1px solid #9eb0c4;color:var(--navy)}.excel{background:#08783e;border:1px solid #08783e;color:#fff}.print{border:1px solid var(--blue);background:var(--blue);color:#fff}
+.page{position:relative;width:210mm;min-height:297mm;margin:0 auto 16px;padding:5mm;overflow:hidden;background:#fff;border:1px solid #93a5b8;box-shadow:0 5px 20px rgba(15,35,62,.14)}
+.header{display:grid;grid-template-columns:32mm 1fr 35mm;min-height:18mm;border:1px solid var(--line)}
+.logo,.client{display:flex;align-items:center;justify-content:center;padding:2mm}.logo{border-right:1px solid var(--line)}.client{border-left:1px solid var(--line)}
+.logo img,.client img{max-width:100%;max-height:13mm;object-fit:contain}.title{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:2mm}
+.title h1{margin:0;font-size:10pt}.title p{margin:1.5mm 0 0;font-size:6.5pt;font-weight:700}
+.condition{display:grid;grid-template-columns:30mm 1fr;margin-top:2mm;border:1px solid var(--line);font-size:7pt;font-weight:800}.condition div{min-height:7mm;display:flex;align-items:center;justify-content:center;padding:1mm 2mm}
+.condition-label{background:#43566f;color:#fff}.condition-normal{background:var(--green);color:#fff}.condition-precaucion,.condition-alerta,.condition-tolerable{background:var(--yellow)}.condition-critico{background:var(--red);color:#fff}.condition-no-medido{background:#64748b;color:#fff}
+table{width:100%;border-collapse:collapse}th,td{border:1px solid var(--line)}
+.cover-grid{display:grid;grid-template-columns:1.12fr .88fr;gap:2mm;margin-top:2mm}.cover-data{font-size:6.3pt}.cover-data th,.cover-data td{height:7.1mm;padding:1mm 1.5mm}.cover-data th{width:25%;background:#43566f;color:#fff;text-align:center}.cover-data .sub{background:#fff;color:#111827;font-size:6.8pt}
+.plant{height:57mm;border:1px solid var(--line)}.plant img{width:100%;height:100%;object-fit:cover}
+.notes{margin-top:2mm;font-size:6.2pt}.notes th{width:30mm;padding:1.4mm;background:#43566f;color:#fff;text-align:center}.notes td{padding:1.5mm 2mm;white-space:pre-line}.notes .large th,.notes .large td{height:30mm}.notes .rec th,.notes .rec td{height:20mm}
+.bar{margin-top:2mm;padding:1.2mm 2mm;background:#43566f;color:#fff;border:1px solid var(--line);text-align:center;font-size:7pt;font-weight:800}
+.diagram{height:58mm;border:1px solid var(--line);border-top:0;padding:2mm}.diagram img{width:100%;height:100%;object-fit:contain}
+.shaft-title{padding:1.2mm 2mm;background:#43566f;color:#fff;border:1px solid var(--line);text-align:center;font-size:7.5pt;font-weight:800}
+.info{display:grid;grid-template-columns:repeat(4,1fr);margin-top:4mm;border:1px solid var(--line)}.info div{min-height:15mm;padding:1.4mm;border-right:1px solid var(--line);font-size:5.8pt}.info div:last-child{border-right:0}.info strong{display:block;margin-bottom:1mm;color:#0d2e52}
+.measurement-layout{display:grid;grid-template-columns:55mm 1fr;gap:3mm;align-items:start;margin-top:5mm;padding:0 7mm}
+.cal,.measure{table-layout:fixed;font-size:5.6pt}.cal caption,.measure caption{height:6mm;padding:1mm;border:1px solid var(--line);border-bottom:0;background:var(--blue);color:#fff;font-size:6.2pt;font-weight:800}.cal th,.cal td{height:5mm;padding:.8mm 1mm}.cal th{width:58%;background:#b7b7b7}.cal td{text-align:center}
+.measure th,.measure td{height:6mm;padding:.55mm;text-align:center}.measure th{background:#b7b7b7}.measure .point{width:9mm}.measure .location{width:18mm}.measure .result{width:12mm}.summary-label{background:var(--orange);font-weight:800}.summary{background:var(--light);font-weight:700}
+.minimum-note{margin:1.2mm 0 0;text-align:center;font-size:5.6pt}
+.visual{margin-top:4mm;border:1px solid var(--line)}.visual-title{padding:1.2mm 2mm;background:#43566f;color:#fff;text-align:center;font-size:7pt;font-weight:800}
+.visual-notes{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--line)}.visual-notes div{min-height:16mm;padding:1.4mm;border-right:1px solid var(--line);font-size:5.8pt;white-space:pre-line}.visual-notes div:last-child{border-right:0}.visual-notes strong{display:block;margin-bottom:1mm;color:#0d2e52}
+.photos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2.5mm;min-height:122mm;padding:2.5mm}.photo{display:flex;flex-direction:column;min-height:54mm;border:1px solid var(--soft);break-inside:avoid}.photo img{width:100%;height:45mm;object-fit:contain;background:#f4f6f8}.caption{padding:1.5mm;border-top:1px solid var(--soft);font-size:5.7pt}.caption p{margin:.5mm 0}.empty{grid-column:1/-1;display:flex;align-items:center;justify-content:center;min-height:105mm;color:#68778a;font-size:7pt}
+.final{display:grid;grid-template-columns:1.35fr 1fr 1fr 1fr;margin-top:4mm;border:1px solid var(--line)}.final>div{min-height:34mm;padding:2mm;border-right:1px solid var(--line);font-size:6pt}.final>div:last-child{border-right:0}.final strong{display:block;margin-bottom:1.5mm;color:#0d2e52}.signature{margin-top:18mm;padding-top:1mm;border-top:1px solid var(--line);text-align:center}
+.status{display:grid;grid-template-columns:32mm 38mm 1fr 34mm 34mm;min-height:8mm;margin-top:2mm;background:var(--navy);color:#fff;border:1px solid var(--line)}.status div{display:flex;align-items:center;justify-content:center;padding:1mm;border-right:1px solid #fff;text-align:center;font-size:5.8pt;font-weight:800}.status div:last-child{border-right:0}.status-value{background:var(--green)}
+.page-number{position:absolute;right:6mm;bottom:3mm;color:#808b98;font-size:6pt}
+@media print{@page{size:A4 portrait;margin:0}html,body{width:210mm;padding:0;background:#fff}.toolbar{display:none!important}.page{width:210mm;height:297mm;min-height:297mm;margin:0;padding:5mm;border:0;box-shadow:none;page-break-after:always}.page:last-child{page-break-after:auto}.measurement-layout,.visual,.photo,.final{page-break-inside:avoid}}
+@media(max-width:900px){body{padding:8px}.page,.toolbar{width:100%}.page{min-height:auto;overflow-x:auto}}
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+<a class="back" href="{% url 'formulario_life_shaft' inspeccion.id %}">Volver al formulario</a>
+<a class="excel" href="{% url 'exportar_excel_life_shaft_cvb0001' inspeccion.id %}">Descargar Excel</a>
+<button class="print" type="button" onclick="window.print()">Imprimir / Guardar PDF</button>
+</div>
+
+<section class="page">
+<header class="header">
+<div class="logo"><img src="{% static 'inspecciones/reportes/cvb0001/life_shaft/logo_overall.png' %}" alt="OverallSolutions"></div>
+<div class="title"><h1>REPORTE INSPECCIÓN {{ inspeccion.codigo_reporte }}</h1><p>Ingeniería de Confiabilidad - Operaciones Procesos</p></div>
+<div class="client"><img src="{% static 'inspecciones/reportes/cvb0001/life_shaft/logo_cliente.jpg' %}" alt="MMG Las Bambas"></div>
+</header>
+
+<div class="condition">
+<div class="condition-label">CONDICIÓN</div>
+<div class="condition-{{ inspeccion.condicion_general|lower }}">{{ inspeccion.get_condicion_general_display }}</div>
+</div>
+
+<div class="cover-grid">
+<table class="cover-data">
+<tr><th class="sub" colspan="4">DATOS DEL EQUIPO O COMPONENTE</th></tr>
+<tr><th>PLANTA</th><td>{{ inspeccion.planta|default:"220" }}</td><th>PROCESO</th><td>{{ inspeccion.proceso|default:"Faja Overland 01" }}</td></tr>
+<tr><th>EQUIPO</th><td>LIFE SHAFT</td><th>TAG</th><td>{{ inspeccion.faja.tag|default:"-" }}</td></tr>
+<tr><th>ETAPA</th><td>{{ inspeccion.etapa|default:"Operaciones" }}</td><th>CONDICIÓN DEL EQUIPO</th><td>{{ inspeccion.condicion_equipo|default:"-" }}</td></tr>
+<tr><th>FECHA DE INSPECCIÓN</th><td>{{ inspeccion.fecha_inspeccion|date:"d/m/Y"|default:"-" }}</td><th>FECHA DE REPORTE</th><td>{{ inspeccion.fecha_reporte|date:"d/m/Y"|default:"-" }}</td></tr>
+<tr><th>INSPECTOR DE CAMPO</th><td>{{ inspeccion.inspector.get_full_name|default:inspeccion.inspector.username }}</td><th>SUPERVISOR DE CAMPO</th><td>{{ inspeccion.supervisor.get_full_name|default:inspeccion.supervisor.username }}</td></tr>
+<tr><th>ANALISTA QUE ELABORA</th><td>{{ inspeccion.analista.get_full_name|default:inspeccion.analista.username }}</td><th>ANALISTA QUE VALIDA</th><td>{{ inspeccion.analista.get_full_name|default:inspeccion.analista.username }}</td></tr>
+</table>
+<div class="plant"><img src="{% static 'inspecciones/reportes/cvb0001/life_shaft/ubicacion.jpg' %}" alt="Faja Overland"></div>
+</div>
+
+<table class="notes">
+<tr><th>CIRCUNSTANCIAS DE LA INSPECCIÓN</th><td>{{ inspeccion.circunstancias|default:"-" }}</td></tr>
+<tr><th>ANTECEDENTES</th><td>{{ inspeccion.antecedentes|default:"-" }}</td></tr>
+<tr class="large"><th>OBSERVACIONES</th><td>{{ inspeccion.observaciones|default:"-" }}</td></tr>
+<tr class="rec"><th>CONCLUSIONES Y RECOMENDACIONES</th><td>{{ inspeccion.recomendaciones|default:"-" }}</td></tr>
+</table>
+
+<div class="bar">ESQUEMA DE UBICACIÓN DE LIFE SHAFT DE LA FAJA {{ inspeccion.faja.tag }}</div>
+<div class="diagram"><img src="{% static 'inspecciones/reportes/cvb0001/life_shaft/esquema.png' %}" alt="Esquema Life Shaft"></div>
+<div class="page-number">Página 1</div>
+</section>
+
+{% for bloque in bloques_shafts %}
+<section class="page shaft-page">
+<div class="shaft-title">{% if bloque.es_campana %}MEDICIÓN DE CAMPAÑA{% else %}MEDICIÓN DE ESPESORES{% endif %} DEL LIFE SHAFT #{{ bloque.life_shaft.numero|stringformat:"02d" }} - {{ inspeccion.faja.tag }}</div>
+
+<div class="info">
+<div><strong>NOMBRE</strong>{{ bloque.life_shaft.nombre|default:"-" }}</div>
+<div><strong>TAG</strong>{{ bloque.life_shaft.tag|default:"-" }}</div>
+<div><strong>UBICACIÓN</strong>{{ bloque.life_shaft.ubicacion|default:"-" }}</div>
+<div><strong>CONDICIÓN</strong>{{ bloque.life_shaft.get_condicion_display|default:"-" }}</div>
+</div>
+
+{% if bloque.es_campana %}
+{% include "inspecciones/_campana_life_shaft_report.html" with b=bloque %}
+{% else %}<div class="measurement-layout">
+<table class="cal">
+<caption>PARÁMETROS DE CALIBRACIÓN DEL EQUIPO UT</caption>
+<tr><th>MARCA DEL EQUIPO</th><td>OLYMPUS</td></tr>
+<tr><th>TIPO DE HAZ</th><td>COMPLETA</td></tr>
+<tr><th>FRECUENCIA (MHz)</th><td>5 MHz</td></tr>
+<tr><th>ANCHO DE BANDA</th><td>0.2 - 10 MHz</td></tr>
+<tr><th>AMORTIGUAMIENTO</th><td>50</td></tr>
+<tr><th>VELOCIDAD (m/s)</th><td>6079</td></tr>
+<tr><th>RETARDO (μs)</th><td>1.53</td></tr>
+</table>
+
+<div>
+<table class="measure js-table">
+<caption>MEDICIÓN DE ESPESORES DEL LIFE SHAFT {{ bloque.life_shaft.numero }}</caption>
+<thead><tr><th class="point">PUNTO</th><th class="location">UBICACIÓN</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th><th>G</th><th class="result">PROM.</th><th class="result">MÍN.</th></tr></thead>
+<tbody>
+{% for medicion in bloque.mediciones %}
+<tr class="js-row">
+<td>{{ medicion.punto }}</td><td>{{ medicion.ubicacion|default:"-" }}</td>
+<td data-col="a">{{ medicion.a|default_if_none:"-" }}</td><td data-col="b">{{ medicion.b|default_if_none:"-" }}</td><td data-col="c">{{ medicion.c|default_if_none:"-" }}</td><td data-col="d">{{ medicion.d|default_if_none:"-" }}</td><td data-col="e">{{ medicion.e|default_if_none:"-" }}</td><td data-col="f">{{ medicion.f|default_if_none:"-" }}</td><td data-col="g">{{ medicion.g|default_if_none:"-" }}</td>
+<td data-row-avg>{{ medicion.promedio|default_if_none:"-" }}</td><td data-row-min>{{ medicion.minimo|default_if_none:"-" }}</td>
+</tr>
+{% empty %}<tr><td colspan="11">No existen mediciones registradas.</td></tr>{% endfor %}
+<tr><td class="summary-label" colspan="2">PROMEDIO</td>{% for c in "abcdefg" %}<td class="summary" data-summary="avg-{{ c }}">-</td>{% endfor %}<td class="summary" data-summary="avg-prom">-</td><td class="summary" data-summary="avg-min">-</td></tr>
+<tr><td class="summary-label" colspan="2">MÍNIMO</td>{% for c in "abcdefg" %}<td class="summary" data-summary="min-{{ c }}">-</td>{% endfor %}<td class="summary" data-summary="min-prom">-</td><td class="summary" data-summary="min-min">-</td></tr>
+</tbody>
+</table>
+<p class="minimum-note js-note">El espesor mínimo corresponde a las mediciones registradas.</p>
+</div>
+</div>{% endif %}
+
+{% if bloque.fotografias or bloque.life_shaft.observacion_visual or bloque.life_shaft.observacion_medicion or bloque.life_shaft.recomendaciones %}<section class="visual">
+<div class="visual-title">INSPECCIÓN VISUAL DEL LIFE SHAFT #{{ bloque.life_shaft.numero|stringformat:"02d" }} - {{ inspeccion.faja.tag }}</div>
+{% if bloque.life_shaft.observacion_visual or bloque.life_shaft.observacion_medicion or bloque.life_shaft.recomendaciones %}<div class="visual-notes">
+{% if bloque.life_shaft.observacion_visual %}<div><strong>OBSERVACIÓN VISUAL</strong>{{ bloque.life_shaft.observacion_visual }}</div>{% endif %}
+{% if bloque.life_shaft.observacion_medicion %}<div><strong>OBSERVACIÓN DE MEDICIÓN</strong>{{ bloque.life_shaft.observacion_medicion }}</div>{% endif %}
+{% if bloque.life_shaft.recomendaciones %}<div><strong>RECOMENDACIONES</strong>{{ bloque.life_shaft.recomendaciones }}</div>{% endif %}
+</div>{% endif %}
+<div class="photos">
+{% for foto in bloque.fotografias %}
+<article class="photo">
+{% if foto.imagen %}<img src="{{ foto.imagen.url }}" alt="Life Shaft {{ bloque.life_shaft.numero }}">{% endif %}
+{% if foto.codigo_dano or foto.descripcion %}<div class="caption">{% if foto.codigo_dano %}<p><strong>Título:</strong> {{ foto.codigo_dano }}</p>{% endif %}{% if foto.descripcion %}<p><strong>Observación:</strong> {{ foto.descripcion }}</p>{% endif %}</div>{% endif %}
+</article>
+{% empty %}{% endfor %}
+</div>
+</section>{% endif %}
+
+<div class="page-number">Página {{ forloop.counter|add:"1" }}</div>
+</section>
+{% endfor %}
+
+<section class="page">
+<header class="header">
+<div class="logo"><img src="{% static 'inspecciones/reportes/cvb0001/life_shaft/logo_overall.png' %}" alt="OverallSolutions"></div>
+<div class="title"><h1>CIERRE DEL REPORTE {{ inspeccion.codigo_reporte }}</h1><p>Ingeniería de Confiabilidad - Operaciones Procesos</p></div>
+<div class="client"><img src="{% static 'inspecciones/reportes/cvb0001/life_shaft/logo_cliente.jpg' %}" alt="MMG Las Bambas"></div>
+</header>
+<div class="bar">OBSERVACIONES, RESPONSABLES Y ESTADO DEL REPORTE</div>
+<div class="final">
+<div><strong>OBSERVACIONES DE MEDICIÓN</strong>{{ inspeccion.observaciones|default:"-" }}</div>
+<div><strong>INSPECTOR DE CAMPO</strong><p>Nombre: {{ inspeccion.inspector.get_full_name|default:inspeccion.inspector.username }}</p><p>Fecha: {{ inspeccion.fecha_inspeccion|date:"d/m/Y"|default:"-" }}</p><div class="signature">Firma</div></div>
+<div><strong>SUPERVISOR DE CAMPO</strong><p>Nombre: {{ inspeccion.supervisor.get_full_name|default:inspeccion.supervisor.username }}</p><p>Fecha: {{ inspeccion.fecha_reporte|date:"d/m/Y"|default:"-" }}</p><div class="signature">Firma</div></div>
+<div><strong>ANALISTA QUE VALIDA</strong><p>Nombre: {{ inspeccion.analista.get_full_name|default:inspeccion.analista.username }}</p><p>Fecha: {{ inspeccion.fecha_reporte|date:"d/m/Y"|default:"-" }}</p><div class="signature">Firma</div></div>
+</div>
+<footer class="status">
+<div>ESTADO DEL REPORTE:</div><div class="status-value">{{ inspeccion.get_estado_display|upper }}</div><div>REVISADO POR: {{ inspeccion.analista.get_full_name|default:inspeccion.analista.username }}</div><div>FECHA:</div><div>{{ inspeccion.fecha_reporte|date:"d/m/Y"|default:"-" }}</div>
+</footer>
+<div class="page-number">Página final</div>
+</section>
+
+<script>
+(()=>{const n=v=>{v=String(v||"").trim().replace(",",".");if(!v||v==="-")return null;const x=Number(v);return Number.isFinite(x)?x:null},f=v=>v===null?"-":v.toFixed(2);
+document.querySelectorAll(".js-table").forEach(t=>{const cols=["a","b","c","d","e","f","g"],rows=[...t.querySelectorAll(".js-row")],set=(k,v)=>{const c=t.querySelector(`[data-summary="${k}"]`);if(c)c.textContent=f(v)};
+cols.forEach(c=>{const vals=rows.map(r=>n(r.querySelector(`[data-col="${c}"]`)?.textContent)).filter(v=>v!==null);set(`avg-${c}`,vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null);set(`min-${c}`,vals.length?Math.min(...vals):null)});
+const avgs=rows.map(r=>n(r.querySelector("[data-row-avg]")?.textContent)).filter(v=>v!==null),mins=rows.map(r=>n(r.querySelector("[data-row-min]")?.textContent)).filter(v=>v!==null);
+set("avg-prom",avgs.length?avgs.reduce((a,b)=>a+b,0)/avgs.length:null);set("min-prom",avgs.length?Math.min(...avgs):null);set("avg-min",mins.length?mins.reduce((a,b)=>a+b,0)/mins.length:null);set("min-min",mins.length?Math.min(...mins):null);
+if(mins.length){const note=t.closest(".shaft-page")?.querySelector(".js-note");if(note)note.textContent=`El espesor mínimo encontrado es de ${f(Math.min(...mins))} mm.`}})})();
+</script>
+</body>
+</html>

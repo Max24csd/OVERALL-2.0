@@ -1,0 +1,118 @@
+<article class="inspection-card">
+
+    <div class="inspection-card-header">
+        <div>
+            <span class="tag-label">
+                {{ inspeccion.faja.tag }}
+            </span>
+
+            <h3>{{ inspeccion.get_tipo_display }}</h3>
+        </div>
+
+        <span class="status-badge status-{{ inspeccion.estado|lower }}">
+            {{ inspeccion.get_estado_display }}
+        </span>
+    </div>
+
+    <dl class="inspection-details">
+
+        <div>
+            <dt>Código</dt>
+            <dd>{{ inspeccion.codigo_reporte }}</dd>
+        </div>
+
+        <div>
+            <dt>Fecha</dt>
+            <dd>
+                {{ inspeccion.fecha_inspeccion|default:inspeccion.fecha_programada|date:"d/m/Y" }}
+            </dd>
+        </div>
+
+        {% if rol == "Administrador" %}
+        <div>
+            <dt>Inspector</dt>
+            <dd>
+                {{ inspeccion.inspector.get_full_name|default:inspeccion.inspector.username }}
+            </dd>
+        </div>
+
+        <div>
+            <dt>Supervisor</dt>
+            <dd>
+                {{ inspeccion.supervisor.get_full_name|default:inspeccion.supervisor.username }}
+            </dd>
+        </div>
+
+        <div>
+            <dt>Analista</dt>
+            <dd>
+                {{ inspeccion.analista.get_full_name|default:inspeccion.analista.username }}
+            </dd>
+        </div>
+
+        <div>
+            <dt>Cliente</dt>
+            <dd>
+                {{ inspeccion.cliente.get_full_name|default:inspeccion.cliente.username|default:"-" }}
+            </dd>
+        </div>
+        {% endif %}
+
+    </dl>
+
+    {% if rol != "Cliente" %}
+    <div class="inspection-metrics">
+        <span>{{ inspeccion.total_mediciones }} mediciones</span>
+        <span>{{ inspeccion.total_fotos }} fotos</span>
+    </div>
+    {% endif %}
+
+    <div class="inspection-actions">
+
+        {% if rol == "Cliente" %}
+
+            {% if inspeccion.tipo == "FAJA" %}
+                <a class="primary-button link-button"
+                   href="{% url 'reporte_faja' inspeccion.id %}">
+                    Ver reporte
+                </a>
+
+            {% elif inspeccion.tipo == "POLEAS" %}
+                <a class="primary-button link-button"
+                   href="{% url 'reporte_poleas' inspeccion.id %}">
+                    Ver reporte
+                </a>
+
+            {% else %}
+                <a class="primary-button link-button"
+                   href="{% url 'reporte_life_shaft' inspeccion.id %}">
+                    Ver reporte
+                </a>
+            {% endif %}
+
+        {% else %}
+
+            {% if inspeccion.tipo == "FAJA" %}
+                <a class="primary-button link-button"
+                   href="{% url 'formulario_faja' inspeccion.id %}">
+                    Abrir
+                </a>
+
+            {% elif inspeccion.tipo == "POLEAS" %}
+                <a class="primary-button link-button"
+                   href="{% url 'formulario_poleas' inspeccion.id %}">
+                    Abrir
+                </a>
+
+            {% else %}
+                <a class="primary-button link-button"
+                   href="{% url 'formulario_life_shaft' inspeccion.id %}">
+                    Abrir
+                </a>
+            {% endif %}
+
+        {% endif %}
+
+    </div>
+
+</article>

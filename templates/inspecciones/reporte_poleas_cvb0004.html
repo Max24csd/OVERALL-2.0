@@ -1,0 +1,1398 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>
+        Reporte de Poleas - {{ inspeccion.faja.tag }}
+    </title>
+    <link rel="stylesheet" href="{% static 'inspecciones/reportes/cvb0004/poleas.css' %}">
+
+    <style>
+        :root {
+            --navy: #173f6d;
+            --navy-dark: #0d2e52;
+            --blue: #0f75b9;
+            --line: #111827;
+            --line-soft: #8ea0b5;
+            --gray: #d9d9d9;
+            --light-blue: #dceaf7;
+            --orange: #f28c28;
+            --green: #00a651;
+            --yellow: #fff200;
+            --red: #d62828;
+            --white: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            background: #dfe6ee;
+        }
+
+        body {
+            margin: 0;
+            padding: 18px;
+            color: #111827;
+            background: #dfe6ee;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .report-toolbar {
+            width: 210mm;
+            max-width: 100%;
+            margin: 0 auto 12px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .report-toolbar a,
+        .report-toolbar button {
+            min-height: 38px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font: inherit;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .button-secondary {
+            border: 1px solid #9eb0c4;
+            background: #ffffff;
+            color: var(--navy);
+        }
+
+        .button-primary {
+            border: 1px solid var(--blue);
+            background: var(--blue);
+            color: #ffffff;
+        }
+
+        .button-excel {
+            border: 1px solid #15803d;
+            background: #15803d;
+            color: #ffffff;
+        }
+
+        .report-page {
+            position: relative;
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto 16px;
+            padding: 5mm;
+            overflow: hidden;
+            background: #ffffff;
+            border: 1px solid #93a5b8;
+            box-shadow: 0 5px 20px rgba(15, 35, 62, 0.14);
+        }
+
+        .report-page:last-child {
+            margin-bottom: 0;
+        }
+
+        .report-header {
+            display: grid;
+            grid-template-columns: 32mm 1fr 35mm;
+            min-height: 18mm;
+            border: 1px solid var(--line);
+        }
+
+        .report-header-logo,
+        .report-header-client {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2mm;
+        }
+
+        .report-header-logo {
+            border-right: 1px solid var(--line);
+        }
+
+        .report-header-client {
+            border-left: 1px solid var(--line);
+        }
+
+        .report-header-logo img,
+        .report-header-client img {
+            display: block;
+            max-width: 100%;
+            max-height: 13mm;
+            object-fit: contain;
+        }
+
+        .report-header-title {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2mm;
+            text-align: center;
+        }
+
+        .report-header-title h1 {
+            margin: 0;
+            font-size: 10pt;
+            line-height: 1.25;
+            font-weight: 800;
+        }
+
+        .report-header-title p {
+            margin: 1.5mm 0 0;
+            font-size: 6.5pt;
+            font-weight: 700;
+        }
+
+        .condition-row {
+            display: grid;
+            grid-template-columns: 30mm 1fr;
+            margin-top: 2mm;
+            border: 1px solid var(--line);
+            font-size: 7pt;
+            font-weight: 800;
+        }
+
+        .condition-row > div {
+            min-height: 7mm;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1mm 2mm;
+        }
+
+        .condition-label {
+            background: #43566f;
+            color: #ffffff;
+        }
+
+        .condition-value {
+            text-transform: uppercase;
+        }
+
+        .condition-normal {
+            background: var(--green);
+            color: #ffffff;
+        }
+
+        .condition-precaucion,
+        .condition-alerta {
+            background: var(--yellow);
+            color: #111827;
+        }
+
+        .condition-critico {
+            background: var(--red);
+            color: #ffffff;
+        }
+
+        .condition-no-medido {
+            background: #64748b;
+            color: #ffffff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--line);
+        }
+
+        .cover-grid {
+            display: grid;
+            grid-template-columns: 1.12fr 0.88fr;
+            gap: 2mm;
+            margin-top: 2mm;
+        }
+
+        .cover-data {
+            font-size: 6.3pt;
+        }
+
+        .cover-data th,
+        .cover-data td {
+            height: 7.1mm;
+            padding: 1mm 1.5mm;
+        }
+
+        .cover-data th {
+            width: 25%;
+            background: #43566f;
+            color: #ffffff;
+            text-align: center;
+            font-weight: 800;
+        }
+
+        .cover-data td {
+            background: #ffffff;
+        }
+
+        .cover-data .subheading {
+            height: 5.5mm;
+            background: #ffffff;
+            color: #111827;
+            font-size: 6.8pt;
+        }
+
+        .cover-photo {
+            height: 57mm;
+            border: 1px solid var(--line);
+            background: #f4f5f7;
+        }
+
+        .cover-photo img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .cover-notes {
+            margin-top: 2mm;
+            font-size: 6.2pt;
+        }
+
+        .cover-notes th {
+            width: 30mm;
+            padding: 1.4mm;
+            background: #43566f;
+            color: #ffffff;
+            text-align: center;
+            font-weight: 800;
+        }
+
+        .cover-notes td {
+            min-height: 9mm;
+            padding: 1.5mm 2mm;
+            white-space: pre-line;
+        }
+
+        .cover-notes .large-note td,
+        .cover-notes .large-note th {
+            height: 30mm;
+        }
+
+        .cover-notes .recommendation-row td,
+        .cover-notes .recommendation-row th {
+            height: 20mm;
+        }
+
+        .section-bar {
+            min-height: 6mm;
+            margin-top: 2mm;
+            padding: 1.2mm 2mm;
+            background: #43566f;
+            color: #ffffff;
+            border: 1px solid var(--line);
+            text-align: center;
+            font-size: 7pt;
+            font-weight: 800;
+            line-height: 1.15;
+        }
+
+        .diagram-box {
+            height: 53mm;
+            border: 1px solid var(--line);
+            border-top: 0;
+            padding: 2mm;
+        }
+        .diagram-container,
+.diagram {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #b7c7d9;
+    background: #ffffff;
+}
+
+.diagram-container img,
+.diagram img {
+    display: block;
+    width: 100%;
+    max-height: 420px;
+    object-fit: contain;
+}
+
+        .diagram-box img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .polea-page-title {
+            min-height: 6mm;
+            padding: 1.2mm 2mm;
+            background: #43566f;
+            color: #ffffff;
+            border: 1px solid var(--line);
+            text-align: center;
+            font-size: 7.5pt;
+            font-weight: 800;
+        }
+
+        .measurement-layout {
+            display: grid;
+            grid-template-columns: 55mm 1fr;
+            gap: 3mm;
+            align-items: start;
+            margin-top: 5mm;
+            padding: 0 7mm;
+        }
+
+        .calibration-table,
+        .measurement-table {
+            table-layout: fixed;
+            font-size: 5.6pt;
+        }
+
+        .calibration-table caption,
+        .measurement-table caption {
+            height: 6mm;
+            padding: 1mm;
+            border: 1px solid var(--line);
+            border-bottom: 0;
+            background: var(--blue);
+            color: #ffffff;
+            caption-side: top;
+            text-align: center;
+            font-size: 6.2pt;
+            font-weight: 800;
+        }
+
+        .calibration-table th,
+        .calibration-table td {
+            height: 5mm;
+            padding: 0.8mm 1mm;
+        }
+
+        .calibration-table th {
+            width: 58%;
+            background: #b7b7b7;
+            text-align: center;
+        }
+
+        .calibration-table td {
+            background: #ffffff;
+            text-align: center;
+        }
+
+        .measurement-table th,
+        .measurement-table td {
+            height: 5.2mm;
+            padding: 0.55mm;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .measurement-table th {
+            background: #b7b7b7;
+            font-weight: 800;
+        }
+
+        .measurement-table .location-column {
+            width: 12mm;
+        }
+
+        .measurement-table .point-column {
+            width: 9mm;
+        }
+
+        .measurement-table .result-column {
+            width: 12mm;
+        }
+
+        .vertical-location {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            background: #b7b7b7;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+        }
+
+        .summary-label {
+            background: var(--orange);
+            font-weight: 800;
+        }
+
+        .summary-cell {
+            background: var(--light-blue);
+            font-weight: 700;
+        }
+
+        .minimum-note {
+            margin: 1.2mm 0 0;
+            text-align: center;
+            font-size: 5.6pt;
+        }
+
+
+        .ceramic-report-note {
+            margin: 5mm 7mm 0;
+            padding: 5mm;
+            border: 1px solid #d6a533;
+            background: #fff8df;
+            color: #6b4f00;
+            text-align: center;
+            font-size: 7pt;
+        }
+
+        .ceramic-report-note p {
+            margin: 2mm 0 0;
+        }
+
+        .visual-panel {
+            margin-top: 4mm;
+            border: 1px solid var(--line);
+        }
+
+        .visual-heading {
+            min-height: 6mm;
+            padding: 1.2mm 2mm;
+            background: #43566f;
+            color: #ffffff;
+            text-align: center;
+            font-size: 7pt;
+            font-weight: 800;
+        }
+
+        .visual-notes {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border-bottom: 1px solid var(--line);
+        }
+
+        .visual-notes > div {
+            min-height: 16mm;
+            padding: 1.4mm;
+            border-right: 1px solid var(--line);
+            font-size: 5.8pt;
+            white-space: pre-line;
+        }
+
+        .visual-notes > div:last-child {
+            border-right: 0;
+        }
+
+        .visual-notes strong {
+            display: block;
+            margin-bottom: 1mm;
+            color: var(--navy-dark);
+            font-size: 5.8pt;
+        }
+
+        .photos-area {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 2.5mm;
+            min-height: 122mm;
+            padding: 2.5mm;
+        }
+
+        .photo-card {
+            display: flex;
+            flex-direction: column;
+            min-height: 54mm;
+            border: 1px solid var(--line-soft);
+            background: #ffffff;
+            break-inside: avoid;
+        }
+
+        .photo-card img {
+            display: block;
+            width: 100%;
+            height: 45mm;
+            object-fit: contain;
+            background: #f4f6f8;
+        }
+
+        .photo-caption {
+            padding: 1.5mm;
+            border-top: 1px solid var(--line-soft);
+            font-size: 5.7pt;
+        }
+
+        .photo-caption p {
+            margin: 0.5mm 0;
+        }
+
+        .empty-photos {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 105mm;
+            color: #68778a;
+            font-size: 7pt;
+        }
+
+        .final-layout {
+            display: grid;
+            grid-template-columns: 1.35fr 1fr 1fr 1fr;
+            margin-top: 4mm;
+            border: 1px solid var(--line);
+        }
+
+        .final-layout > div {
+            min-height: 34mm;
+            padding: 2mm;
+            border-right: 1px solid var(--line);
+            font-size: 6pt;
+        }
+
+        .final-layout > div:last-child {
+            border-right: 0;
+        }
+
+        .final-layout strong {
+            display: block;
+            margin-bottom: 1.5mm;
+            color: var(--navy-dark);
+        }
+
+        .signature-line {
+            margin-top: 18mm;
+            padding-top: 1mm;
+            border-top: 1px solid var(--line);
+            text-align: center;
+        }
+
+        .status-bar {
+            display: grid;
+            grid-template-columns: 32mm 38mm 1fr 34mm 34mm;
+            min-height: 8mm;
+            margin-top: 2mm;
+            background: var(--navy);
+            color: #ffffff;
+            border: 1px solid var(--line);
+        }
+
+        .status-bar > div {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1mm;
+            border-right: 1px solid #ffffff;
+            text-align: center;
+            font-size: 5.8pt;
+            font-weight: 800;
+        }
+
+        .status-bar > div:last-child {
+            border-right: 0;
+        }
+
+        .status-value {
+            background: var(--green);
+        }
+
+        .page-number {
+            position: absolute;
+            right: 6mm;
+            bottom: 3mm;
+            color: #808b98;
+            font-size: 6pt;
+        }
+
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 0;
+            }
+
+            html,
+            body {
+                width: 210mm;
+                margin: 0;
+                padding: 0;
+                background: #ffffff;
+            }
+
+            .report-toolbar {
+                display: none !important;
+            }
+
+            .report-page {
+                width: 210mm;
+                height: 297mm;
+                min-height: 297mm;
+                margin: 0;
+                padding: 5mm;
+                border: 0;
+                box-shadow: none;
+                page-break-after: always;
+                break-after: page;
+            }
+
+            .report-page:last-child {
+                page-break-after: auto;
+                break-after: auto;
+            }
+
+            .measurement-layout,
+            .visual-panel,
+            .photo-card,
+            .final-layout {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+        }
+
+        @media screen and (max-width: 900px) {
+            body {
+                padding: 8px;
+            }
+
+            .report-page,
+            .report-toolbar {
+                width: 100%;
+            }
+
+            .report-page {
+                min-height: auto;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="report-toolbar">
+    <a
+        class="button-secondary"
+        href="{% url 'formulario_poleas' inspeccion.id %}"
+    >
+        Volver al formulario
+    </a>
+
+    <a
+        class="button-excel"
+        href="{% url 'exportar_excel_poleas_cvb0004' inspeccion.id %}"
+    >
+        Descargar Excel
+    </a>
+
+    <button
+        class="button-primary"
+        type="button"
+        onclick="window.print()"
+    >
+        Imprimir / Guardar PDF
+    </button>
+</div>
+
+<!-- ====================================================== -->
+<!-- PÁGINA 1: PORTADA                                      -->
+<!-- ====================================================== -->
+
+<section class="report-page">
+    <header class="report-header">
+        <div class="report-header-logo">
+            <img
+                src="{% static 'inspecciones/reportes/cvb0004/poleas_logo_overall.png' %}"
+                alt="OverallSolutions"
+            >
+        </div>
+
+        <div class="report-header-title">
+            <h1>
+                REPORTE INSPECCIÓN {{ inspeccion.codigo_reporte }}
+            </h1>
+
+            <p>
+                Ingeniería de Confiabilidad - Operaciones Procesos
+            </p>
+        </div>
+
+        <div class="report-header-client">
+            <img
+                src="{% static 'inspecciones/reportes/cvb0004/poleas_logo_cliente.jpg' %}"
+                alt="MMG Las Bambas"
+            >
+        </div>
+    </header>
+
+    <div class="condition-row">
+        <div class="condition-label">
+            CONDICIÓN
+        </div>
+
+        <div class="condition-value condition-{{ inspeccion.condicion_general|lower }}">
+            {{ inspeccion.get_condicion_general_display }}
+        </div>
+    </div>
+
+    <div class="cover-grid">
+        <table class="cover-data">
+            <tbody>
+                <tr>
+                    <th
+                        class="subheading"
+                        colspan="4"
+                    >
+                        DATOS DEL EQUIPO O COMPONENTE
+                    </th>
+                </tr>
+
+                <tr>
+                    <th>PLANTA</th>
+                    <td>{{ inspeccion.planta|default:"220" }}</td>
+
+                    <th>PROCESO</th>
+                    <td>{{ inspeccion.proceso|default:"Transporte de mineral" }}</td>
+                </tr>
+
+                <tr>
+                    <th>EQUIPO</th>
+                    <td>POLEAS</td>
+
+                    <th>TAG</th>
+                    <td>{{ inspeccion.faja.tag|default:"-" }}</td>
+                </tr>
+
+                <tr>
+                    <th>ETAPA</th>
+                    <td>{{ inspeccion.etapa|default:"Operaciones" }}</td>
+
+                    <th>CONDICIÓN DEL EQUIPO</th>
+                    <td>{{ inspeccion.condicion_equipo|default:"-" }}</td>
+                </tr>
+
+                <tr>
+                    <th>FECHA DE INSPECCIÓN</th>
+                    <td>{{ inspeccion.fecha_inspeccion|date:"d/m/Y"|default:"-" }}</td>
+
+                    <th>FECHA DE REPORTE</th>
+                    <td>{{ inspeccion.fecha_reporte|date:"d/m/Y"|default:"-" }}</td>
+                </tr>
+
+                <tr>
+                    <th>INSPECTOR DE CAMPO</th>
+                    <td>
+                        {{ inspeccion.inspector.get_full_name|default:inspeccion.inspector.username }}
+                    </td>
+
+                    <th>SUPERVISOR DE CAMPO</th>
+                    <td>
+                        {{ inspeccion.supervisor.get_full_name|default:inspeccion.supervisor.username }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>ANALISTA QUE ELABORA REPORTE</th>
+                    <td>
+                        {{ inspeccion.analista.get_full_name|default:inspeccion.analista.username }}
+                    </td>
+
+                    <th>ANALISTA QUE VALIDA</th>
+                    <td>
+                        {{ inspeccion.analista.get_full_name|default:inspeccion.analista.username }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="cover-photo">
+            <img
+                src="{% static 'inspecciones/reportes/cvb0004/poleas_ubicacion.png' %}"
+                alt="Faja Overland"
+            >
+        </div>
+    </div>
+
+    <table class="cover-notes">
+        <tbody>
+            <tr>
+                <th>CIRCUNSTANCIAS DE LA INSPECCIÓN</th>
+                <td>{{ inspeccion.circunstancias|default:"-" }}</td>
+            </tr>
+
+            <tr>
+                <th>ANTECEDENTES</th>
+                <td>{{ inspeccion.antecedentes|default:"-" }}</td>
+            </tr>
+
+            <tr class="large-note">
+                <th>OBSERVACIONES</th>
+                <td>{{ inspeccion.observaciones|default:"-" }}</td>
+            </tr>
+
+            <tr class="recommendation-row">
+                <th>CONCLUSIONES Y RECOMENDACIONES</th>
+                <td>{{ inspeccion.recomendaciones|default:"-" }}</td>
+            </tr>
+        </tbody>
+    </table>
+<div class="bar">
+    ESQUEMA DE UBICACIÓN DE POLEAS DE LA FAJA 0220-CVB-004
+</div>
+
+<div class="diagram">
+    <img
+        src="{% static 'inspecciones/reportes/cvb0004/poleas_esquema.png' %}"
+        alt="Esquema real de Poleas CVB0004"
+    >
+</div>
+
+    <div class="page-number">Página 1</div>
+</section>
+
+<!-- ====================================================== -->
+<!-- PÁGINAS 2 A 6: UNA PÁGINA POR POLEA                    -->
+<!-- ====================================================== -->
+
+{% for bloque in bloques_poleas %}
+    <section class="report-page polea-report-page">
+        <div class="polea-page-title">
+            {% if bloque.es_campana %}
+                MEDICIÓN DE CAMPAÑA DE LA POLEA
+            {% elif bloque.polea.numero == 4 or bloque.polea.numero == 5 %}
+                INSPECCIÓN VISUAL DE LA POLEA CERÁMICA
+            {% else %}
+                MEDICIÓN DE ESPESORES DEL LAGGING DE LA POLEA
+            {% endif %}
+            #{{ bloque.polea.numero|stringformat:"02d" }}
+            - {{ inspeccion.faja.tag }}
+        </div>
+
+        {% if bloque.es_campana %}
+            {% if bloque.polea.numero == 4 or bloque.polea.numero == 5 %}
+                {% include "inspecciones/_campana_polea_report.html" with b=bloque material_label="CERÁMICA" lagging_label="LAGGING CERÁMICO" %}
+            {% else %}
+                {% include "inspecciones/_campana_polea_report.html" with b=bloque material_label="CAUCHO" lagging_label="LAGGING DE CAUCHO" %}
+            {% endif %}
+        {% elif bloque.polea.numero != 4 and bloque.polea.numero != 5 %}
+        <div class="measurement-layout">
+            <table class="calibration-table">
+                <caption>
+                    PARÁMETROS DE CALIBRACIÓN DEL EQUIPO UT
+                </caption>
+
+                <tbody>
+                    <tr>
+                        <th>MARCA DEL EQUIPO</th>
+                        <td>{{ bloque.polea.marca_equipo|default:"-" }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>TIPO DE HAZ</th>
+                        <td>{{ bloque.polea.modelo_equipo|default:"-" }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>FRECUENCIA (MHz)</th>
+                        <td>{{ bloque.polea.frecuencia_mhz|default:"-" }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>ANCHO DE BANDA</th>
+                        <td>{{ bloque.polea.rango_mm|default:"-" }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>AMORTIGUAMIENTO</th>
+                        <td>{{ bloque.polea.metodo_empleado|default:"-" }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>VELOCIDAD (m/s)</th>
+                        <td>{{ bloque.polea.velocidad_ms|default:"-" }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>RETARDO (μs)</th>
+                        <td>{{ bloque.polea.retardo_us|default:"-" }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div>
+                <table class="measurement-table js-measurement-table">
+                    <caption>
+                        MEDICIÓN DE ESPESORES DEL LAGGING DE LA POLEA
+                        {{ bloque.polea.numero }}
+                    </caption>
+
+                    <thead>
+                        <tr>
+                            <th class="location-column">UBICACIÓN</th>
+                            <th class="point-column">PUNTOS</th>
+                            <th>A</th>
+                            <th>B</th>
+                            <th>C</th>
+                            <th>D</th>
+                            <th>E</th>
+                            <th>F</th>
+                            <th>G</th>
+                            <th class="result-column">PROMEDIO</th>
+                            <th class="result-column">MÍNIMO</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for medicion in bloque.mediciones %}
+                            <tr class="js-data-row">
+                                {% if forloop.first %}
+                                    <td
+                                        class="vertical-location"
+                                        rowspan="{{ bloque.mediciones|length }}"
+                                    >
+                                        PUNTOS SENTIDO RADIAL
+                                    </td>
+                                {% endif %}
+
+                                <td>{{ medicion.punto }}</td>
+                                <td data-column="a">{{ medicion.a|default_if_none:"-" }}</td>
+                                <td data-column="b">{{ medicion.b|default_if_none:"-" }}</td>
+                                <td data-column="c">{{ medicion.c|default_if_none:"-" }}</td>
+                                <td data-column="d">{{ medicion.d|default_if_none:"-" }}</td>
+                                <td data-column="e">{{ medicion.e|default_if_none:"-" }}</td>
+                                <td data-column="f">{{ medicion.f|default_if_none:"-" }}</td>
+                                <td data-column="g">{{ medicion.g|default_if_none:"-" }}</td>
+                                <td data-row-average>{{ medicion.promedio|default_if_none:"-" }}</td>
+                                <td data-row-minimum>{{ medicion.minimo|default_if_none:"-" }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="11">
+                                    No existen mediciones registradas.
+                                </td>
+                            </tr>
+                        {% endfor %}
+
+                        <tr>
+                            <td
+                                class="summary-label"
+                                colspan="2"
+                            >
+                                PROMEDIO
+                            </td>
+
+                            <td class="summary-cell" data-summary="average-a">-</td>
+                            <td class="summary-cell" data-summary="average-b">-</td>
+                            <td class="summary-cell" data-summary="average-c">-</td>
+                            <td class="summary-cell" data-summary="average-d">-</td>
+                            <td class="summary-cell" data-summary="average-e">-</td>
+                            <td class="summary-cell" data-summary="average-f">-</td>
+                            <td class="summary-cell" data-summary="average-g">-</td>
+                            <td class="summary-cell" data-summary="average-promedio">-</td>
+                            <td class="summary-cell" data-summary="average-minimo">-</td>
+                        </tr>
+
+                        <tr>
+                            <td
+                                class="summary-label"
+                                colspan="2"
+                            >
+                                MÍNIMO
+                            </td>
+
+                            <td class="summary-cell" data-summary="minimum-a">-</td>
+                            <td class="summary-cell" data-summary="minimum-b">-</td>
+                            <td class="summary-cell" data-summary="minimum-c">-</td>
+                            <td class="summary-cell" data-summary="minimum-d">-</td>
+                            <td class="summary-cell" data-summary="minimum-e">-</td>
+                            <td class="summary-cell" data-summary="minimum-f">-</td>
+                            <td class="summary-cell" data-summary="minimum-g">-</td>
+                            <td class="summary-cell" data-summary="minimum-promedio">-</td>
+                            <td class="summary-cell" data-summary="minimum-minimo">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p class="minimum-note js-minimum-note">
+                    El espesor mínimo encontrado corresponde a las mediciones registradas.
+                </p>
+            </div>
+        </div>
+        {% else %}
+            <div class="ceramic-report-note">
+                <strong>
+                    Polea cerámica: no aplica medición de espesores por ultrasonido.
+                </strong>
+                <p>
+                    La evaluación corresponde a inspección visual y registro fotográfico.
+                </p>
+            </div>
+        {% endif %}
+
+        <section class="visual-panel">
+            <div class="visual-heading">
+                INSPECCIÓN VISUAL DE LA POLEA
+                #{{ bloque.polea.numero|stringformat:"02d" }}
+                - {{ inspeccion.faja.tag }}
+            </div>
+
+            {% if bloque.polea.observacion_visual or bloque.polea.observacion_medicion or bloque.polea.recomendaciones %}
+            <div class="visual-notes">
+                {% if bloque.polea.observacion_visual %}<div>
+                    <strong>OBSERVACIÓN VISUAL</strong>
+                    {{ bloque.polea.observacion_visual }}
+                </div>{% endif %}
+
+                {% if bloque.polea.observacion_medicion %}<div>
+                    <strong>OBSERVACIÓN DE MEDICIÓN</strong>
+                    {{ bloque.polea.observacion_medicion }}
+                </div>{% endif %}
+
+                {% if bloque.polea.recomendaciones %}<div>
+                    <strong>RECOMENDACIONES</strong>
+                    {{ bloque.polea.recomendaciones }}
+                </div>{% endif %}
+            </div>
+            {% endif %}
+
+            <div class="photos-area">
+                {% for foto in bloque.fotografias %}
+                    <article class="photo-card">
+                        {% if foto.imagen %}
+                            <img
+                                src="{{ foto.imagen.url }}"
+                                alt="Fotografía de la Polea {{ bloque.polea.numero }}"
+                            >
+                        {% endif %}
+
+                        {% if foto.codigo_dano or foto.descripcion %}<div class="photo-caption">
+                            {% if foto.codigo_dano %}
+                            <p>
+                                <strong>Código de daño:</strong>
+                                {{ foto.codigo_dano }}
+                            </p>
+                            {% endif %}
+
+                            {% if foto.descripcion %}
+                            <p>
+                                <strong>Descripción:</strong>
+                                {{ foto.descripcion }}
+                            </p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </article>
+                {% empty %}
+                    <div class="empty-photos">
+                        No existen fotografías registradas para esta polea.
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <div class="page-number">
+            Página {{ forloop.counter|add:"1" }}
+        </div>
+    </section>
+{% endfor %}
+
+<!-- ====================================================== -->
+<!-- PÁGINA FINAL: FIRMAS Y ESTADO                          -->
+<!-- ====================================================== -->
+
+<section class="report-page">
+    <header class="report-header">
+        <div class="report-header-logo">
+            <img
+                src="{% static 'inspecciones/reportes/cvb0004/poleas_logo_overall.png' %}"
+                alt="OverallSolutions"
+            >
+        </div>
+
+        <div class="report-header-title">
+            <h1>
+                CIERRE DEL REPORTE {{ inspeccion.codigo_reporte }}
+            </h1>
+
+            <p>
+                Ingeniería de Confiabilidad - Operaciones Procesos
+            </p>
+        </div>
+
+        <div class="report-header-client">
+            <img
+                src="{% static 'inspecciones/reportes/cvb0004/poleas_logo_cliente.jpg' %}"
+                alt="MMG Las Bambas"
+            >
+        </div>
+    </header>
+
+    <div class="section-bar">
+        OBSERVACIONES, RESPONSABLES Y ESTADO DEL REPORTE
+    </div>
+
+    <div class="final-layout">
+        <div>
+            <strong>OBSERVACIONES DE MEDICIÓN</strong>
+            {{ inspeccion.observaciones|default:"-" }}
+        </div>
+
+        <div>
+            <strong>INSPECTOR DE CAMPO</strong>
+
+            <p>
+                Nombre:
+                {{ inspeccion.inspector.get_full_name|default:inspeccion.inspector.username }}
+            </p>
+
+            <p>
+                Fecha:
+                {{ inspeccion.fecha_inspeccion|date:"d/m/Y"|default:"-" }}
+            </p>
+
+            <div class="signature-line">
+                Firma
+            </div>
+        </div>
+
+        <div>
+            <strong>SUPERVISOR DE CAMPO</strong>
+
+            <p>
+                Nombre:
+                {{ inspeccion.supervisor.get_full_name|default:inspeccion.supervisor.username }}
+            </p>
+
+            <p>
+                Fecha:
+                {{ inspeccion.fecha_reporte|date:"d/m/Y"|default:"-" }}
+            </p>
+
+            <div class="signature-line">
+                Firma
+            </div>
+        </div>
+
+        <div>
+            <strong>ANALISTA QUE VALIDA</strong>
+
+            <p>
+                Nombre:
+                {{ inspeccion.analista.get_full_name|default:inspeccion.analista.username }}
+            </p>
+
+            <p>
+                Fecha:
+                {{ inspeccion.fecha_reporte|date:"d/m/Y"|default:"-" }}
+            </p>
+
+            <div class="signature-line">
+                Firma
+            </div>
+        </div>
+    </div>
+
+    <footer class="status-bar">
+        <div>ESTADO DEL REPORTE:</div>
+
+        <div class="status-value">
+            {{ inspeccion.get_estado_display|upper }}
+        </div>
+
+        <div>
+            REVISADO POR:
+            {{ inspeccion.analista.get_full_name|default:inspeccion.analista.username }}
+        </div>
+
+        <div>FECHA DE REPORTE:</div>
+
+        <div>
+            {{ inspeccion.fecha_reporte|date:"d/m/Y"|default:"-" }}
+        </div>
+    </footer>
+
+    <div class="page-number">
+        Página final
+    </div>
+</section>
+
+<script>
+(() => {
+    const parseNumber = (rawValue) => {
+        const normalized = String(rawValue || "")
+            .trim()
+            .replace(",", ".");
+
+        if (
+            !normalized
+            || normalized === "-"
+        ) {
+            return null;
+        }
+
+        const number = Number(normalized);
+
+        return Number.isFinite(number)
+            ? number
+            : null;
+    };
+
+    const formatNumber = (value) => {
+        return value === null
+            ? "-"
+            : value.toFixed(2);
+    };
+
+    document
+        .querySelectorAll(".js-measurement-table")
+        .forEach((table) => {
+            const columns = [
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f",
+                "g",
+            ];
+
+            const rows = [
+                ...table.querySelectorAll(".js-data-row"),
+            ];
+
+            const setSummary = (
+                type,
+                column,
+                value
+            ) => {
+                const cell = table.querySelector(
+                    `[data-summary="${type}-${column}"]`
+                );
+
+                if (cell) {
+                    cell.textContent = formatNumber(value);
+                }
+            };
+
+            columns.forEach((column) => {
+                const values = rows
+                    .map((row) => {
+                        const cell = row.querySelector(
+                            `[data-column="${column}"]`
+                        );
+
+                        return parseNumber(
+                            cell?.textContent
+                        );
+                    })
+                    .filter((value) => value !== null);
+
+                if (!values.length) {
+                    setSummary(
+                        "average",
+                        column,
+                        null
+                    );
+
+                    setSummary(
+                        "minimum",
+                        column,
+                        null
+                    );
+
+                    return;
+                }
+
+                const average = values.reduce(
+                    (total, value) => total + value,
+                    0
+                ) / values.length;
+
+                setSummary(
+                    "average",
+                    column,
+                    average
+                );
+
+                setSummary(
+                    "minimum",
+                    column,
+                    Math.min(...values)
+                );
+            });
+
+            const rowAverages = rows
+                .map((row) => {
+                    return parseNumber(
+                        row.querySelector(
+                            "[data-row-average]"
+                        )?.textContent
+                    );
+                })
+                .filter((value) => value !== null);
+
+            const rowMinimums = rows
+                .map((row) => {
+                    return parseNumber(
+                        row.querySelector(
+                            "[data-row-minimum]"
+                        )?.textContent
+                    );
+                })
+                .filter((value) => value !== null);
+
+            if (rowAverages.length) {
+                setSummary(
+                    "average",
+                    "promedio",
+                    rowAverages.reduce(
+                        (total, value) => total + value,
+                        0
+                    ) / rowAverages.length
+                );
+
+                setSummary(
+                    "minimum",
+                    "promedio",
+                    Math.min(...rowAverages)
+                );
+            }
+
+            if (rowMinimums.length) {
+                const overallMinimum = Math.min(
+                    ...rowMinimums
+                );
+
+                setSummary(
+                    "average",
+                    "minimo",
+                    rowMinimums.reduce(
+                        (total, value) => total + value,
+                        0
+                    ) / rowMinimums.length
+                );
+
+                setSummary(
+                    "minimum",
+                    "minimo",
+                    overallMinimum
+                );
+
+                const page = table.closest(
+                    ".polea-report-page"
+                );
+
+                const note = page?.querySelector(
+                    ".js-minimum-note"
+                );
+
+                if (note) {
+                    note.textContent = (
+                        "El espesor mínimo encontrado es de "
+                        + formatNumber(overallMinimum)
+                        + " mm."
+                    );
+                }
+            }
+        });
+})();
+</script>
+
+</body>
+</html>

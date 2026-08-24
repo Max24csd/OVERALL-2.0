@@ -1,0 +1,573 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{ inspeccion.codigo_reporte }} | Faja CVB0001</title>
+  <link rel="stylesheet" href="{% static 'css/faja_cvb0001.css' %}">
+</head>
+<body>
+<header class="faja1-topbar">
+  <div class="brand-wrap">
+    <img src="{% static 'inspecciones/faja/cvb0001/logo_overall.jpeg' %}" alt="OverallSolutions">
+    <div><strong>OverallSolutions</strong><br><span>Inspecciones › Faja Overland 01 › Formulario</span></div>
+  </div>
+  <div class="top-actions">
+    <a class="btn btn-soft" href="{% url 'dashboard' %}">Volver</a>
+    <a class="btn btn-primary" target="_blank" href="{% url 'reporte_faja' inspeccion.id %}">Vista previa</a>
+  </div>
+</header>
+
+<main class="page-wrap">
+  {% for message in messages %}<div class="report-card">{{ message }}</div>{% endfor %}
+  <div class="heading-row">
+    <div>
+      <h1>REPORTE DE INSPECCIÓN {{ inspeccion.codigo_reporte }}</h1>
+      <p>Ingeniería de Confiabilidad – Operaciones Procesos</p>
+    </div>
+  </div>
+
+  <form method="post" enctype="multipart/form-data" class="inspection-document">
+    {% csrf_token %}
+    {{ mediciones_formset.management_form }}
+
+    <section class="report-card info-and-photo">
+      <div class="info-grid">
+        <div class="label">CONDICIÓN</div>
+        <div class="condition-cell">
+
+    <div
+        class="condition-selector
+        condition-{{ inspeccion.condicion_general|lower }}"
+    >
+        <span class="condition-dot"></span>
+
+        {{ formulario.condicion_general }}
+    </div>
+
+</div>
+        <div class="label">PLANTA</div><div>{{ inspeccion.planta }}</div>
+        <div class="label">PROCESO</div><div>{{ inspeccion.proceso }}</div>
+        <div class="label">EQUIPO</div><div>{{ inspeccion.faja.nombre }}</div>
+        <div class="label">TAG-NUMBER</div><div>0220-{{ inspeccion.faja.tag|slice:"3:" }}</div>
+        <div class="label">ETAPA</div><div>{{ inspeccion.etapa }}</div>
+        <div class="label">CONDICIÓN DEL EQUIPO</div><div>{{ formulario.condicion_equipo }}</div>
+        <div class="label">FECHA DE INSPECCIÓN</div><div>{{ formulario.fecha_inspeccion }}</div>
+        <div class="label">FECHA DE REPORTE</div><div>{{ formulario.fecha_reporte }}</div>
+        <div class="label">INSPECTOR DE CAMPO</div>
+<div>{{ formulario.inspector_campo_nombre }}</div>
+
+<div class="label">SUPERVISOR DE CAMPO</div>
+<div>{{ formulario.supervisor_campo_nombre }}</div>
+
+<div class="label">ANALISTA QUE ELABORA</div>
+<div>{{ formulario.analista_elabora_nombre }}</div>
+
+<div class="label">ANALISTA QUE VALIDA</div>
+<div>{{ formulario.analista_valida_nombre }}</div>
+      </div>
+      <div class="plant-photo"><img src="{% static 'inspecciones/faja/cvb0001/planta_cvb0001.jpeg' %}" alt="Faja Overland CVB0001"></div>
+    </section>
+
+    <section class="report-card triptych">
+      <article><div class="section-bar">CIRCUNSTANCIAS DE PRUEBAS</div><div class="content">{{ formulario.circunstancias }}</div></article>
+      <article><div class="section-bar">ANTECEDENTES</div><div class="content">{{ formulario.antecedentes }}</div></article>
+      <article><div class="section-bar">OBSERVACIONES</div><div class="content">{{ formulario.observaciones }}</div></article>
+    </section>
+
+    <section class="report-card">
+      <div class="guide-head"><div><h2>GUÍA VISUAL PARA MEDICIÓN</h2><small>Ubica los empalmes y bastidores antes de registrar mediciones.</small></div></div>
+      <div class="section-bar">DIAGRAMA DE UBICACIÓN DE EMPALMES Y BASTIDORES DE LA FAJA OVERLAND 0220-CVB-00001</div>
+      <div class="diagram-box"><img src="{% static 'inspecciones/faja/cvb0001/diagrama_cvb0001.png' %}" alt="Diagrama CVB0001"></div>
+      <h2 class="reference-title">REFERENCIAS TÉCNICAS DE FAJA OVERLAND 01</h2>
+      <div class="reference-grid">
+        <div class="reference-panel"><h3>PUNTOS DE MEDICIÓN DEL TOP COVER</h3><img src="{% static 'inspecciones/faja/cvb0001/puntos_top_cover.png' %}" alt="Puntos de medición"></div>
+        <div class="reference-panel"><h3>CORTE SECCIONAL DE EMPALME</h3><img src="{% static 'inspecciones/faja/cvb0001/corte_empalme.png' %}" alt="Corte de empalme"></div>
+        <div class="reference-panel"><h3>PARÁMETROS DE CALIBRACIÓN UT USADOS COMO REFERENCIA</h3>
+          <div class="calibration-grid">
+            <table class="cal-table"><tr><th>MARCA</th><td>OLYMPUS</td></tr><tr><th>MODELO</th><td>EPOCH 6LT</td></tr><tr><th>FRECUENCIA</th><td>1 MHz</td></tr><tr><th>RANGO</th><td>50 mm</td></tr><tr><th>MÉTODO</th><td>Pulso - eco</td></tr><tr><th>COMPONENTE</th><td>TOP COVER</td></tr></table>
+            <table class="cal-table"><tr><th>ACOPLANTE</th><td>Echo gel</td></tr><tr><th>RECTIFICACIÓN</th><td>Full</td></tr><tr><th>VELOCIDAD</th><td>1565 m/s</td></tr><tr><th>RETARDO</th><td>2.53 μs</td></tr><tr><th>SCAN</th><td>A Scan</td></tr></table>
+            <table class="cal-table"><tr><th>MARCA</th><td>OLYMPUS</td></tr><tr><th>MODELO</th><td>EPOCH 6LT</td></tr><tr><th>FRECUENCIA</th><td>1 MHz</td></tr><tr><th>RANGO</th><td>50 mm</td></tr><tr><th>MÉTODO</th><td>Pulso - eco</td></tr><tr><th>COMPONENTE</th><td>EMPALME E-01</td></tr></table>
+            <table class="cal-table"><tr><th>ACOPLANTE</th><td>Echo gel</td></tr><tr><th>RECTIFICACIÓN</th><td>Full</td></tr><tr><th>VELOCIDAD</th><td>1572 m/s</td></tr><tr><th>RETARDO</th><td>2.52 μs</td></tr><tr><th>SCAN</th><td>A Scan</td></tr></table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {% include "inspecciones/_tabla_empalme_cvb0001.html" with filas=empalme_e01 nombre_empalme="EMPALME E-01" zona="Zona de carga" bastidor="174" lado="TOP COVER" resumen=resumen_e01 %}
+    {% include "inspecciones/_fotos_faja_cvb0001.html" with titulo="INSPECCIÓN VISUAL – EMPALME E-01 TOP COVER" formset=fotos_e01_formset %}
+
+    {% include "inspecciones/_tabla_empalme_cvb0001.html" with filas=empalme_e02 nombre_empalme="EMPALME E-02" bastidor="86-87" lado="BOTTOM COVER" resumen=resumen_e02 %}
+    {% include "inspecciones/_fotos_faja_cvb0001.html" with titulo="INSPECCIÓN VISUAL – EMPALME E-02 BOTTOM COVER" formset=fotos_e02_formset %}
+
+    <section class="measurement-card">
+      <div class="section-bar">DISTRIBUCIÓN DE PUNTOS DE MEDICIÓN DE ESPESORES EN LA FAJA OVERLAND 0220-CVB-00001</div>
+      <div class="table-scroll"><table class="measure-table"><thead><tr><th>Tramos</th><th>Medición</th><th>Posición/Bastidor</th><th>Espesor nominal</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th><th>G</th><th>Mínimo</th><th>Promedio</th><th>Desgaste</th><th>% desgaste</th><th>% residual</th></tr></thead><tbody>
+      {% for m in tramos %}
+<tr class="measurement-row tramo-row">
+    {{ m.id }}
+    {{ m.seccion }}
+    {{ m.punto }}
+    {{ m.bastidor }}
+    {{ m.lado }}
+    {{ m.posicion }}
+    {{ m.orden }}
+
+    {% if forloop.first %}
+        <td
+            class="green-cell"
+            rowspan="15"
+        >
+            TRAMOS<br>200–80
+        </td>
+    {% endif %}
+
+    <td>
+        {{ m.instance.punto }}
+    </td>
+
+    <td>
+        {{ m.instance.bastidor }}
+    </td>
+
+    <td>
+        {{ m.espesor_nominal }}
+    </td>
+
+    <td>{{ m.a }}</td>
+    <td>{{ m.b }}</td>
+    <td>{{ m.c }}</td>
+    <td>{{ m.d }}</td>
+    <td>{{ m.e }}</td>
+    <td>{{ m.f }}</td>
+    <td>{{ m.g }}</td>
+
+    <td class="readonly-result result-minimum">
+        {{ m.instance.minimo|default:"-" }}
+    </td>
+
+    <td class="readonly-result result-average">
+        {{ m.instance.promedio|default:"-" }}
+    </td>
+
+    <td class="readonly-result result-wear">
+        {{ m.instance.desgaste|default:"-" }}
+    </td>
+
+    <td class="readonly-result result-wear-percentage">
+        {{ m.instance.porcentaje_desgaste|default:"-" }}
+    </td>
+
+    <td class="readonly-result result-residual-percentage">
+        {{ m.instance.porcentaje_residual|default:"-" }}
+    </td>
+</tr>
+{% endfor %}
+
+<tr class="summary-row">
+    <th colspan="3">
+        ESPESOR MÍNIMO (mm)
+    </th>
+
+    <td id="summary-nominal-min">
+        -
+    </td>
+
+    <td id="summary-a-min">-</td>
+    <td id="summary-b-min">-</td>
+    <td id="summary-c-min">-</td>
+    <td id="summary-d-min">-</td>
+    <td id="summary-e-min">-</td>
+    <td id="summary-f-min">-</td>
+    <td id="summary-g-min">-</td>
+
+    <td colspan="5">
+        -
+    </td>
+</tr>
+
+<tr class="summary-row summary-average-row">
+    <th colspan="3">
+        ESPESOR PROMEDIO (mm)
+    </th>
+
+    <td id="summary-nominal-average">
+        -
+    </td>
+
+    <td id="summary-a-average">-</td>
+    <td id="summary-b-average">-</td>
+    <td id="summary-c-average">-</td>
+    <td id="summary-d-average">-</td>
+    <td id="summary-e-average">-</td>
+    <td id="summary-f-average">-</td>
+    <td id="summary-g-average">-</td>
+
+    <td colspan="5">
+        -
+    </td>
+</tr></table></div>
+    </section>
+
+    {% include "inspecciones/_fotos_faja_cvb0001.html" with titulo="INSPECCIÓN VISUAL – PUNTOS DE MEDICIÓN" formset=fotos_puntos_formset %}
+
+    <section class="report-card notes-area"><div class="section-bar">OBSERVACIONES DE MEDICIÓN / RECOMENDACIONES</div>{{ formulario.recomendaciones }}</section>
+
+    <input type="hidden" name="comentario_revision" id="comentario-revision" value="">
+
+    <div class="sticky-actions no-print">
+      <a class="btn btn-back" href="{% url 'dashboard' %}">← Volver</a>
+
+      <div class="workflow-status">
+        <span>Estado actual</span>
+        <strong class="state-badge state-{{ inspeccion.estado|lower }}">{{ inspeccion.get_estado_display }}</strong>
+      </div>
+
+      <div class="right">
+        {% if puede_editar %}
+          <button class="btn btn-save" type="submit" name="workflow_action" value="guardar">▣ Guardar cambios</button>
+        {% endif %}
+
+        <a class="btn btn-preview" target="_blank" href="{% url 'reporte_faja' inspeccion.id %}">◉ Vista previa</a>
+
+        {% if rol == "Inspector" or rol == "Administrador" %}
+          {% if inspeccion.estado == "BORRADOR" or inspeccion.estado == "DEVUELTO" %}
+            <button class="btn btn-send" type="submit" name="workflow_action" value="enviar_supervisor">➤ Guardar y enviar a revisión</button>
+          {% endif %}
+        {% endif %}
+
+        {% if rol == "Supervisor" or rol == "Administrador" %}
+          {% if inspeccion.estado == "EN_REVISION" %}
+            <button class="btn btn-return js-comment-required" type="submit" name="workflow_action" value="devolver_supervisor">↩ Devolver</button>
+            <button class="btn btn-approve" type="submit" name="workflow_action" value="aprobar_supervisor">✓ Aprobar y enviar al analista</button>
+          {% endif %}
+        {% endif %}
+
+        {% if rol == "Analista" or rol == "Administrador" %}
+          {% if inspeccion.estado == "REVISADO" %}
+            <button class="btn btn-return js-comment-required" type="submit" name="workflow_action" value="devolver_analista">↩ Devolver</button>
+            <button class="btn btn-approve" type="submit" name="workflow_action" value="aprobar_analista">✓ Aprobar informe</button>
+          {% elif inspeccion.estado == "APROBADO" %}
+            <button class="btn btn-publish" type="submit" name="workflow_action" value="publicar">★ Publicar para el cliente</button>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+  </form>
+</main>
+<script>
+(() => {
+    const convertirNumero = (valor) => {
+        const numero = Number(
+            String(valor || "")
+                .replace(",", ".")
+        );
+
+        return Number.isFinite(numero)
+            ? numero
+            : null;
+    };
+
+    const formato = (valor) => {
+        if (
+            valor === null
+            || !Number.isFinite(valor)
+        ) {
+            return "-";
+        }
+
+        return valor.toFixed(2);
+    };
+
+    const calcularFila = (fila) => {
+        const valores = [
+            ...fila.querySelectorAll(
+                ".value-input"
+            ),
+        ]
+            .map((input) => {
+                return convertirNumero(
+                    input.value
+                );
+            })
+            .filter((valor) => {
+                return valor !== null;
+            });
+
+        const nominalInput = fila.querySelector(
+            ".nominal-input"
+        );
+
+        const nominal = convertirNumero(
+            nominalInput?.value
+        );
+
+        if (!valores.length) {
+            [
+                "minimum",
+                "average",
+                "wear",
+                "wear-percentage",
+                "residual-percentage",
+            ].forEach((nombre) => {
+                const celda = fila.querySelector(
+                    `.result-${nombre}`
+                );
+
+                if (celda) {
+                    celda.textContent = "-";
+                }
+            });
+
+            return;
+        }
+
+        const minimo = Math.min(...valores);
+
+        const promedio = (
+            valores.reduce(
+                (total, valor) => {
+                    return total + valor;
+                },
+                0
+            ) / valores.length
+        );
+
+        const desgaste = (
+            nominal !== null
+            && nominal > 0
+        )
+            ? nominal - minimo
+            : null;
+
+        const porcentajeDesgaste = (
+            desgaste !== null
+            && nominal > 0
+        )
+            ? desgaste / nominal * 100
+            : null;
+
+        const porcentajeResidual = (
+            nominal !== null
+            && nominal > 0
+        )
+            ? minimo / nominal * 100
+            : null;
+
+        const resultados = {
+            minimum: minimo,
+            average: promedio,
+            wear: desgaste,
+            "wear-percentage": porcentajeDesgaste,
+            "residual-percentage": porcentajeResidual,
+        };
+
+        Object.entries(resultados).forEach(
+            ([nombre, valor]) => {
+                const celda = fila.querySelector(
+                    `.result-${nombre}`
+                );
+
+                if (celda) {
+                    celda.textContent = formato(
+                        valor
+                    );
+                }
+            }
+        );
+    };
+
+    const obtenerValoresColumna = (
+        filas,
+        indice
+    ) => {
+        return filas
+            .map((fila) => {
+                const inputs = fila.querySelectorAll(
+                    ".value-input"
+                );
+
+                return convertirNumero(
+                    inputs[indice]?.value
+                );
+            })
+            .filter((valor) => {
+                return valor !== null;
+            });
+    };
+
+    const colocarResumen = (
+        letra,
+        valores
+    ) => {
+        const celdaMinimo = document.getElementById(
+            `summary-${letra}-min`
+        );
+
+        const celdaPromedio = document.getElementById(
+            `summary-${letra}-average`
+        );
+
+        if (!valores.length) {
+            if (celdaMinimo) {
+                celdaMinimo.textContent = "-";
+            }
+
+            if (celdaPromedio) {
+                celdaPromedio.textContent = "-";
+            }
+
+            return;
+        }
+
+        const minimo = Math.min(...valores);
+
+        const promedio = (
+            valores.reduce(
+                (total, valor) => {
+                    return total + valor;
+                },
+                0
+            ) / valores.length
+        );
+
+        if (celdaMinimo) {
+            celdaMinimo.textContent = formato(
+                minimo
+            );
+        }
+
+        if (celdaPromedio) {
+            celdaPromedio.textContent = formato(
+                promedio
+            );
+        }
+    };
+
+    const calcularResumenTramos = () => {
+        const filas = [
+            ...document.querySelectorAll(
+                ".tramo-row"
+            ),
+        ];
+
+        const letras = [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f",
+            "g",
+        ];
+
+        letras.forEach((letra, indice) => {
+            const valores = obtenerValoresColumna(
+                filas,
+                indice
+            );
+
+            colocarResumen(
+                letra,
+                valores
+            );
+        });
+
+        const nominales = filas
+            .map((fila) => {
+                return convertirNumero(
+                    fila.querySelector(
+                        ".nominal-input"
+                    )?.value
+                );
+            })
+            .filter((valor) => {
+                return valor !== null;
+            });
+
+        const nominalMinimo = document.getElementById(
+            "summary-nominal-min"
+        );
+
+        const nominalPromedio = document.getElementById(
+            "summary-nominal-average"
+        );
+
+        if (!nominales.length) {
+            nominalMinimo.textContent = "-";
+            nominalPromedio.textContent = "-";
+            return;
+        }
+
+        nominalMinimo.textContent = formato(
+            Math.min(...nominales)
+        );
+
+        nominalPromedio.textContent = formato(
+            nominales.reduce(
+                (total, valor) => {
+                    return total + valor;
+                },
+                0
+            ) / nominales.length
+        );
+    };
+
+    const filas = document.querySelectorAll(
+        ".measurement-row"
+    );
+
+    filas.forEach((fila) => {
+        const actualizar = () => {
+            calcularFila(fila);
+            calcularResumenTramos();
+        };
+
+        fila.querySelectorAll(
+            ".value-input, .nominal-input"
+        ).forEach((input) => {
+            input.addEventListener(
+                "input",
+                actualizar
+            );
+        });
+
+        calcularFila(fila);
+    });
+
+    calcularResumenTramos();
+})();
+</script>
+<script>
+(() => {
+  const editable = {{ puede_editar|yesno:"true,false" }};
+  if (!editable) {
+    document.querySelectorAll('.inspection-document input, .inspection-document select, .inspection-document textarea').forEach(el => {
+      if (el.type !== 'hidden') el.disabled = true;
+    });
+  }
+
+  document.querySelectorAll('.js-comment-required').forEach(button => {
+    button.addEventListener('click', event => {
+      const motivo = window.prompt('Escribe el motivo de devolución:');
+      if (!motivo || !motivo.trim()) {
+        event.preventDefault();
+        return;
+      }
+      document.getElementById('comentario-revision').value = motivo.trim();
+    });
+  });
+
+  document.querySelectorAll('.photo-input').forEach(input => {
+    input.addEventListener('change', () => {
+      const preview = input.closest('.photo-card')?.querySelector('.new-photo-preview');
+      const archivo = input.files?.[0];
+      if (!preview || !archivo) return;
+      preview.src = URL.createObjectURL(archivo);
+      preview.hidden = false;
+    });
+  });
+})();
+</script>
+</body></html>

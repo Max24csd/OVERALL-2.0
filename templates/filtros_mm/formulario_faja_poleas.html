@@ -1,0 +1,296 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>{{ reporte.tag }} | Faja y Poleas</title>
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    <style>
+        :root{--navy:#092849;--blue:#075cad;--line:#d5e0eb;--bg:#f3f7fb;--muted:#64748b}
+        *{box-sizing:border-box}
+        body{margin:0;background:var(--bg);color:#10223e;font-family:Arial,sans-serif}
+        .page{max-width:1450px;margin:auto;padding:24px}
+        .top{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:18px}
+        .top h1{margin:0 0 5px;font-size:25px}.top p{margin:0;color:var(--muted)}
+        .back{background:#fff;border:1px solid var(--line);padding:10px 14px;border-radius:8px;text-decoration:none;color:var(--navy);font-weight:800}
+        .card{background:white;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:18px;box-shadow:0 8px 28px rgba(15,35,62,.05)}
+        .section-title{margin:0 0 14px;color:var(--navy);font-size:18px}
+        .master-band{margin:0 0 14px;padding:8px 10px;color:#fff;background:#3f5066;border-radius:7px;text-align:center;font-size:14px;font-weight:900;text-transform:uppercase}
+        .reference{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,.5fr);gap:18px;align-items:start}
+        .diagram{border:1px solid var(--line);border-radius:12px;background:#fff;padding:10px;overflow:auto}
+        .diagram img{display:block;width:100%;height:auto;min-width:760px}
+        .reference-info{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:15px}
+        .reference-info dl{margin:0}.reference-info dt{font-size:10px;color:var(--muted);font-weight:900;margin-top:11px}.reference-info dd{margin:3px 0 0;font-weight:800}
+        .grid-fields,.photo-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+        .field label{display:block;font-size:11px;font-weight:900;color:#475569;margin-bottom:6px}
+        .field input,.field select,.field textarea{width:100%;border:1px solid #b9c7d8;border-radius:8px;padding:9px;background:white}
+        .text-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+        .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px;background:#fff;margin-bottom:16px}
+        .master-table{width:100%;border-collapse:collapse;min-width:850px}
+        .master-table th{background:#0879bd;color:#fff;font-size:11px;text-transform:uppercase}
+        .master-table th,.master-table td{border:1px solid #9fb0c4;padding:7px;text-align:center}
+        .master-table input{width:100%;min-width:70px;border:1px solid #b9c7d8;border-radius:5px;padding:6px;text-align:center}
+        .master-table .readonly{display:block;min-height:30px;padding:7px 6px;background:#fff;color:#111}
+        .master-table .summary{background:#eef3f8;font-weight:900;color:#0b2340}
+        .master-table .summary-min{background:#fff200}
+        .section-grid{display:grid;grid-template-columns:minmax(260px,.75fr) minmax(360px,1fr);gap:14px;margin-bottom:16px}
+        .mini-title{margin:0 0 10px;padding:7px;background:#3f5066;color:#fff;text-align:center;font-size:12px;font-weight:900;text-transform:uppercase;border-radius:6px}
+        .ut-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+        .inspection-block{border-top:2px solid #dbe6f2;padding-top:16px;margin-top:16px}
+        .reference-strip{display:block;max-width:100%;margin:12px auto 0;border:1px solid var(--line);border-radius:8px}
+        .photo-slot{border:1px solid var(--line);border-radius:10px;padding:12px;background:#fff}
+        .photo-slot img{display:block;max-width:100%;max-height:170px;margin:8px 0;border:1px solid var(--line);border-radius:8px;object-fit:contain}
+        .actions{position:sticky;bottom:0;display:flex;justify-content:flex-end;gap:10px;padding:13px;background:rgba(243,247,251,.94);border-top:1px solid var(--line);z-index:20}
+        .btn{border:0;border-radius:8px;padding:11px 18px;font-weight:900;cursor:pointer;text-decoration:none}
+        .btn-primary{background:var(--blue);color:#fff}
+        .btn-secondary{background:#fff;border:1px solid var(--line);color:var(--navy)}
+        .message{padding:11px 14px;border-radius:8px;margin-bottom:15px;background:#dcfce7;color:#166534}
+        @media(max-width:900px){.reference,.grid-fields,.text-grid,.photo-grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
+    </style>
+</head>
+<body>
+<div class="page">
+    <div class="top">
+        <div>
+            <h1>{{ reporte.tag }} · Faja y Poleas</h1>
+            <p>{{ reporte.codigo_catalogo }} · Área {{ reporte.area }} · {{ reporte.tecnica }}</p>
+        </div>
+        <a class="back" href="{% url 'filtros_mm:inicio' parada.id %}">← Volver</a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <section class="card">
+            <h2 class="section-title">Referencia para inspección en campo</h2>
+            <div class="reference">
+                <div class="diagram">
+                    <img src="{% static reporte_config.diagrama %}" alt="Diagrama de referencia {{ reporte.tag }}">
+                </div>
+                <aside class="reference-info">
+                    <dl>
+                        <dt>TAG</dt><dd>{{ reporte.tag }}</dd>
+                        <dt>COMPONENTE</dt><dd>Faja y Poleas</dd>
+                        <dt>CÓDIGO OVERVIEW</dt><dd>{{ reporte.codigo_catalogo }}</dd>
+                        <dt>TÉCNICA</dt><dd>{{ reporte.tecnica }}</dd>
+                        <dt>ESTADO</dt><dd>{{ reporte.get_estado_display }}</dd>
+                    </dl>
+                </aside>
+            </div>
+            <div class="table-wrap" style="margin-top:14px">
+                <table class="master-table">
+                    <tbody>
+                        <tr>
+                            <th>INSPECTORES DE CAMPO</th>
+                            <td>{{ responsables.inspectores|default:"Sin inspector asignado" }}</td>
+                            <th>SUPERVISOR DE CAMPO</th>
+                            <td>{{ responsables.supervisor|default:"Sin supervisor asignado" }}</td>
+                        </tr>
+                        <tr>
+                            <th>ANALISTA QUE ELABORA REPORTE</th>
+                            <td>{{ responsables.inspector_reporte|default:"Sin inspector asignado" }}</td>
+                            <th>ANALISTA QUE VALIDA DIAGNOSTICO</th>
+                            <td>{{ responsables.analista|default:"Sin analista asignado" }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 class="section-title">DATOS DEL EQUIPO O COMPONENTE</h2>
+            <div class="grid-fields">
+                <div class="field"><label>FECHA DE INSPECCIÓN</label>{{ form.fecha_inspeccion }}</div>
+                <div class="field"><label>FECHA DE REPORTE</label>{{ form.fecha_reporte }}</div>
+                <div class="field"><label>CONDICIÓN GENERAL</label>{{ form.condicion_general }}</div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 class="section-title">INFORMACIÓN DE LA INSPECCIÓN</h2>
+            <div class="text-grid">
+                <div class="field"><label>CIRCUNSTANCIAS DE LA INSPECCIÓN</label>{{ form.circunstancias }}</div>
+                <div class="field"><label>ANTECEDENTES</label>{{ form.antecedentes }}</div>
+                <div class="field"><label>OBSERVACIONES</label>{{ form.observaciones }}</div>
+                <div class="field"><label>CONCLUSIONES Y RECOMENDACIONES</label>{{ form.recomendaciones }}</div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 class="master-band">BELTING (NOTE 2)</h2>
+            <div class="table-wrap">
+                <table class="master-table">
+                    <thead>
+                        <tr>
+                            {% for campo in faja_poleas.belting %}
+                                <th>{{ campo.label }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            {% for campo in faja_poleas.belting %}
+                                <td>
+                                    <span class="readonly">{{ campo.value }}</span>
+                                    <input type="hidden" name="belting_{{ campo.key }}" value="{{ campo.value }}">
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <img class="reference-strip" src="{% static 'filtros_mm/diagramas/cvb0024_belting_detalle.png' %}" alt="Detalle de espesores de faja">
+
+            {% for seccion in faja_poleas.secciones %}
+                <div class="inspection-block">
+                    <h2 class="master-band">{{ seccion.titulo }} DE LA FAJA {{ reporte.tag }}</h2>
+                    <div class="section-grid">
+                        <div>
+                            <h3 class="mini-title">DESCRIPCION DEL PROCESO DE INSPECCION</h3>
+                            <div class="field">
+                                <label>PROCEDIMIENTO</label>
+                                <input name="{{ seccion.key }}_procedimiento" value="{{ seccion.procedimiento }}">
+                            </div>
+                            <div class="field">
+                                <label>MATERIAL INSPECCIONADO</label>
+                                <input name="{{ seccion.key }}_material" value="{{ seccion.material }}">
+                            </div>
+                            <div class="field">
+                                <label>COMPONENTE INSPECCIONADO</label>
+                                <input name="{{ seccion.key }}_componente" value="{{ seccion.componente }}">
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="mini-title">PARAMETROS DE CALIBRACION DEL EQUIPO UT</h3>
+                            <div class="ut-grid">
+                                {% for campo in seccion.ut %}
+                                    <div class="field">
+                                        <label>{{ campo.label }}</label>
+                                        <input name="{{ campo.name }}" value="{{ campo.value }}">
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table class="master-table">
+                            <thead>
+                                <tr>
+                                    <th>PUNTOS</th>
+                                    {% for columna in faja_poleas.columnas %}
+                                        <th>{{ columna }}</th>
+                                    {% endfor %}
+                                    <th>PROMEDIO</th>
+                                    <th>MINIMO</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for fila in seccion.filas %}
+                                    <tr>
+                                        <th>{{ fila.label }}</th>
+                                        {% for valor in fila.valores %}
+                                            <td><input name="{{ valor.name }}" value="{{ valor.value }}" inputmode="decimal"></td>
+                                        {% endfor %}
+                                        <td class="summary" data-row-prom>--</td>
+                                        <td class="summary summary-min" data-row-min>--</td>
+                                    </tr>
+                                {% endfor %}
+                                <tr>
+                                    <th>PROMEDIO</th>
+                                    {% for columna in faja_poleas.columnas %}
+                                        <td class="summary" data-col-prom="{{ forloop.counter0 }}">--</td>
+                                    {% endfor %}
+                                    <td class="summary" colspan="2"></td>
+                                </tr>
+                                <tr>
+                                    <th>MINIMO</th>
+                                    {% for columna in faja_poleas.columnas %}
+                                        <td class="summary summary-min" data-col-min="{{ forloop.counter0 }}">--</td>
+                                    {% endfor %}
+                                    <td class="summary" colspan="2"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="field">
+                        <label>COMENTARIOS</label>
+                        <textarea name="{{ seccion.key }}_comentarios" rows="3">{{ seccion.comentarios }}</textarea>
+                    </div>
+                </div>
+            {% endfor %}
+        </section>
+
+        <section class="card">
+            <h2 class="master-band">REGISTRO FOTOGRAFICO POR TABLA</h2>
+            {% for grupo in fotos_faja_poleas %}
+                <h3 class="mini-title">{{ grupo.titulo }} · MAXIMO 5 IMAGENES</h3>
+                <div class="photo-grid">
+                    {% for slot in grupo.slots %}
+                        <div class="photo-slot">
+                            <div class="field">
+                                <label>IMAGEN {{ slot.orden }}</label>
+                                {% if slot.foto %}
+                                    <img src="{{ slot.foto.imagen.url }}" alt="{{ slot.titulo }}">
+                                {% endif %}
+                                <input type="file" name="{{ slot.input }}" accept="image/*">
+                            </div>
+                            <div class="field" style="margin-top:10px">
+                                <label>COMENTARIO IMAGEN {{ slot.orden }}</label>
+                                <textarea name="{{ slot.comentario }}" rows="3">{{ slot.comentario_valor }}</textarea>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </section>
+
+        <div class="actions">
+            <a class="btn btn-secondary" href="{% url 'filtros_mm:exportar_excel_reporte' parada.id reporte.codigo_catalogo %}">Descargar Excel</a>
+            <button class="btn btn-primary" type="submit">Guardar inspección</button>
+        </div>
+    </form>
+</div>
+<script>
+document.querySelectorAll(".master-table").forEach(function(table){
+    function numbers(inputs){
+        return Array.from(inputs).map(function(input){
+            return Number(String(input.value || "").replace(",", "."));
+        }).filter(function(value){ return Number.isFinite(value); });
+    }
+    function fmt(value){
+        return Number.isFinite(value) ? value.toFixed(2) : "--";
+    }
+    function recalc(){
+        var rows = Array.from(table.querySelectorAll("tbody tr")).filter(function(row){
+            return row.querySelector("input[inputmode='decimal']");
+        });
+        rows.forEach(function(row){
+            var values = numbers(row.querySelectorAll("input[inputmode='decimal']"));
+            var prom = row.querySelector("[data-row-prom]");
+            var min = row.querySelector("[data-row-min]");
+            if (prom) prom.textContent = fmt(values.reduce(function(a,b){return a+b},0) / values.length);
+            if (min) min.textContent = fmt(Math.min.apply(null, values));
+        });
+        for (var index = 0; index < 7; index += 1){
+            var values = numbers(rows.map(function(row){ return row.querySelectorAll("input[inputmode='decimal']")[index]; }).filter(Boolean));
+            var prom = table.querySelector("[data-col-prom='" + index + "']");
+            var min = table.querySelector("[data-col-min='" + index + "']");
+            if (prom) prom.textContent = fmt(values.reduce(function(a,b){return a+b},0) / values.length);
+            if (min) min.textContent = fmt(Math.min.apply(null, values));
+        }
+    }
+    table.addEventListener("input", recalc);
+    recalc();
+});
+</script>
+</body>
+</html>

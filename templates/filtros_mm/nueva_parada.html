@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Nueva parada de Filtros</title>
+
+    <style>
+        :root{
+            --navy:#08213f;
+            --blue:#0b66b2;
+            --blue-hover:#09589a;
+            --bg:#f3f7fb;
+            --card:#ffffff;
+            --line:#d6e1ec;
+            --text:#10223e;
+            --muted:#64748b;
+            --soft:#f8fafc;
+            --danger:#b91c1c;
+        }
+
+        *{
+            box-sizing:border-box;
+        }
+
+        body{
+            margin:0;
+            font-family:Arial, Helvetica, sans-serif;
+            background:var(--bg);
+            color:var(--text);
+        }
+
+        .page{
+            max-width:1180px;
+            margin:0 auto;
+            padding:32px 28px 50px;
+        }
+
+        /* ==============================
+           CABECERA
+        ============================== */
+
+        .top{
+            display:flex;
+            justify-content:space-between;
+            align-items:flex-start;
+            gap:20px;
+            margin-bottom:22px;
+        }
+
+        .eyebrow{
+            color:var(--blue);
+            font-size:12px;
+            font-weight:900;
+            text-transform:uppercase;
+            letter-spacing:.06em;
+            margin-bottom:6px;
+        }
+
+        .top h1{
+            margin:0;
+            font-size:30px;
+            color:var(--navy);
+        }
+
+        .top p{
+            margin:8px 0 0;
+            color:var(--muted);
+            line-height:1.5;
+            max-width:720px;
+        }
+
+        /* ==============================
+           FORMULARIO
+        ============================== */
+
+        .card{
+            background:var(--card);
+            border:1px solid var(--line);
+            border-radius:16px;
+            box-shadow:0 10px 30px rgba(15, 35, 62, .05);
+            overflow:hidden;
+        }
+
+        .section{
+            padding:22px;
+            border-bottom:1px solid #e8eef5;
+        }
+
+        .section:last-of-type{
+            border-bottom:0;
+        }
+
+        .section-title{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            margin-bottom:17px;
+        }
+
+        .section-title h2{
+            margin:0;
+            font-size:17px;
+            color:var(--navy);
+        }
+
+        .section-title span{
+            font-size:11px;
+            color:var(--muted);
+        }
+
+        .grid{
+            display:grid;
+            grid-template-columns:repeat(2, minmax(0, 1fr));
+            gap:16px;
+        }
+
+        .full{
+            grid-column:1 / -1;
+        }
+
+        .field label{
+            display:block;
+            font-size:11px;
+            font-weight:900;
+            color:#42566e;
+            margin-bottom:7px;
+            text-transform:uppercase;
+            letter-spacing:.02em;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        select,
+        textarea{
+            width:100%;
+            border:1px solid #bccada;
+            border-radius:9px;
+            padding:10px 12px;
+            min-height:42px;
+            background:#fff;
+            color:var(--text);
+            font-size:14px;
+            outline:none;
+            transition:.15s ease;
+        }
+
+        textarea{
+            min-height:90px;
+            resize:vertical;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus{
+            border-color:var(--blue);
+            box-shadow:0 0 0 3px rgba(11, 102, 178, .10);
+        }
+
+        .help{
+            margin-top:6px;
+            font-size:11px;
+            color:var(--muted);
+            line-height:1.4;
+        }
+
+        .errors{
+            margin-top:6px;
+            color:var(--danger);
+            font-size:12px;
+        }
+
+        .errors ul{
+            margin:0;
+            padding-left:18px;
+        }
+
+        /* ==============================
+           RESPONSABLES
+        ============================== */
+
+        .roles-grid{
+            display:grid;
+            grid-template-columns:repeat(2, minmax(0, 1fr));
+            gap:16px;
+        }
+
+        .role-card{
+            border:1px solid var(--line);
+            border-radius:12px;
+            overflow:hidden;
+            background:var(--soft);
+        }
+
+        .role-head{
+            padding:11px 14px;
+            background:#edf4fb;
+            border-bottom:1px solid var(--line);
+        }
+
+        .role-head strong{
+            display:block;
+            font-size:12px;
+            color:var(--navy);
+        }
+
+        .role-head small{
+            color:var(--muted);
+            font-size:10px;
+        }
+
+        .role-body{
+            padding:11px 14px;
+            max-height:215px;
+            overflow-y:auto;
+            background:#fff;
+        }
+
+        /* Django CheckboxSelectMultiple genera ul/li */
+        .role-body ul{
+            list-style:none;
+            margin:0;
+            padding:0;
+        }
+
+        .role-body li{
+            margin:0;
+            border-bottom:1px solid #edf1f5;
+        }
+
+        .role-body li:last-child{
+            border-bottom:0;
+        }
+
+        .role-body label{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            padding:9px 4px;
+            margin:0;
+            cursor:pointer;
+            text-transform:none;
+            font-size:13px;
+            font-weight:600;
+            color:#24364c;
+        }
+
+        .role-body label:hover{
+            background:#f5f9fd;
+        }
+
+        .role-body input[type="checkbox"]{
+            width:17px;
+            height:17px;
+            accent-color:var(--blue);
+            flex:none;
+        }
+
+        .cliente-card{
+            border:1px solid var(--line);
+            background:#fff;
+            border-radius:12px;
+            padding:14px;
+        }
+
+        /* ==============================
+           RESUMEN
+        ============================== */
+
+        .notice{
+            display:flex;
+            gap:12px;
+            align-items:flex-start;
+            padding:14px 16px;
+            background:#eef6ff;
+            border:1px solid #cfe3f7;
+            border-radius:10px;
+            color:#244664;
+            font-size:12px;
+            line-height:1.5;
+            margin-top:15px;
+        }
+
+        .notice-icon{
+            width:28px;
+            height:28px;
+            border-radius:50%;
+            background:var(--blue);
+            color:#fff;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-weight:900;
+            flex:none;
+        }
+
+        /* ==============================
+           BOTONES
+        ============================== */
+
+        .actions{
+            display:flex;
+            justify-content:flex-end;
+            align-items:center;
+            gap:10px;
+            padding:18px 22px;
+            background:#f8fafc;
+            border-top:1px solid var(--line);
+        }
+
+        .btn{
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            min-height:42px;
+            padding:0 17px;
+            border:0;
+            border-radius:9px;
+            text-decoration:none;
+            font-weight:900;
+            font-size:13px;
+            cursor:pointer;
+            transition:.15s ease;
+        }
+
+        .btn-secondary{
+            background:#e7edf4;
+            color:var(--navy);
+        }
+
+        .btn-secondary:hover{
+            background:#dce5ee;
+        }
+
+        .btn-primary{
+            background:var(--blue);
+            color:#fff;
+        }
+
+        .btn-primary:hover{
+            background:var(--blue-hover);
+        }
+
+        /* ==============================
+           RESPONSIVE
+        ============================== */
+
+        @media(max-width:800px){
+            .page{
+                padding:22px 14px 40px;
+            }
+
+            .top{
+                flex-direction:column;
+            }
+
+            .grid,
+            .roles-grid{
+                grid-template-columns:1fr;
+            }
+
+            .full{
+                grid-column:auto;
+            }
+
+            .actions{
+                flex-direction:column-reverse;
+            }
+
+            .btn{
+                width:100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="page">
+
+    <!-- CABECERA -->
+    <div class="top">
+
+        <div>
+            <div class="eyebrow">
+                Administración · Filtros
+            </div>
+
+            <h1>
+                Nueva parada de Filtros
+            </h1>
+
+            <p>
+                Programa la parada, define las fechas y asigna al equipo responsable.
+                Los usuarios seleccionados tendrán acceso a los reportes de Filtros
+                según su rol.
+            </p>
+        </div>
+
+        <a
+            class="btn btn-secondary"
+            href="{% url 'filtros_mm:lista_paradas' %}"
+        >
+            ← Volver
+        </a>
+
+    </div>
+
+
+    <form method="post" class="card">
+
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="section">
+                <div class="errors">
+                    {{ form.non_field_errors }}
+                </div>
+            </div>
+        {% endif %}
+
+
+        <!-- ==========================
+             DATOS DE LA PARADA
+        =========================== -->
+        <section class="section">
+
+            <div class="section-title">
+                <h2>Datos de la parada</h2>
+                <span>Información general</span>
+            </div>
+
+            <div class="grid">
+
+                <div class="field full">
+                    <label>Nombre de la parada</label>
+
+                    {{ form.nombre }}
+
+                    <div class="errors">
+                        {{ form.nombre.errors }}
+                    </div>
+                </div>
+
+
+                <div class="field">
+                    <label>Fecha de inicio</label>
+
+                    {{ form.fecha_inicio }}
+
+                    <div class="errors">
+                        {{ form.fecha_inicio.errors }}
+                    </div>
+                </div>
+
+
+                <div class="field">
+                    <label>Fecha de fin</label>
+
+                    {{ form.fecha_fin }}
+
+                    <div class="errors">
+                        {{ form.fecha_fin.errors }}
+                    </div>
+                </div>
+
+
+                <div class="field full">
+                    <label>Observaciones</label>
+
+                    {{ form.observaciones }}
+
+                    <div class="help">
+                        Campo opcional para indicar alcance, condiciones
+                        especiales o información relevante de la parada.
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==========================
+             RESPONSABLES
+        =========================== -->
+        <section class="section">
+
+            <div class="section-title">
+                <h2>Equipo responsable</h2>
+                <span>Puede asignarse más de un usuario por rol</span>
+            </div>
+
+
+            <div class="roles-grid">
+
+                <!-- INSPECTORES -->
+                <div class="role-card">
+
+                    <div class="role-head">
+                        <strong>Inspectores</strong>
+                        <small>
+                            Usuarios que podrán realizar las inspecciones en campo.
+                        </small>
+                    </div>
+
+                    <div class="role-body">
+                        {{ form.inspectores }}
+                    </div>
+
+                    <div class="errors">
+                        {{ form.inspectores.errors }}
+                    </div>
+
+                </div>
+
+
+                <!-- SUPERVISORES -->
+                <div class="role-card">
+
+                    <div class="role-head">
+                        <strong>Supervisores</strong>
+                        <small>
+                            Usuarios responsables de la revisión de los reportes.
+                        </small>
+                    </div>
+
+                    <div class="role-body">
+                        {{ form.supervisores }}
+                    </div>
+
+                    <div class="errors">
+                        {{ form.supervisores.errors }}
+                    </div>
+
+                </div>
+
+
+                <!-- ANALISTAS -->
+                <div class="role-card">
+
+                    <div class="role-head">
+                        <strong>Analistas</strong>
+                        <small>
+                            Usuarios que validarán el diagnóstico técnico.
+                        </small>
+                    </div>
+
+                    <div class="role-body">
+                        {{ form.analistas }}
+                    </div>
+
+                    <div class="errors">
+                        {{ form.analistas.errors }}
+                    </div>
+
+                </div>
+
+
+                <!-- CLIENTE -->
+                <div class="role-card">
+
+                    <div class="role-head">
+                        <strong>Cliente</strong>
+                        <small>
+                            Cuenta que tendrá acceso a los reportes publicados.
+                        </small>
+                    </div>
+
+                    <div class="role-body">
+
+                        <div class="cliente-card">
+
+                            <div class="field">
+                                <label>Cliente asignado</label>
+
+                                {{ form.cliente }}
+
+                                <div class="errors">
+                                    {{ form.cliente.errors }}
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="notice">
+
+                <div class="notice-icon">
+                    i
+                </div>
+
+                <div>
+                    Al crear la parada se generarán automáticamente los reportes
+                    configurados para Filtros y se registrará un acceso por cada
+                    Inspector, Supervisor y Analista seleccionado.
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==========================
+             ACCIONES
+        =========================== -->
+        <div class="actions">
+
+            <a
+                class="btn btn-secondary"
+                href="{% url 'filtros_mm:lista_paradas' %}"
+            >
+                Cancelar
+            </a>
+
+            <button
+                class="btn btn-primary"
+                type="submit"
+            >
+                Crear parada de Filtros
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+</body>
+</html>

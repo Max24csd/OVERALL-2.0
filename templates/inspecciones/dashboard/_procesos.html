@@ -1,0 +1,248 @@
+<section id="procesos" class="process-hub">
+  <div class="process-hub-heading">
+    <div>
+      <h2>Procesos Las Bambas</h2>
+      <p>Accede al proceso de inspección correspondiente.</p>
+    </div>
+  </div>
+
+  <div class="process-hub-grid">
+
+    <article class="process-card process-card-current">
+      <div class="process-card-top">
+        <span class="process-badge">Proceso actual</span>
+      </div>
+
+      <h3>Chancado</h3>
+
+      <p>
+        Faja / Top Cover, Poleas y Life Shaft de CVB001,
+        CVB003 y CVB004.
+      </p>
+
+      {% if parada_actual %}
+        <div class="process-stop">
+          <span>PARADA</span>
+          <strong>{{ parada_actual.nombre }}</strong>
+          <small>
+            {{ parada_actual.fecha_inicio|date:"d/m/Y" }}
+            {% if parada_actual.fecha_fin %}
+              · {{ parada_actual.fecha_fin|date:"d/m/Y" }}
+            {% endif %}
+          </small>
+        </div>
+      {% endif %}
+
+      <a class="process-button process-button-muted" href="#inspecciones">
+        Ver Chancado
+      </a>
+    </article>
+
+
+    <article class="process-card">
+      <div class="process-card-top">
+        <span class="process-badge process-badge-blue">Filtros</span>
+
+        {% if parada_filtros_actual %}
+          <span class="process-count">
+            {{ reportes_filtros_total }} reportes
+          </span>
+        {% endif %}
+      </div>
+
+      <h3>Filtros</h3>
+
+      <p>
+        Carrilería, Skirting, Tuberías y reportes de Faja / Poleas.
+      </p>
+
+      {% if parada_filtros_actual %}
+
+        <div class="process-stop process-stop-blue">
+          <span>PARADA ACTUAL</span>
+
+          <strong>
+            {{ parada_filtros_actual.nombre }}
+          </strong>
+
+          <small>
+            {{ parada_filtros_actual.fecha_inicio|date:"d/m/Y" }}
+
+            {% if parada_filtros_actual.fecha_fin %}
+              · {{ parada_filtros_actual.fecha_fin|date:"d/m/Y" }}
+            {% endif %}
+
+            · {{ parada_filtros_actual.get_estado_display }}
+          </small>
+        </div>
+
+        <a
+          class="process-button"
+          href="{% url 'filtros_mm:inicio' parada_filtros_actual.id %}"
+        >
+          Abrir parada de Filtros
+        </a>
+
+      {% else %}
+
+        <div class="process-empty">
+          No tienes una parada de Filtros disponible.
+        </div>
+
+        {% if rol == "Administrador" %}
+          <a
+            class="process-button"
+            href="{% url 'filtros_mm:nueva_parada' %}"
+          >
+            + Nueva parada de Filtros
+          </a>
+        {% else %}
+          <a
+            class="process-button process-button-muted"
+            href="{% url 'filtros_mm:lista_paradas' %}"
+          >
+            Ver Filtros
+          </a>
+        {% endif %}
+
+      {% endif %}
+    </article>
+
+  </div>
+</section>
+
+<style>
+  .process-hub{margin:24px 0 28px}
+  .process-hub-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:12px}
+  .process-hub-heading h2{margin:0;font-size:20px;color:#0a2545}
+  .process-hub-heading p{margin:5px 0 0;color:#64748b;font-size:13px}
+
+  .process-hub-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:14px;
+  }
+
+  .process-card{
+    min-width:0;
+    background:#fff;
+    border:1px solid #d6e1ec;
+    border-radius:14px;
+    padding:17px;
+    box-shadow:0 6px 18px rgba(15,35,62,.04);
+  }
+
+  .process-card-current{border-color:#b9cce0}
+
+  .process-card-top{
+    min-height:25px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+  }
+
+  .process-badge{
+    display:inline-flex;
+    align-items:center;
+    padding:5px 8px;
+    border-radius:999px;
+    background:#eef2f6;
+    color:#52667d;
+    font-size:10px;
+    font-weight:900;
+    text-transform:uppercase;
+    letter-spacing:.03em;
+  }
+
+  .process-badge-blue{background:#e7f2fd;color:#075cad}
+
+  .process-count{
+    color:#64748b;
+    font-size:11px;
+    font-weight:800;
+  }
+
+  .process-card h3{
+    margin:8px 0 7px;
+    font-size:20px;
+    color:#0a2545;
+  }
+
+  .process-card > p{
+    margin:0 0 13px;
+    color:#64748b;
+    font-size:12px;
+    line-height:1.55;
+  }
+
+  .process-stop{
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+    margin:0 0 14px;
+    padding:11px 12px;
+    border:1px solid #dce5ee;
+    border-radius:9px;
+    background:#f8fafc;
+  }
+
+  .process-stop-blue{
+    border-color:#cfe0ef;
+    background:#f3f8fd;
+  }
+
+  .process-stop span{
+    color:#64748b;
+    font-size:9px;
+    font-weight:900;
+    letter-spacing:.05em;
+  }
+
+  .process-stop strong{
+    color:#0a2545;
+    font-size:13px;
+  }
+
+  .process-stop small{
+    color:#64748b;
+    font-size:10px;
+  }
+
+  .process-empty{
+    margin:0 0 14px;
+    padding:11px 12px;
+    border-radius:9px;
+    background:#f8fafc;
+    color:#64748b;
+    font-size:11px;
+  }
+
+  .process-button{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:38px;
+    padding:0 13px;
+    border-radius:8px;
+    background:#075cad;
+    color:#fff;
+    text-decoration:none;
+    font-size:12px;
+    font-weight:900;
+  }
+
+  .process-button:hover{background:#064f92}
+
+  .process-button-muted{
+    background:#eef4fa;
+    color:#075cad;
+    border:1px solid #cfe0ef;
+  }
+
+  .process-button-muted:hover{background:#e3eef8}
+
+  @media(max-width:760px){
+    .process-hub-grid{grid-template-columns:1fr}
+  }
+</style>

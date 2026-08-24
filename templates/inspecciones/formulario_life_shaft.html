@@ -1,0 +1,1022 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>
+        Life Shaft {{ inspeccion.faja.tag }}
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/app.css' %}"
+    >
+
+    <style>
+        :root {
+            --ls-navy: #0d3564;
+            --ls-blue: #0c66b2;
+            --ls-line: #b7c7d9;
+            --ls-light: #f5f8fc;
+            --ls-green: #00a651;
+            --ls-yellow: #f4d400;
+            --ls-red: #d62828;
+            --ls-gray: #64748b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        .ls-topbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            min-height: 66px;
+            padding: 10px 18px;
+            background: #071b35;
+            color: #ffffff;
+            box-shadow: 0 6px 20px rgba(15, 35, 62, 0.16);
+        }
+
+        .ls-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .ls-brand img {
+            width: 44px;
+            height: 44px;
+            object-fit: contain;
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 4px;
+        }
+
+        .ls-brand strong,
+        .ls-brand span {
+            display: block;
+        }
+
+        .ls-brand span {
+            margin-top: 2px;
+            font-size: 12px;
+            opacity: 0.78;
+        }
+
+        .ls-page {
+            width: min(1520px, calc(100% - 28px));
+            margin: 20px auto 110px;
+        }
+
+        .ls-document {
+            overflow: hidden;
+            background: #ffffff;
+            border: 1px solid #c7d3e0;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(15, 35, 62, 0.10);
+        }
+
+        .ls-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 24px;
+            padding: 22px 24px;
+            border-bottom: 1px solid var(--ls-line);
+            background: linear-gradient(180deg, #ffffff, #f8fbff);
+        }
+
+        .ls-heading h1 {
+            margin: 0;
+            color: #10223e;
+            font-size: clamp(22px, 2.2vw, 34px);
+        }
+
+        .ls-heading p {
+            margin: 6px 0 0;
+            color: #5d6f86;
+        }
+
+        .ls-cover {
+            padding: 14px;
+        }
+
+        .ls-cover-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.25fr) minmax(360px, 0.75fr);
+            gap: 12px;
+        }
+
+        .ls-data-table {
+            display: grid;
+            grid-template-columns: 150px 1fr 150px 1fr;
+            border-top: 1px solid var(--ls-line);
+            border-left: 1px solid var(--ls-line);
+        }
+
+        .ls-data-table > div {
+            min-height: 48px;
+            padding: 9px 10px;
+            border-right: 1px solid var(--ls-line);
+            border-bottom: 1px solid var(--ls-line);
+            display: flex;
+            align-items: center;
+        }
+
+        .ls-data-table .label {
+            background: #eef4fa;
+            color: var(--ls-navy);
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .ls-data-table .value {
+            background: #ffffff;
+            color: #10223e;
+        }
+
+        .ls-data-table input,
+        .ls-data-table select {
+            width: 100%;
+            min-height: 34px;
+            border: 1px solid #b8c7d8;
+            border-radius: 6px;
+            padding: 5px 8px;
+            background: #ffffff;
+            color: #10223e;
+        }
+
+        .condition-cell {
+            grid-column: 2 / 5;
+            padding: 6px 10px !important;
+        }
+
+        .condition-control {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            min-width: 190px;
+            min-height: 36px;
+            padding-left: 38px;
+            border-radius: 999px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(15, 35, 62, 0.14);
+        }
+
+        .condition-control::before {
+            content: "";
+            position: absolute;
+            left: 14px;
+            width: 10px;
+            height: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.25);
+            z-index: 2;
+        }
+
+        .condition-control select {
+            width: 100%;
+            min-height: 36px;
+            border: 0;
+            border-radius: 999px;
+            padding: 0 40px 0 6px;
+            background: transparent;
+            color: inherit;
+            font-weight: 800;
+            text-align: center;
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+
+        .condition-control select option {
+            background: #ffffff;
+            color: #10223e;
+        }
+
+        .condition-normal {
+            background: var(--ls-green);
+            color: #ffffff;
+        }
+
+        .condition-precaucion,
+        .condition-alerta,
+        .condition-tolerable {
+            background: var(--ls-yellow);
+            color: #111827;
+        }
+
+        .condition-critico {
+            background: var(--ls-red);
+            color: #ffffff;
+        }
+
+        .condition-no-medido {
+            background: var(--ls-gray);
+            color: #ffffff;
+        }
+
+        .ls-main-photo {
+            min-height: 320px;
+            border: 1px solid var(--ls-line);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f3f6fa;
+        }
+
+        .ls-main-photo img {
+            width: 100%;
+            height: 100%;
+            min-height: 320px;
+            object-fit: cover;
+        }
+
+        .ls-text-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            margin-top: 12px;
+            border-top: 1px solid var(--ls-line);
+            border-left: 1px solid var(--ls-line);
+        }
+
+        .ls-text-card {
+            border-right: 1px solid var(--ls-line);
+            border-bottom: 1px solid var(--ls-line);
+            background: #ffffff;
+        }
+
+        .ls-text-card h3 {
+            margin: 0;
+            padding: 8px 10px;
+            background: var(--ls-navy);
+            color: #ffffff;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .ls-text-card textarea {
+            width: 100%;
+            min-height: 120px;
+            border: 0;
+            resize: vertical;
+            padding: 10px;
+            font-family: inherit;
+        }
+
+        .ls-section-title {
+            margin: 14px 0 0;
+            padding: 8px 12px;
+            background: var(--ls-navy);
+            color: #ffffff;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .ls-diagram {
+            border: 1px solid var(--ls-line);
+            border-top: 0;
+            padding: 10px;
+            background: #ffffff;
+        }
+
+        .ls-diagram img {
+            display: block;
+            width: 100%;
+            height: 260px;
+            object-fit: contain;
+        }
+
+        .ls-tabs {
+            position: sticky;
+            top: 66px;
+            z-index: 40;
+            display: flex;
+            gap: 8px;
+            padding: 10px 14px;
+            overflow-x: auto;
+            border-top: 1px solid var(--ls-line);
+            border-bottom: 1px solid var(--ls-line);
+            background: #eef4fa;
+        }
+
+        .ls-tabs a {
+            flex: 0 0 auto;
+            padding: 9px 16px;
+            border: 1px solid #c2cfdd;
+            border-radius: 8px;
+            background: #ffffff;
+            color: var(--ls-navy);
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .shaft-block {
+            padding: 18px 14px;
+            border-bottom: 1px solid var(--ls-line);
+        }
+
+        .shaft-title {
+            margin: 0 0 12px;
+            padding: 9px 12px;
+            background: var(--ls-navy);
+            color: #ffffff;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .shaft-fields {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .shaft-field label {
+            display: block;
+            margin-bottom: 5px;
+            color: #4f6480;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .shaft-field input,
+        .shaft-field select,
+        .shaft-field textarea {
+            width: 100%;
+            min-height: 38px;
+            border: 1px solid #bfd0e1;
+            border-radius: 7px;
+            padding: 7px 9px;
+            background: #ffffff;
+        }
+
+        .shaft-layout {
+            display: grid;
+            grid-template-columns: 330px minmax(0, 1fr);
+            gap: 12px;
+            align-items: start;
+        }
+
+        .ut-static-table,
+        .shaft-measurement-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .ut-static-table caption,
+        .shaft-measurement-table caption {
+            padding: 7px;
+            border: 1px solid #183b65;
+            border-bottom: 0;
+            background: var(--ls-blue);
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .ut-static-table th,
+        .ut-static-table td,
+        .shaft-measurement-table th,
+        .shaft-measurement-table td {
+            border: 1px solid var(--ls-line);
+            padding: 6px;
+        }
+
+        .ut-static-table {
+            font-size: 11px;
+        }
+
+        .ut-static-table th {
+            width: 58%;
+            background: #d4d4d4;
+            color: #111827;
+            text-align: center;
+        }
+
+        .ut-static-table td {
+            text-align: center;
+            background: #ffffff;
+            font-weight: 700;
+        }
+
+        .shaft-table-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--ls-line);
+        }
+
+        .shaft-measurement-table {
+            min-width: 960px;
+            table-layout: fixed;
+        }
+
+        .shaft-measurement-table th {
+            background: #dfeaf5;
+            color: #10223e;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        .shaft-measurement-table td {
+            text-align: center;
+        }
+
+        .shaft-measurement-table input {
+            width: 100%;
+            min-width: 66px;
+            min-height: 34px;
+            border: 1px solid #b8c7d8;
+            border-radius: 5px;
+            padding: 4px 6px;
+            text-align: center;
+            background: #ffffff;
+        }
+
+        .shaft-subtitle {
+            margin: 18px 0 8px;
+            color: #10223e;
+            font-size: 17px;
+        }
+
+        .photo-entry {
+            display: grid;
+            grid-template-columns: minmax(260px, 0.8fr) 1fr 1.4fr;
+            gap: 12px;
+            padding: 12px;
+            border: 1px solid var(--ls-line);
+            border-radius: 9px;
+            background: var(--ls-light);
+        }
+
+        .existing-photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .existing-photo-card {
+            margin: 0;
+            overflow: hidden;
+            border: 1px solid var(--ls-line);
+            border-radius: 8px;
+            background: #ffffff;
+        }
+
+        .existing-photo-card img {
+            display: block;
+            width: 100%;
+            height: 230px;
+            object-fit: contain;
+            background: #f3f6fa;
+        }
+
+        .existing-photo-card figcaption {
+            padding: 9px;
+            border-top: 1px solid var(--ls-line);
+        }
+
+        .existing-photo-card p {
+            margin: 4px 0 0;
+        }
+
+        .ls-sticky-actions {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 60;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.96);
+            border-top: 1px solid #c4d1df;
+            box-shadow: 0 -6px 22px rgba(15, 35, 62, 0.12);
+            backdrop-filter: blur(10px);
+        }
+
+        .ls-sticky-actions .primary-button,
+        .ls-sticky-actions .secondary-button {
+            min-width: 180px;
+        }
+
+        @media (max-width: 1100px) {
+            .ls-cover-grid,
+            .ls-text-grid,
+            .shaft-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .ls-data-table {
+                grid-template-columns: 140px 1fr;
+            }
+
+            .condition-cell {
+                grid-column: 2;
+            }
+
+            .shaft-fields {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .photo-entry {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 680px) {
+            .ls-page {
+                width: calc(100% - 14px);
+            }
+
+            .ls-heading,
+            .ls-topbar,
+            .ls-sticky-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .shaft-fields {
+                grid-template-columns: 1fr;
+            }
+
+            .ls-sticky-actions .primary-button,
+            .ls-sticky-actions .secondary-button {
+                width: 100%;
+            }
+        }
+        .delete-existing-photo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 9px 10px;
+    border: 1px solid #f0a3a3;
+    border-radius: 7px;
+    background: #fff1f1;
+    color: #b42318;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.delete-existing-photo:hover {
+    background: #ffe2e2;
+}
+
+.delete-existing-photo input {
+    width: 17px;
+    height: 17px;
+    margin: 0;
+    accent-color: #d62828;
+    cursor: pointer;
+}
+
+.existing-photo-card:has(
+    .delete-existing-photo input:checked
+) {
+    border-color: #d62828;
+    opacity: 0.65;
+}
+
+.existing-photo-card:has(
+    .delete-existing-photo input:checked
+) img {
+    filter: grayscale(1);
+}
+    </style>
+</head>
+
+<body class="app-body">
+
+<header class="ls-topbar">
+    <div class="ls-brand">
+        <img
+            src="{% static 'inspecciones/faja/cvb0001/logo_overall.jpeg' %}"
+            alt="OverallSolutions"
+        >
+
+        <div>
+            <strong>OverallSolutions</strong>
+            <span>
+                Inspecciones › {{ inspeccion.faja.tag }} › Life Shaft
+            </span>
+        </div>
+    </div>
+
+    <a
+        class="secondary-button link-button"
+        href="{% url 'dashboard' %}"
+    >
+        Volver
+    </a>
+</header>
+
+<main class="ls-page">
+
+    {% for message in messages %}
+        <div class="alert">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <form
+        method="post"
+        enctype="multipart/form-data"
+        class="ls-document"
+    >
+        {% csrf_token %}
+
+        <section class="ls-heading">
+            <div>
+                <h1>
+                    REPORTE DE INSPECCIÓN
+                    {{ inspeccion.codigo_reporte }}
+                </h1>
+
+                <p>
+                    Ingeniería de Confiabilidad – Operaciones Procesos
+                </p>
+            </div>
+
+            <a
+                class="secondary-button link-button"
+                target="_blank"
+                href="{% url 'reporte_life_shaft' inspeccion.id %}"
+            >
+                Vista previa
+            </a>
+        </section>
+
+        <section class="ls-cover">
+
+            <div class="ls-cover-grid">
+                <div class="ls-data-table">
+
+                    <div class="label">CONDICIÓN</div>
+
+                    <div class="value condition-cell">
+                        <div class="condition-control condition-{{ inspeccion.condicion_general|lower }}">
+                            {{ formulario.condicion_general }}
+                        </div>
+                    </div>
+
+                    <div class="label">PLANTA</div>
+                    <div class="value">
+                        {{ inspeccion.planta|default:"220" }}
+                    </div>
+
+                    <div class="label">PROCESO</div>
+                    <div class="value">
+                        {{ inspeccion.proceso|default:"Faja Overland 01" }}
+                    </div>
+
+                    <div class="label">EQUIPO</div>
+                    <div class="value">LIFE SHAFT</div>
+
+                    <div class="label">TAG</div>
+                    <div class="value">
+                        {{ inspeccion.faja.tag }}
+                    </div>
+
+                    <div class="label">ETAPA</div>
+                    <div class="value">
+                        {{ inspeccion.etapa|default:"Operaciones" }}
+                    </div>
+
+                    <div class="label">CONDICIÓN DEL EQUIPO</div>
+                    <div class="value">
+                        {{ formulario.condicion_equipo }}
+                        {{ formulario.condicion_equipo.errors }}
+                    </div>
+
+                    <div class="label">FECHA DE INSPECCIÓN</div>
+                    <div class="value">
+                        {{ formulario.fecha_inspeccion }}
+                        {{ formulario.fecha_inspeccion.errors }}
+                    </div>
+
+                    <div class="label">FECHA DE REPORTE</div>
+                    <div class="value">
+                        {{ formulario.fecha_reporte }}
+                        {{ formulario.fecha_reporte.errors }}
+                    </div>
+
+                    <div class="label">INSPECTOR DE CAMPO</div>
+                    <div class="value">
+                        {{ inspeccion.inspector.get_full_name|default:inspeccion.inspector.username }}
+                    </div>
+
+                    <div class="label">SUPERVISOR DE CAMPO</div>
+                    <div class="value">
+                        {{ inspeccion.supervisor.get_full_name|default:inspeccion.supervisor.username }}
+                    </div>
+
+                    <div class="label">ANALISTA QUE ELABORA</div>
+                    <div class="value">
+                        {{ inspeccion.analista.get_full_name|default:inspeccion.analista.username }}
+                    </div>
+
+                    <div class="label">ANALISTA QUE VALIDA</div>
+                    <div class="value">
+                        {{ inspeccion.analista.get_full_name|default:inspeccion.analista.username }}
+                    </div>
+                </div>
+
+                <div class="ls-main-photo">
+                    <img
+                        src="{% static 'inspecciones/faja/cvb0001/planta_cvb0001.jpeg' %}"
+                        alt="Faja Overland CVB0001"
+                    >
+                </div>
+            </div>
+
+            <div class="ls-text-grid">
+                <article class="ls-text-card">
+                    <h3>CIRCUNSTANCIAS DE LA INSPECCIÓN</h3>
+                    {{ formulario.circunstancias }}
+                    {{ formulario.circunstancias.errors }}
+                </article>
+
+                <article class="ls-text-card">
+                    <h3>ANTECEDENTES</h3>
+                    {{ formulario.antecedentes }}
+                    {{ formulario.antecedentes.errors }}
+                </article>
+
+                <article class="ls-text-card">
+                    <h3>OBSERVACIONES</h3>
+                    {{ formulario.observaciones }}
+                    {{ formulario.observaciones.errors }}
+                </article>
+            </div>
+
+            <article
+                class="ls-text-card"
+                style="
+                    margin-top: 12px;
+                    border: 1px solid var(--ls-line);
+                "
+            >
+                <h3>CONCLUSIONES Y RECOMENDACIONES</h3>
+                {{ formulario.recomendaciones }}
+                {{ formulario.recomendaciones.errors }}
+            </article>
+
+            <div class="ls-section-title">
+                ESQUEMA DE UBICACIÓN DE LIFE SHAFT DE LA FAJA
+                {{ inspeccion.faja.tag }}
+            </div>
+
+            <div class="ls-diagram">
+                <img
+                    src="{% static 'inspecciones/life_shaft/diagrama_cvb0001.png' %}"
+                    alt="Esquema de ubicación de Life Shaft"
+                >
+            </div>
+        </section>
+
+        <nav class="ls-tabs">
+            {% for b in bloques_shafts %}
+                <a href="#shaft-{{ b.life_shaft.numero }}">
+                    Life Shaft {{ b.life_shaft.numero }}
+                </a>
+            {% endfor %}
+        </nav>
+
+        {% for b in bloques_shafts %}
+            <section
+                class="shaft-block"
+                id="shaft-{{ b.life_shaft.numero }}"
+            >
+                <h2 class="shaft-title">
+                    LIFE SHAFT #{{ b.life_shaft.numero|stringformat:"02d" }}
+                </h2>
+
+                <div class="shaft-fields">
+                    {% for field in b.formulario_shaft %}
+                        {% if field.name != "marca_equipo" and field.name != "tipo_haz" and field.name != "frecuencia_mhz" and field.name != "ancho_banda" and field.name != "amortiguamiento" and field.name != "velocidad_ms" and field.name != "retardo_us" %}
+                            <div class="shaft-field">
+                                <label>{{ field.label }}</label>
+                                {{ field }}
+                                {{ field.errors }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <div class="shaft-layout">
+                    <table class="ut-static-table">
+                        <caption>
+                            PARÁMETROS DE CALIBRACIÓN DEL EQUIPO UT
+                        </caption>
+
+                        <tbody>
+                            <tr>
+                                <th>MARCA DEL EQUIPO</th>
+                                <td>OLYMPUS</td>
+                            </tr>
+
+                            <tr>
+                                <th>TIPO DE HAZ</th>
+                                <td>COMPLETA</td>
+                            </tr>
+
+                            <tr>
+                                <th>FRECUENCIA (MHz)</th>
+                                <td>5 MHz</td>
+                            </tr>
+
+                            <tr>
+                                <th>ANCHO DE BANDA</th>
+                                <td>0.2 - 10 MHz</td>
+                            </tr>
+
+                            <tr>
+                                <th>AMORTIGUAMIENTO</th>
+                                <td>50</td>
+                            </tr>
+
+                            <tr>
+                                <th>VELOCIDAD (m/s)</th>
+                                <td>6079</td>
+                            </tr>
+
+                            <tr>
+                                <th>RETARDO (μs)</th>
+                                <td>1.53</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div>
+                        <h3 class="shaft-subtitle" style="margin-top:0;">
+                            Medición de espesores (mm)
+                        </h3>
+
+                        {{ b.mediciones_formset.management_form }}
+
+                        {% if b.mediciones_formset.non_form_errors %}
+                            <div class="alert">
+                                {{ b.mediciones_formset.non_form_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="shaft-table-wrap">
+                            <table class="shaft-measurement-table">
+                                <caption>
+                                    MEDICIÓN DE ESPESORES DEL LIFE SHAFT
+                                    {{ b.life_shaft.numero }}
+                                </caption>
+
+                                <thead>
+                                    <tr>
+                                        <th>Punto</th>
+                                        <th>Ubicación</th>
+                                        <th>A</th>
+                                        <th>B</th>
+                                        <th>C</th>
+                                        <th>D</th>
+                                        <th>E</th>
+                                        <th>F</th>
+                                        <th>G</th>
+                                        <th>Mín.</th>
+                                        <th>Prom.</th>
+                                        <th>Observación</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    {% for m in b.mediciones_formset %}
+                                        <tr>
+                                            {{ m.id }}
+                                            {{ m.punto }}
+                                            {{ m.orden }}
+
+                                            <td>{{ m.instance.punto }}</td>
+                                            <td>{{ m.ubicacion }}</td>
+                                            <td>{{ m.a }}</td>
+                                            <td>{{ m.b }}</td>
+                                            <td>{{ m.c }}</td>
+                                            <td>{{ m.d }}</td>
+                                            <td>{{ m.e }}</td>
+                                            <td>{{ m.f }}</td>
+                                            <td>{{ m.g }}</td>
+                                            <td>{{ m.instance.minimo|default:"-" }}</td>
+                                            <td>{{ m.instance.promedio|default:"-" }}</td>
+                                            <td>{{ m.observacion }}</td>
+                                        </tr>
+
+                                        {% if m.errors %}
+                                            <tr>
+                                                <td colspan="12">
+                                                    {{ m.errors }}
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="12">
+                                                No hay mediciones configuradas.
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="shaft-subtitle">
+                    Inspección visual y registro fotográfico
+                </h3>
+
+                <div class="photo-entry">
+                    {% for field in b.formulario_foto %}
+                        <div class="shaft-field">
+                            <label>{{ field.label }}</label>
+                            {{ field }}
+                            {{ field.errors }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+            {% if b.fotografias %}
+    <div class="existing-photo-grid">
+        {% for foto in b.fotografias %}
+            <figure class="existing-photo-card">
+
+                {% if foto.imagen %}
+                    <img
+                        src="{{ foto.imagen.url }}"
+                        alt="Inspección visual de Life Shaft {{ b.life_shaft.numero }}"
+                    >
+                {% endif %}
+
+                <figcaption>
+                    <strong>
+                        {{ foto.codigo_dano|default:"Sin código" }}
+                    </strong>
+
+                    <p>
+                        {{ foto.descripcion|default:"Sin descripción" }}
+                    </p>
+
+                    {% if puede_editar %}
+                        <label class="delete-existing-photo">
+                            <input
+                                type="checkbox"
+                                name="eliminar_fotografias"
+                                value="{{ foto.id }}"
+                            >
+
+                            <span>Eliminar esta fotografía</span>
+                        </label>
+                    {% endif %}
+                </figcaption>
+            </figure>
+        {% endfor %}
+    </div>
+{% endif %}
+
+            </section>
+        {% endfor %}
+
+
+        <div class="ls-sticky-actions">
+            {% if puede_editar %}
+                <button
+                    class="primary-button"
+                    type="submit"
+                >
+                    Guardar borrador
+                </button>
+            {% endif %}
+
+            <a
+                class="secondary-button link-button"
+                target="_blank"
+                href="{% url 'reporte_life_shaft' inspeccion.id %}"
+            >
+                Vista previa
+            </a>
+        </div>
+    </form>
+</main>
+
+</body>
+</html>

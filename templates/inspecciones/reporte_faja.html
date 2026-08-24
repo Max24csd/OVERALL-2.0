@@ -1,0 +1,247 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <title>
+        Reporte {{ inspeccion.codigo_reporte }}
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/app.css' %}"
+    >
+</head>
+
+<body class="report-body">
+
+<div class="report-toolbar">
+
+    <button
+        class="primary-button"
+        onclick="window.print()"
+    >
+        Imprimir / PDF
+    </button>
+
+    <a
+        class="secondary-button link-button"
+        href="{% url 'formulario_faja' inspeccion.id %}"
+    >
+        Editar formulario
+    </a>
+
+</div>
+
+<main class="report-sheet">
+
+    <header class="report-header">
+
+        <div class="report-logo">
+            OverallSolutions
+        </div>
+
+        <div>
+            <h1>REPORTE DE INSPECCIÓN</h1>
+
+            <strong>
+                {{ inspeccion.codigo_reporte }}
+            </strong>
+        </div>
+
+        <div class="report-client">
+            LAS BAMBAS
+        </div>
+
+    </header>
+
+    <section class="report-condition">
+        <strong>CONDICIÓN</strong>
+
+        <span>
+            {{ inspeccion.get_condicion_general_display }}
+        </span>
+    </section>
+
+    <section class="report-general-grid">
+
+        <div>
+            <strong>PLANTA</strong>
+            <span>{{ inspeccion.planta }}</span>
+        </div>
+
+        <div>
+            <strong>PROCESO</strong>
+            <span>{{ inspeccion.proceso }}</span>
+        </div>
+
+        <div>
+            <strong>EQUIPO</strong>
+            <span>{{ inspeccion.faja.nombre }}</span>
+        </div>
+
+        <div>
+            <strong>TAG</strong>
+            <span>{{ inspeccion.faja.tag }}</span>
+        </div>
+
+        <div>
+            <strong>INSPECTOR</strong>
+            <span>{{ inspeccion.inspector.get_full_name }}</span>
+        </div>
+
+        <div>
+            <strong>SUPERVISOR</strong>
+            <span>{{ inspeccion.supervisor.get_full_name }}</span>
+        </div>
+
+    </section>
+
+    <section class="report-text-grid">
+
+        <article>
+            <h2>CIRCUNSTANCIAS</h2>
+            <p>{{ inspeccion.circunstancias|default_if_none:"-" }}</p>
+        </article>
+
+        <article>
+            <h2>ANTECEDENTES</h2>
+            <p>{{ inspeccion.antecedentes|default_if_none:"-" }}</p>
+        </article>
+
+        <article>
+            <h2>OBSERVACIONES</h2>
+            <p>{{ inspeccion.observaciones|default_if_none:"-" }}</p>
+        </article>
+
+    </section>
+
+    <section class="report-section">
+
+        <h2>MEDICIÓN DE EMPALME E-01</h2>
+
+        <div class="table-scroll">
+
+            <table class="measurement-table report-table">
+
+                <thead>
+                    <tr>
+                        <th>Posición</th>
+                        <th>Nominal</th>
+                        <th>A</th>
+                        <th>B</th>
+                        <th>C</th>
+                        <th>D</th>
+                        <th>E</th>
+                        <th>F</th>
+                        <th>G</th>
+                        <th>Mínimo</th>
+                        <th>Promedio</th>
+                        <th>Desgaste</th>
+                        <th>% desgaste</th>
+                        <th>% residual</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                {% for medicion in empalmes %}
+
+                    <tr>
+                        <td>{{ medicion.posicion }}</td>
+                        <td>{{ medicion.espesor_nominal|default_if_none:"-" }}</td>
+                        <td>{{ medicion.a|default_if_none:"-" }}</td>
+                        <td>{{ medicion.b|default_if_none:"-" }}</td>
+                        <td>{{ medicion.c|default_if_none:"-" }}</td>
+                        <td>{{ medicion.d|default_if_none:"-" }}</td>
+                        <td>{{ medicion.e|default_if_none:"-" }}</td>
+                        <td>{{ medicion.f|default_if_none:"-" }}</td>
+                        <td>{{ medicion.g|default_if_none:"-" }}</td>
+                        <td>{{ medicion.minimo|default_if_none:"-" }}</td>
+                        <td>{{ medicion.promedio|default_if_none:"-" }}</td>
+                        <td>{{ medicion.desgaste|default_if_none:"-" }}</td>
+                        <td>{{ medicion.porcentaje_desgaste|default_if_none:"-" }}</td>
+                        <td>{{ medicion.porcentaje_residual|default_if_none:"-" }}</td>
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+    <section class="report-section">
+
+        <h2>TRAMOS 200–80</h2>
+
+        <div class="table-scroll">
+
+            <table class="measurement-table report-table">
+
+                <thead>
+                    <tr>
+                        <th>Medición</th>
+                        <th>Bastidor</th>
+                        <th>Nominal</th>
+                        <th>A</th>
+                        <th>B</th>
+                        <th>C</th>
+                        <th>D</th>
+                        <th>E</th>
+                        <th>F</th>
+                        <th>G</th>
+                        <th>Mínimo</th>
+                        <th>Promedio</th>
+                        <th>Desgaste</th>
+                        <th>% desgaste</th>
+                        <th>% residual</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                {% for medicion in tramos %}
+
+                    <tr>
+                        <td>{{ medicion.punto }}</td>
+                        <td>{{ medicion.bastidor }}</td>
+                        <td>{{ medicion.espesor_nominal|default_if_none:"-" }}</td>
+                        <td>{{ medicion.a|default_if_none:"-" }}</td>
+                        <td>{{ medicion.b|default_if_none:"-" }}</td>
+                        <td>{{ medicion.c|default_if_none:"-" }}</td>
+                        <td>{{ medicion.d|default_if_none:"-" }}</td>
+                        <td>{{ medicion.e|default_if_none:"-" }}</td>
+                        <td>{{ medicion.f|default_if_none:"-" }}</td>
+                        <td>{{ medicion.g|default_if_none:"-" }}</td>
+                        <td>{{ medicion.minimo|default_if_none:"-" }}</td>
+                        <td>{{ medicion.promedio|default_if_none:"-" }}</td>
+                        <td>{{ medicion.desgaste|default_if_none:"-" }}</td>
+                        <td>{{ medicion.porcentaje_desgaste|default_if_none:"-" }}</td>
+                        <td>{{ medicion.porcentaje_residual|default_if_none:"-" }}</td>
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</main>
+
+</body>
+</html>

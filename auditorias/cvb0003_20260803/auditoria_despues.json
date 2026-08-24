@@ -1,0 +1,258 @@
+{
+  "faja": {
+    "id": 7,
+    "codigo_reporte": "20260731-VTUT-CVB0003-FAJA",
+    "fecha_inspeccion": "2026-08-03",
+    "fecha_reporte": "2026-08-08",
+    "empalmes": 90,
+    "empalmes_con_datos": 84,
+    "tramos": 222,
+    "tramos_con_datos": 120,
+    "fotografias": 79
+  },
+  "polea_03": {
+    "id": 8,
+    "tipo_medicion": "CAMPANA",
+    "normal_conservado": 5,
+    "campana": [
+      {
+        "id": 15,
+        "fase": "INICIO",
+        "punto": 1,
+        "valores": {
+          "A": "30.31",
+          "B": "30.16",
+          "C": "29.38",
+          "D": "25.38",
+          "E": "27.80",
+          "F": "30.07",
+          "G": null
+        },
+        "minimo": "25.38",
+        "promedio": "28.85"
+      },
+      {
+        "id": 16,
+        "fase": "INICIO",
+        "punto": 2,
+        "valores": {
+          "A": "30.16",
+          "B": "29.68",
+          "C": "29.01",
+          "D": "25.48",
+          "E": "27.54",
+          "F": "30.08",
+          "G": null
+        },
+        "minimo": "25.48",
+        "promedio": "28.66"
+      },
+      {
+        "id": 17,
+        "fase": "INICIO",
+        "punto": 3,
+        "valores": {
+          "A": "30.86",
+          "B": "29.83",
+          "C": "29.83",
+          "D": "25.16",
+          "E": "27.61",
+          "F": "29.87",
+          "G": null
+        },
+        "minimo": "25.16",
+        "promedio": "28.86"
+      },
+      {
+        "id": 18,
+        "fase": "INICIO",
+        "punto": 4,
+        "valores": {
+          "A": null,
+          "B": null,
+          "C": null,
+          "D": null,
+          "E": null,
+          "F": null,
+          "G": null
+        },
+        "minimo": null,
+        "promedio": null
+      },
+      {
+        "id": 19,
+        "fase": "INICIO",
+        "punto": 5,
+        "valores": {
+          "A": null,
+          "B": null,
+          "C": null,
+          "D": null,
+          "E": null,
+          "F": null,
+          "G": null
+        },
+        "minimo": null,
+        "promedio": null
+      }
+    ]
+  },
+  "life_shaft_01": {
+    "id": 3,
+    "tipo_medicion": "CAMPANA",
+    "normal_conservado": 4,
+    "campana": [
+      {
+        "id": 1,
+        "fase": "INICIO",
+        "punto": 1,
+        "valores": {
+          "A": "11.32",
+          "B": "11.46",
+          "C": "11.74",
+          "D": "11.72",
+          "E": "11.69",
+          "F": "11.51",
+          "G": "11.30"
+        },
+        "minimo": "11.30",
+        "promedio": "11.53"
+      },
+      {
+        "id": 2,
+        "fase": "INICIO",
+        "punto": 2,
+        "valores": {
+          "A": "10.59",
+          "B": "10.65",
+          "C": "10.76",
+          "D": "10.48",
+          "E": "10.50",
+          "F": "10.60",
+          "G": "10.43"
+        },
+        "minimo": "10.43",
+        "promedio": "10.57"
+      },
+      {
+        "id": 3,
+        "fase": "INICIO",
+        "punto": 3,
+        "valores": {
+          "A": "10.65",
+          "B": "10.34",
+          "C": "10.30",
+          "D": "10.38",
+          "E": "10.10",
+          "F": "10.56",
+          "G": "10.37"
+        },
+        "minimo": "10.10",
+        "promedio": "10.39"
+      },
+      {
+        "id": 4,
+        "fase": "INICIO",
+        "punto": 4,
+        "valores": {
+          "A": null,
+          "B": null,
+          "C": null,
+          "D": null,
+          "E": null,
+          "F": null,
+          "G": null
+        },
+        "minimo": null,
+        "promedio": null
+      }
+    ]
+  },
+  "polea_07": [
+    {
+      "id": 81,
+      "punto": 1,
+      "valores": {
+        "A": "32.84",
+        "B": "32.90",
+        "C": "32.36",
+        "D": "32.58",
+        "E": "32.10",
+        "F": "32.18",
+        "G": "32.54"
+      },
+      "minimo": "32.10",
+      "promedio": "32.50"
+    },
+    {
+      "id": 82,
+      "punto": 2,
+      "valores": {
+        "A": "32.66",
+        "B": "32.67",
+        "C": "32.30",
+        "D": "32.11",
+        "E": "32.17",
+        "F": "32.40",
+        "G": "32.17"
+      },
+      "minimo": "32.11",
+      "promedio": "32.35"
+    },
+    {
+      "id": 83,
+      "punto": 3,
+      "valores": {
+        "A": "32.82",
+        "B": "32.37",
+        "C": "32.13",
+        "D": "32.40",
+        "E": "32.45",
+        "F": "32.95",
+        "G": "32.42"
+      },
+      "minimo": "32.13",
+      "promedio": "32.51"
+    },
+    {
+      "id": 84,
+      "punto": 4,
+      "valores": {
+        "A": null,
+        "B": null,
+        "C": null,
+        "D": null,
+        "E": null,
+        "F": null,
+        "G": null
+      },
+      "minimo": null,
+      "promedio": null
+    },
+    {
+      "id": 85,
+      "punto": 5,
+      "valores": {
+        "A": null,
+        "B": null,
+        "C": null,
+        "D": null,
+        "E": null,
+        "F": null,
+        "G": null
+      },
+      "minimo": null,
+      "promedio": null
+    }
+  ],
+  "poleas_04_05": [
+    {
+      "numero": 4,
+      "tipo_medicion": "NORMAL"
+    },
+    {
+      "numero": 5,
+      "tipo_medicion": "NORMAL"
+    }
+  ]
+}

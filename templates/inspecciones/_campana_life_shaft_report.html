@@ -1,0 +1,14 @@
+{% for fase, mediciones in b.campana_mediciones %}
+<div class="measurement-layout campaign-report-table">
+    <table class="cal"><caption>PARÁMETROS DE CALIBRACIÓN DEL EQUIPO UT – {{ fase }} DE CAMPAÑA</caption>
+        <tr><th>MARCA DEL EQUIPO</th><td>{{ b.life_shaft.marca_equipo|default:"OLYMPUS" }}</td></tr><tr><th>TIPO DE HAZ</th><td>{{ b.life_shaft.tipo_haz|default:"COMPLETA" }}</td></tr><tr><th>FRECUENCIA (MHz)</th><td>{{ b.life_shaft.frecuencia_mhz|default:"5 MHz" }}</td></tr><tr><th>ANCHO DE BANDA</th><td>{{ b.life_shaft.ancho_banda|default:"0.2 - 10 MHz" }}</td></tr><tr><th>AMORTIGUAMIENTO</th><td>{{ b.life_shaft.amortiguamiento|default:"50" }}</td></tr><tr><th>VELOCIDAD (m/s)</th><td>{{ b.life_shaft.velocidad_ms|default:"6079" }}</td></tr><tr><th>RETARDO (µs)</th><td>{{ b.life_shaft.retardo_us|default:"1.53" }}</td></tr>
+    </table>
+    <div><table class="measure js-table"><caption>MEDICIÓN DE ESPESORES DEL LIFE SHAFT {{ b.life_shaft.numero }} – {{ fase }} DE CAMPAÑA</caption>
+        <thead><tr><th class="point">PUNTO</th><th class="location">UBICACIÓN</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th><th>G</th><th class="result">PROM.</th><th class="result">MÍN.</th></tr></thead><tbody>
+        {% for medicion in mediciones %}<tr class="js-row"><td>{{ medicion.punto }}</td><td>{{ medicion.ubicacion|default:"-" }}</td><td data-col="a">{{ medicion.a|default_if_none:"-" }}</td><td data-col="b">{{ medicion.b|default_if_none:"-" }}</td><td data-col="c">{{ medicion.c|default_if_none:"-" }}</td><td data-col="d">{{ medicion.d|default_if_none:"-" }}</td><td data-col="e">{{ medicion.e|default_if_none:"-" }}</td><td data-col="f">{{ medicion.f|default_if_none:"-" }}</td><td data-col="g">{{ medicion.g|default_if_none:"-" }}</td><td data-row-avg>{{ medicion.promedio|default_if_none:"-" }}</td><td data-row-min>{{ medicion.minimo|default_if_none:"-" }}</td></tr>{% empty %}<tr><td colspan="11">No existen mediciones registradas.</td></tr>{% endfor %}
+        <tr><td class="summary-label" colspan="2">PROMEDIO</td>{% for c in "abcdefg" %}<td class="summary" data-summary="avg-{{ c }}">-</td>{% endfor %}<td class="summary" data-summary="avg-prom">-</td><td class="summary" data-summary="avg-min">-</td></tr><tr><td class="summary-label" colspan="2">MÍNIMO</td>{% for c in "abcdefg" %}<td class="summary" data-summary="min-{{ c }}">-</td>{% endfor %}<td class="summary" data-summary="min-prom">-</td><td class="summary" data-summary="min-min">-</td></tr>
+        </tbody></table><p class="minimum-note js-note">El espesor mínimo corresponde a {{ fase|lower }} de campaña.</p>
+    </div>
+</div>
+{% endfor %}
+{% if b.variacion_campana != None %}<p class="minimum-note">Variación Inicio/Fin: {{ b.variacion_campana|floatformat:2 }} mm.</p>{% endif %}

@@ -1,0 +1,112 @@
+{
+  "faja": {
+    "id": 7,
+    "codigo_reporte": "20260731-VTUT-CVB0003-FAJA",
+    "fecha_inspeccion": null,
+    "fecha_reporte": null,
+    "empalmes": 90,
+    "empalmes_con_datos": 0,
+    "tramos": 222,
+    "tramos_con_datos": 0,
+    "fotografias": 0
+  },
+  "polea_03": {
+    "id": 8,
+    "tipo_medicion": "NORMAL",
+    "normal_conservado": 5,
+    "campana": []
+  },
+  "life_shaft_01": {
+    "id": 3,
+    "tipo_medicion": "NORMAL",
+    "normal_conservado": 4,
+    "campana": []
+  },
+  "polea_07": [
+    {
+      "id": 81,
+      "punto": 1,
+      "valores": {
+        "A": "32.84",
+        "B": "32.90",
+        "C": "32.36",
+        "D": "31.58",
+        "E": "32.10",
+        "F": "32.18",
+        "G": "32.11"
+      },
+      "minimo": "31.58",
+      "promedio": "32.30"
+    },
+    {
+      "id": 82,
+      "punto": 2,
+      "valores": {
+        "A": "32.66",
+        "B": "32.67",
+        "C": "32.30",
+        "D": "31.54",
+        "E": "32.17",
+        "F": "32.40",
+        "G": "32.17"
+      },
+      "minimo": "31.54",
+      "promedio": "32.27"
+    },
+    {
+      "id": 83,
+      "punto": 3,
+      "valores": {
+        "A": "32.82",
+        "B": "32.37",
+        "C": "32.13",
+        "D": "31.40",
+        "E": "31.40",
+        "F": "31.95",
+        "G": "31.42"
+      },
+      "minimo": "31.40",
+      "promedio": "31.93"
+    },
+    {
+      "id": 84,
+      "punto": 4,
+      "valores": {
+        "A": null,
+        "B": null,
+        "C": null,
+        "D": null,
+        "E": null,
+        "F": null,
+        "G": null
+      },
+      "minimo": null,
+      "promedio": null
+    },
+    {
+      "id": 85,
+      "punto": 5,
+      "valores": {
+        "A": null,
+        "B": null,
+        "C": null,
+        "D": null,
+        "E": null,
+        "F": null,
+        "G": null
+      },
+      "minimo": null,
+      "promedio": null
+    }
+  ],
+  "poleas_04_05": [
+    {
+      "numero": 4,
+      "tipo_medicion": "NORMAL"
+    },
+    {
+      "numero": 5,
+      "tipo_medicion": "NORMAL"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+.photos-area img,
+.poleas-main-photo img,
+.poleas-diagrama-contenedor img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+}
+
+.visual-notes:empty,
+.photo-caption:empty {
+    display: none;
+}
+
+@media print {
+    .toolbar { display: none !important; }
+    .visual-panel, .measurement-panel { break-inside: avoid; page-break-inside: avoid; }
+}

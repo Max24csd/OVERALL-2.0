@@ -1,0 +1,1029 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Formulario Faja CVB0003</title>
+
+    <style>
+        :root {
+            --navy: #123e70;
+            --blue: #0878bd;
+            --line: #aabdd1;
+            --soft: #eef4fa;
+            --green: #00ad57;
+            --danger: #b42318;
+            --text: #10233d;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: #edf3f8;
+            color: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            padding: 12px 20px;
+            background: #061d39;
+            color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, .16);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand img {
+            width: 48px;
+            height: 48px;
+            padding: 4px;
+            border-radius: 8px;
+            background: #fff;
+            object-fit: contain;
+        }
+
+        .brand strong {
+            display: block;
+            font-size: 18px;
+        }
+
+        .brand small {
+            display: block;
+            margin-top: 4px;
+            opacity: .8;
+        }
+
+        .page {
+            width: min(1660px, calc(100% - 28px));
+            margin: 18px auto 105px;
+        }
+
+        .card {
+            margin-bottom: 14px;
+            overflow: hidden;
+            border: 1px solid #c6d5e4;
+            border-radius: 10px;
+            background: #fff;
+            box-shadow: 0 6px 20px rgba(19, 54, 90, .06);
+        }
+
+        .card-title {
+            padding: 10px 14px;
+            background: var(--navy);
+            color: #fff;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .section-help {
+            padding: 8px 14px;
+            border-bottom: 1px solid #d8e2ec;
+            background: #f8fbfe;
+            color: #607187;
+            font-size: 12px;
+        }
+
+        .general-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1.55fr) minmax(320px, .75fr);
+            gap: 12px;
+            padding: 12px;
+        }
+
+        .general-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .field { min-width: 0; }
+        .field.span-2 { grid-column: span 2; }
+        .field.span-4 { grid-column: span 4; }
+
+        .field label {
+            display: block;
+            margin-bottom: 5px;
+            color: #40536b;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .field input,
+        .field select,
+        .field textarea {
+            width: 100%;
+            min-height: 38px;
+            padding: 8px 10px;
+            border: 1px solid #b7c9dc;
+            border-radius: 6px;
+            background: #fff;
+            color: #10233d;
+        }
+
+        .field textarea {
+            min-height: 74px;
+            resize: vertical;
+        }
+
+        .main-photo {
+            min-height: 290px;
+            overflow: hidden;
+            border: 1px solid #b7c9dc;
+            border-radius: 8px;
+            background: #f5f8fb;
+        }
+
+        .main-photo img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            min-height: 290px;
+            object-fit: cover;
+        }
+
+        .image-box { padding: 12px; }
+
+        .image-box img {
+            display: block;
+            width: 100%;
+            max-height: 420px;
+            object-fit: contain;
+            border: 1px solid #c5d3e2;
+            background: #fff;
+        }
+
+        .reference-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 12px;
+        }
+
+        .reference-grid img {
+            width: 100%;
+            height: 280px;
+            object-fit: contain;
+            border: 1px solid #c5d3e2;
+            background: #fff;
+        }
+
+        .table-wrap {
+            width: 100%;
+            overflow: auto;
+            padding: 10px;
+        }
+
+        table {
+            width: 100%;
+            min-width: 1280px;
+            border-collapse: collapse;
+            table-layout: fixed;
+            font-size: 11px;
+        }
+
+        th, td {
+            border: 1px solid #9eb3c8;
+            padding: 4px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        th {
+            background: #dce9f6;
+            color: #082f58;
+            font-weight: 800;
+        }
+
+        .group-cell {
+            background: var(--green);
+            color: #fff;
+            font-weight: 800;
+        }
+
+        td input {
+            width: 100%;
+            min-width: 58px;
+            height: 31px;
+            padding: 4px;
+            border: 1px solid #b5c7d9;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .calculated {
+            background: #e9f2fb;
+            font-weight: 700;
+        }
+
+        .percentage-value {
+            min-width: 68px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: clip;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .readonly-cell { background: #f1f5f9; }
+
+        .errors {
+            margin: 10px 12px 0;
+            padding: 10px 13px;
+            border: 1px solid #f1b5b5;
+            border-radius: 7px;
+            background: #fff3f3;
+            color: #991b1b;
+            font-size: 13px;
+        }
+
+        .photo-form-area { padding: 12px; }
+
+        .photo-form-row {
+            display: grid;
+            grid-template-columns: minmax(220px, 1fr) minmax(220px, 1fr) minmax(320px, 2fr);
+            gap: 12px;
+            margin-bottom: 12px;
+            padding: 12px;
+            border: 1px solid #bfd0e1;
+            border-radius: 8px;
+            background: #f6f9fc;
+        }
+
+        .photo-form-row .field textarea {
+            min-height: 74px;
+        }
+
+        .existing-photo {
+            grid-column: 1 / -1;
+            padding: 10px;
+            border: 1px solid #f1aaaa;
+            border-radius: 7px;
+            background: #fff6f6;
+        }
+
+        .existing-photo img {
+            display: block;
+            width: min(680px, 100%);
+            max-height: 380px;
+            margin: 0 auto 10px;
+            object-fit: contain;
+            background: #fff;
+        }
+
+        .delete-photo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #a61b1b;
+            font-weight: 800;
+        }
+
+        .sticky-actions {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 60;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 12px 20px;
+            border-top: 1px solid #c6d5e4;
+            background: rgba(255, 255, 255, .97);
+            box-shadow: 0 -3px 14px rgba(0, 0, 0, .08);
+        }
+
+        .btn {
+            min-height: 42px;
+            padding: 9px 17px;
+            border-radius: 7px;
+            font-weight: 800;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            border: 1px solid #0c67b8;
+            background: #fff;
+            color: #0c67b8;
+        }
+
+        .btn-primary {
+            border: 1px solid #0868bf;
+            background: #0868bf;
+            color: #fff;
+        }
+
+        .btn-danger {
+            border: 1px solid #c62828;
+            background: #fff;
+            color: var(--danger);
+        }
+
+        .workflow-comment {
+            min-width: 260px;
+            min-height: 42px;
+            padding: 9px 12px;
+            border: 1px solid #b9c9da;
+            border-radius: 7px;
+        }
+
+        @media (max-width: 980px) {
+            .general-layout,
+            .reference-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .general-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .field.span-4 { grid-column: span 2; }
+
+            .photo-form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 620px) {
+            .general-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .field.span-2,
+            .field.span-4 {
+                grid-column: auto;
+            }
+
+            .sticky-actions {
+                justify-content: center;
+            }
+        }
+
+        .ut-accordion {
+            margin-top: 10px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: #fff;
+        }
+
+        .ut-accordion summary {
+            padding: 12px 14px;
+            cursor: pointer;
+            color: var(--navy);
+            font-weight: 800;
+            background: var(--soft);
+        }
+
+        .ut-form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            padding: 14px;
+        }
+
+        @media (max-width: 620px) {
+            .ut-form-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+<header class="topbar">
+    <div class="brand">
+        <img
+            src="{% static 'inspecciones/faja/cvb0003/logo_overall.jpeg' %}"
+            alt="OverallSolutions"
+        >
+        <div>
+            <strong>OverallSolutions</strong>
+            <small>Inspecciones › CVB0003 › Faja / Top Cover</small>
+        </div>
+    </div>
+
+    <a class="btn btn-secondary" href="{% url 'dashboard' %}">
+        Volver
+    </a>
+</header>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% include "inspecciones/_workflow_controls_cvb0003.html" with workflow_section="header" %}
+
+    {{ empalmes_formset.management_form }}
+    {{ carga_formset.management_form }}
+    {{ retorno_formset.management_form }}
+
+    {{ fotos_empalmes_formset.management_form }}
+    {{ fotos_carga_formset.management_form }}
+    {{ fotos_retorno_formset.management_form }}
+    {{ calibraciones_ut_formset.management_form }}
+
+    <main class="page">
+        {% if formulario.non_field_errors %}
+            <div class="errors">{{ formulario.non_field_errors }}</div>
+        {% endif %}
+
+        <section class="card">
+            <div class="card-title">
+                REPORTE DE INSPECCIÓN
+                <span
+                    data-codigo-reporte-cvb0003
+                    data-tipo-reporte="FAJA"
+                >{{ inspeccion.codigo_reporte }}</span>
+            </div>
+
+            <div class="general-layout">
+                <div class="general-grid">
+                    <div class="field span-2">
+                        <label>Condición general</label>
+                        {{ formulario.condicion_general }}
+                    </div>
+
+                    <div class="field">
+                        <label>Fecha de inspección</label>
+                        {{ formulario.fecha_inspeccion }}
+                    </div>
+
+                    <div class="field">
+                        <label>Fecha de reporte</label>
+                        {{ formulario.fecha_reporte }}
+                    </div>
+
+                    <div class="field">
+                        <label>Planta</label>
+                        <input value="{{ inspeccion.planta|default:'0220' }}" readonly>
+                    </div>
+
+                    <div class="field">
+                        <label>Proceso</label>
+                        <input value="{{ inspeccion.proceso|default:'Transporte de Mineral' }}" readonly>
+                    </div>
+
+                    <div class="field">
+                        <label>Equipo</label>
+                        <input value="Faja Overland 03" readonly>
+                    </div>
+
+                    <div class="field">
+                        <label>TAG</label>
+                        <input value="0220-CVB-0003" readonly>
+                    </div>
+
+                    <div class="field">
+                        <label>Etapa</label>
+                        <input value="{{ inspeccion.etapa|default:'CHANCADO' }}" readonly>
+                    </div>
+
+                    <div class="field">
+                        <label>Condición del equipo</label>
+                        {{ formulario.condicion_equipo }}
+                    </div>
+
+                    <div class="field">
+                        <label>Inspector de campo</label>
+                        <input
+                            value="{{ inspeccion.inspector.get_full_name|default:inspeccion.inspector.username }}"
+                            readonly
+                        >
+                    </div>
+
+                    <div class="field">
+                        <label>Supervisor</label>
+                        <input
+                            value="{{ inspeccion.supervisor.get_full_name|default:inspeccion.supervisor.username }}"
+                            readonly
+                        >
+                    </div>
+
+                    <div class="field span-4">
+                        <label>Circunstancias de pruebas</label>
+                        {{ formulario.circunstancias }}
+                    </div>
+
+                    <div class="field span-4">
+                        <label>Antecedentes</label>
+                        {{ formulario.antecedentes }}
+                    </div>
+
+                    <div class="field span-4">
+                        <label>Observaciones</label>
+                        {{ formulario.observaciones }}
+                    </div>
+
+                    <div class="field span-4">
+                        <label>Conclusiones y recomendaciones</label>
+                        {{ formulario.recomendaciones }}
+                    </div>
+                </div>
+
+                <div class="main-photo">
+                    <img
+                        src="{% static 'inspecciones/faja/cvb0003/planta_cvb0003.png' %}"
+                        alt="Faja Overland CVB0003"
+                    >
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="card-title">
+                PARÁMETROS DE CALIBRACIÓN PARA INSPECCIÓN POR ULTRASONIDO
+            </div>
+
+            {% if calibraciones_ut_formset.non_form_errors %}
+                <div class="errors">{{ calibraciones_ut_formset.non_form_errors }}</div>
+            {% endif %}
+
+            {% for calibracion in calibraciones_ut_formset %}
+                <details class="ut-accordion" {% if forloop.first %}open{% endif %}>
+                    <summary>Conjunto UT {{ calibracion.instance.numero|stringformat:"02d" }}</summary>
+                    {{ calibracion.id }}
+                    <div class="ut-form-grid">
+                        {% for field in calibracion.visible_fields %}
+                            <div class="field">
+                                <label>{{ field.label }}</label>
+                                {{ field }}
+                                {{ field.errors }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </details>
+            {% endfor %}
+        </section>
+
+        <section class="card">
+            <div class="card-title">
+                DISTRIBUCIÓN DE PUNTOS DE MEDICIÓN DE ESPESORES
+            </div>
+            <div class="image-box">
+                <img
+                    src="{% static 'inspecciones/faja/cvb0003/puntos_medicion_cvb0003.png' %}"
+                    alt="Distribución de puntos CVB0003"
+                >
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="card-title">
+                DIAGRAMA DE UBICACIÓN DE EMPALMES Y BASTIDORES
+            </div>
+            <div class="image-box">
+                <img
+                    src="{% static 'inspecciones/faja/cvb0003/diagrama_empalmes_cvb0003.png' %}"
+                    alt="Diagrama de empalmes CVB0003"
+                >
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="card-title">
+                REFERENCIAS TÉCNICAS CVB0003
+            </div>
+            <div class="reference-grid">
+                <img
+                    src="{% static 'inspecciones/faja/cvb0003/vista_transversal_cvb0003.jpg' %}"
+                    alt="Vista transversal CVB0003"
+                >
+                <img
+                    src="{% static 'inspecciones/faja/cvb0003/puntos_medicion_cvb0003.png' %}"
+                    alt="Puntos de medición CVB0003"
+                >
+            </div>
+        </section>
+
+        <!-- TABLA 1: EMPALMES -->
+        {% if historial_empalmes or historial_carga or historial_retorno %}
+        <section class="card">
+            <div class="card-title">HISTORIAL TÉCNICO ANTERIOR</div>
+            <details>
+                <summary>Ver mediciones, condiciones, observaciones y fotografías anteriores</summary>
+                {% for historial in historial_empalmes %}{% include "inspecciones/_historial_cvb0003.html" with historial=historial %}{% endfor %}
+                {% for historial in historial_carga %}{% include "inspecciones/_historial_cvb0003.html" with historial=historial %}{% endfor %}
+                {% for historial in historial_retorno %}{% include "inspecciones/_historial_cvb0003.html" with historial=historial %}{% endfor %}
+            </details>
+        </section>
+        {% endif %}
+
+        <section class="card">
+            <div class="card-title">
+                1. DATOS DE MEDICIÓN DE ESPESORES POR UT EN EMPALMES
+            </div>
+
+            <div class="section-help">
+                Cada empalme incluye P-1 a P-5 para Top Cover y una fila B.COVER.
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Zona</th>
+                        <th>Empalme</th>
+                        <th>Bastidor / lado</th>
+                        <th>Posición</th>
+                        <th>Nominal</th>
+                        <th>A</th>
+                        <th>B</th>
+                        <th>C</th>
+                        <th>D</th>
+                        <th>E</th>
+                        <th>F</th>
+                        <th>G</th>
+                        <th>Mín.</th>
+                        <th>Prom.</th>
+                        <th>Desgaste</th>
+                        <th>% desgaste</th>
+                        <th>% residual</th>
+                        <th>Observación</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for fila in empalmes_formset %}
+                        <tr>
+                            {{ fila.id }}
+
+                            <td class="group-cell">
+                                {{ fila.instance.zona|default:"-" }}
+                            </td>
+                            <td class="group-cell">
+                                {{ fila.instance.empalme|default:"-" }}
+                            </td>
+                            <td class="readonly-cell">
+                                {{ fila.instance.bastidor_lado|default:"-" }}
+                            </td>
+                            <td>{{ fila.posicion }}</td>
+                            <td>{{ fila.espesor_nominal }}</td>
+
+                            <td>{{ fila.a }}</td>
+                            <td>{{ fila.b }}</td>
+                            <td>{{ fila.c }}</td>
+                            <td>{{ fila.d }}</td>
+                            <td>{{ fila.e }}</td>
+                            <td>{{ fila.f }}</td>
+                            <td>{{ fila.g }}</td>
+
+                            <td class="calculated">
+                                {{ fila.instance.minimo|default:"-" }}
+                            </td>
+                            <td class="calculated">
+                                {{ fila.instance.promedio|default:"-" }}
+                            </td>
+                            <td class="calculated">
+                                {{ fila.instance.desgaste|default:"-" }}
+                            </td>
+                            <td class="calculated percentage-value">
+                                {{ fila.instance.porcentaje_desgaste|default_if_none:"-"|floatformat:"1u" }}
+                            </td>
+                            <td class="calculated percentage-value">
+                                {{ fila.instance.porcentaje_residual|default_if_none:"-"|floatformat:"1u" }}
+                            </td>
+                            <td>{{ fila.observacion }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="18">No existen filas de empalmes.</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- FOTOS EMPALMES -->
+        <section class="card">
+            <div class="card-title">
+                INSPECCIÓN VISUAL Y FOTOGRAFÍAS DE EMPALMES
+            </div>
+
+            <div class="section-help">
+                Puedes registrar varias fotografías. Para agregar más espacios, aumenta <strong>extra</strong> en el formset.
+            </div>
+
+            <div class="photo-form-area">
+                {% for foto_form in fotos_empalmes_formset %}
+                    <div class="photo-form-row">
+                        {{ foto_form.id }}
+
+                        <div class="field">
+                            <label>Imagen</label>
+                            {{ foto_form.imagen }}
+                            {{ foto_form.imagen.errors }}
+                        </div>
+
+                        <div class="field">
+                            <label>Código del daño</label>
+                            {{ foto_form.codigo_dano }}
+                            {{ foto_form.codigo_dano.errors }}
+                        </div>
+
+                        <div class="field">
+                            <label>Descripción</label>
+                            {{ foto_form.descripcion }}
+                            {{ foto_form.descripcion.errors }}
+                        </div>
+
+                        {% if foto_form.instance.pk and foto_form.instance.imagen %}
+                            <div class="existing-photo">
+                                <img
+                                    src="{{ foto_form.instance.imagen.url }}"
+                                    alt="Fotografía de empalmes"
+                                >
+
+                                <label class="delete-photo">
+                                    {{ foto_form.DELETE }}
+                                    Eliminar fotografía
+                                </label>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% empty %}
+                    <p>No existen campos fotográficos disponibles.</p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- TABLA 2: CARGA -->
+        <section class="card">
+            <div class="card-title">
+                2. DISTRIBUCIÓN DE PUNTOS DE MEDICIÓN – TRAMOS DE CARGA
+            </div>
+
+            <div class="section-help">
+                Tabla general de las 120 mediciones en sentido de carga.
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Tramo</th>
+                        <th>Medición</th>
+                        <th>Posición / bastidor</th>
+                        <th>Nominal</th>
+                        <th>A</th>
+                        <th>B</th>
+                        <th>C</th>
+                        <th>D</th>
+                        <th>E</th>
+                        <th>F</th>
+                        <th>G</th>
+                        <th>Mín.</th>
+                        <th>Prom.</th>
+                        <th>Desgaste</th>
+                        <th>% desgaste</th>
+                        <th>% residual</th>
+                        <th>Observación</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for fila in carga_formset %}
+                        <tr>
+                            {{ fila.id }}
+
+                            <td class="group-cell">
+                                {{ fila.instance.tramo|default:"-" }}
+                            </td>
+                            <td>{{ fila.instance.medicion }}</td>
+                            <td class="readonly-cell">{{ fila.instance.bastidor }}</td>
+                            <td>{{ fila.espesor_nominal }}</td>
+
+                            <td>{{ fila.a }}</td>
+                            <td>{{ fila.b }}</td>
+                            <td>{{ fila.c }}</td>
+                            <td>{{ fila.d }}</td>
+                            <td>{{ fila.e }}</td>
+                            <td>{{ fila.f }}</td>
+                            <td>{{ fila.g }}</td>
+
+                            <td class="calculated">
+                                {{ fila.instance.minimo|default:"-" }}
+                            </td>
+                            <td class="calculated">
+                                {{ fila.instance.promedio|default:"-" }}
+                            </td>
+                            <td class="calculated">
+                                {{ fila.instance.desgaste|default:"-" }}
+                            </td>
+                            <td class="calculated percentage-value">
+                                {{ fila.instance.porcentaje_desgaste|default_if_none:"-"|floatformat:"1u" }}
+                            </td>
+                            <td class="calculated percentage-value">
+                                {{ fila.instance.porcentaje_residual|default_if_none:"-"|floatformat:"1u" }}
+                            </td>
+                            <td>{{ fila.observacion }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="17">No existen filas de carga.</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- FOTOS CARGA -->
+        <section class="card">
+            <div class="card-title">
+                INSPECCIÓN VISUAL Y FOTOGRAFÍAS DE TRAMOS DE CARGA
+            </div>
+
+            <div class="photo-form-area">
+                {% for foto_form in fotos_carga_formset %}
+                    <div class="photo-form-row">
+                        {{ foto_form.id }}
+
+                        <div class="field">
+                            <label>Imagen</label>
+                            {{ foto_form.imagen }}
+                            {{ foto_form.imagen.errors }}
+                        </div>
+
+                        <div class="field">
+                            <label>Código del daño</label>
+                            {{ foto_form.codigo_dano }}
+                            {{ foto_form.codigo_dano.errors }}
+                        </div>
+
+                        <div class="field">
+                            <label>Descripción</label>
+                            {{ foto_form.descripcion }}
+                            {{ foto_form.descripcion.errors }}
+                        </div>
+
+                        {% if foto_form.instance.pk and foto_form.instance.imagen %}
+                            <div class="existing-photo">
+                                <img
+                                    src="{{ foto_form.instance.imagen.url }}"
+                                    alt="Fotografía de tramos de carga"
+                                >
+
+                                <label class="delete-photo">
+                                    {{ foto_form.DELETE }}
+                                    Eliminar fotografía
+                                </label>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% empty %}
+                    <p>No existen campos fotográficos disponibles.</p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- TABLA 3: RETORNO -->
+        <section class="card">
+            <div class="card-title">
+                3. DISTRIBUCIÓN DE PUNTOS DE MEDICIÓN – TRAMOS DE RETORNO
+            </div>
+
+            <div class="section-help">
+                Tabla general de las 102 mediciones en sentido de retorno.
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Tramo</th>
+                        <th>Medición</th>
+                        <th>Posición / bastidor</th>
+                        <th>Nominal</th>
+                        <th>A</th>
+                        <th>B</th>
+                        <th>C</th>
+                        <th>D</th>
+                        <th>E</th>
+                        <th>F</th>
+                        <th>G</th>
+                        <th>Mín.</th>
+                        <th>Prom.</th>
+                        <th>Desgaste</th>
+                        <th>% desgaste</th>
+                        <th>% residual</th>
+                        <th>Observación</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for fila in retorno_formset %}
+                        <tr>
+                            {{ fila.id }}
+
+                            <td class="group-cell">
+                                {{ fila.instance.tramo|default:"-" }}
+                            </td>
+                            <td>{{ fila.instance.medicion }}</td>
+                            <td class="readonly-cell">{{ fila.instance.bastidor }}</td>
+                            <td>{{ fila.espesor_nominal }}</td>
+
+                            <td>{{ fila.a }}</td>
+                            <td>{{ fila.b }}</td>
+                            <td>{{ fila.c }}</td>
+                            <td>{{ fila.d }}</td>
+                            <td>{{ fila.e }}</td>
+                            <td>{{ fila.f }}</td>
+                            <td>{{ fila.g }}</td>
+
+                            <td class="calculated">
+                                {{ fila.instance.minimo|default:"-" }}
+                            </td>
+                            <td class="calculated">
+                                {{ fila.instance.promedio|default:"-" }}
+                            </td>
+                            <td class="calculated">
+                                {{ fila.instance.desgaste|default:"-" }}
+                            </td>
+                            <td class="calculated percentage-value">
+                                {{ fila.instance.porcentaje_desgaste|default_if_none:"-"|floatformat:"1u" }}
+                            </td>
+                            <td class="calculated percentage-value">
+                                {{ fila.instance.porcentaje_residual|default_if_none:"-"|floatformat:"1u" }}
+                            </td>
+                            <td>{{ fila.observacion }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="17">No existen filas de retorno.</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- FOTOS RETORNO -->
+        <section class="card">
+            <div class="card-title">
+                INSPECCIÓN VISUAL Y FOTOGRAFÍAS DE TRAMOS DE RETORNO
+            </div>
+
+            <div class="photo-form-area">
+                {% for foto_form in fotos_retorno_formset %}
+                    <div class="photo-form-row">
+                        {{ foto_form.id }}
+
+                        <div class="field">
+                            <label>Imagen</label>
+                            {{ foto_form.imagen }}
+                            {{ foto_form.imagen.errors }}
+                        </div>
+
+                        <div class="field">
+                            <label>Código del daño</label>
+                            {{ foto_form.codigo_dano }}
+                            {{ foto_form.codigo_dano.errors }}
+                        </div>
+
+                        <div class="field">
+                            <label>Descripción</label>
+                            {{ foto_form.descripcion }}
+                            {{ foto_form.descripcion.errors }}
+                        </div>
+
+                        {% if foto_form.instance.pk and foto_form.instance.imagen %}
+                            <div class="existing-photo">
+                                <img
+                                    src="{{ foto_form.instance.imagen.url }}"
+                                    alt="Fotografía de tramos de retorno"
+                                >
+
+                                <label class="delete-photo">
+                                    {{ foto_form.DELETE }}
+                                    Eliminar fotografía
+                                </label>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% empty %}
+                    <p>No existen campos fotográficos disponibles.</p>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+
+    {% include "inspecciones/_workflow_controls_cvb0003.html" with workflow_section="actions" %}
+</form>
+<script src="{% static 'inspecciones/reportes/cvb0003/historical_validation.js' %}"></script>
+<script src="{% static 'inspecciones/reportes/cvb0003/codigo_reporte.js' %}"></script>
+</body>
+</html>

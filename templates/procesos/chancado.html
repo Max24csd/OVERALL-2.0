@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Chancado</title>
+  <style>
+    :root{--navy:#08213f;--blue:#0b66b2;--bg:#f3f7fb;--card:#fff;--line:#d6e1ec;--muted:#64748b;--soft:#f8fafc}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--navy)}
+    .page{max-width:1250px;margin:auto;padding:30px}
+    .top{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:22px}
+    .top h1{margin:0 0 6px;font-size:29px}
+    .top p{margin:0;color:var(--muted)}
+    .back{background:#fff;border:1px solid var(--line);padding:10px 14px;border-radius:8px;color:var(--navy);text-decoration:none;font-weight:900}
+    .hero{background:#fff;border:1px solid var(--line);border-radius:15px;padding:18px;margin-bottom:24px}
+    .hero-meta{display:flex;flex-wrap:wrap;gap:18px;color:var(--muted);font-size:12px}
+    .section-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin:25px 0 12px}
+    .section-head h2{margin:0;font-size:21px}
+    .section-head span{font-size:12px;color:var(--muted)}
+    .equipment{background:#fff;border:1px solid var(--line);border-radius:15px;padding:15px;margin-bottom:15px}
+    .equipment h3{margin:0 0 12px;color:#075cad}
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .report{border:1px solid var(--line);border-radius:11px;padding:13px;background:var(--soft)}
+    .report strong{display:block;font-size:14px;margin-bottom:7px}
+    .meta{font-size:10px;line-height:1.6;color:var(--muted)}
+    .badge{display:inline-block;margin-top:8px;padding:4px 7px;border-radius:999px;background:#fff2c2;font-size:9px;font-weight:900}
+    .actions{margin-top:11px}
+    .open{display:inline-flex;background:#075cad;color:#fff;padding:8px 11px;border-radius:7px;text-decoration:none;font-size:11px;font-weight:900}
+    .empty{padding:18px;background:#fff;border:1px dashed var(--line);border-radius:12px;color:var(--muted)}
+    @media(max-width:850px){.grid{grid-template-columns:1fr}.page{padding:20px 14px}}
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <div class="top">
+    <div>
+      <h1>Chancado</h1>
+      <p>Inspección actual e histórico del proceso.</p>
+    </div>
+
+    <a class="back" href="{% url 'dashboard' %}">
+      ← Procesos
+    </a>
+  </div>
+
+
+  {% if parada_actual %}
+    <section class="hero">
+      <strong>{{ parada_actual.nombre }}</strong>
+
+      <div class="hero-meta">
+        <span>Inicio: {{ parada_actual.fecha_inicio|date:"d/m/Y" }}</span>
+
+        {% if parada_actual.fecha_fin %}
+          <span>Fin: {{ parada_actual.fecha_fin|date:"d/m/Y" }}</span>
+        {% endif %}
+
+        <span>{{ total_actuales }} reportes visibles</span>
+      </div>
+    </section>
+  {% endif %}
+
+
+  <div class="section-head">
+    <h2>Inspección actual</h2>
+    <span>{{ total_actuales }} reportes</span>
+  </div>
+
+  {% for equipo in actuales_por_equipo %}
+    <section class="equipment">
+      <h3>{{ equipo.codigo }}</h3>
+
+      <div class="grid">
+        {% for inspeccion in equipo.inspecciones %}
+          <article class="report">
+            <strong>{{ inspeccion.get_tipo_display }}</strong>
+
+            <div class="meta">
+              {{ inspeccion.codigo_reporte }}<br>
+              Fecha:
+              {% if inspeccion.fecha_inspeccion %}
+                {{ inspeccion.fecha_inspeccion|date:"d/m/Y" }}
+              {% else %}
+                {{ inspeccion.fecha_programada|date:"d/m/Y" }}
+              {% endif %}
+            </div>
+
+            <span class="badge">
+              {{ inspeccion.get_estado_display }}
+            </span>
+
+            <div class="actions">
+              {% if inspeccion.tipo == "FAJA" %}
+                <a class="open" href="{% url 'formulario_faja' inspeccion.id %}">Abrir</a>
+              {% elif inspeccion.tipo == "POLEAS" %}
+                <a class="open" href="{% url 'formulario_poleas' inspeccion.id %}">Abrir</a>
+              {% elif inspeccion.tipo == "LIFE_SHAFT" %}
+                <a class="open" href="{% url 'formulario_life_shaft' inspeccion.id %}">Abrir</a>
+              {% endif %}
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+  {% empty %}
+    <div class="empty">
+      No hay inspecciones actuales disponibles para este usuario.
+    </div>
+  {% endfor %}
+
+
+  <div class="section-head">
+    <h2>Histórico</h2>
+    <span>{{ total_historicos }} reportes</span>
+  </div>
+
+  {% for equipo in historicos_por_equipo %}
+    <section class="equipment">
+      <h3>{{ equipo.codigo }}</h3>
+
+      <div class="grid">
+        {% for inspeccion in equipo.inspecciones %}
+          <article class="report">
+            <strong>{{ inspeccion.get_tipo_display }}</strong>
+
+            <div class="meta">
+              {{ inspeccion.codigo_reporte }}<br>
+              Fecha:
+              {% if inspeccion.fecha_inspeccion %}
+                {{ inspeccion.fecha_inspeccion|date:"d/m/Y" }}
+              {% else %}
+                {{ inspeccion.fecha_programada|date:"d/m/Y" }}
+              {% endif %}
+            </div>
+
+            <span class="badge">
+              Histórico
+            </span>
+
+            <div class="actions">
+              {% if inspeccion.tipo == "FAJA" %}
+                <a class="open" href="{% url 'reporte_faja' inspeccion.id %}">Ver reporte</a>
+              {% elif inspeccion.tipo == "POLEAS" %}
+                <a class="open" href="{% url 'reporte_poleas' inspeccion.id %}">Ver reporte</a>
+              {% elif inspeccion.tipo == "LIFE_SHAFT" %}
+                <a class="open" href="{% url 'reporte_life_shaft' inspeccion.id %}">Ver reporte</a>
+              {% endif %}
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+  {% empty %}
+    <div class="empty">
+      No hay reportes históricos disponibles para este usuario.
+    </div>
+  {% endfor %}
+
+</div>
+</body>
+</html>

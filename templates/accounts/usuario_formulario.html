@@ -1,0 +1,400 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <title>{{ titulo }}</title>
+
+    <style>
+        body {
+            margin: 0;
+            background: #eef3f8;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #10233d;
+        }
+
+        .user-form-page {
+            width: min(760px, calc(100% - 32px));
+            margin: 30px auto;
+        }
+
+        .user-form-card {
+            padding: 24px;
+            background: white;
+            border: 1px solid #d5e0eb;
+            border-radius: 10px;
+            box-shadow: 0 8px 25px rgba(15, 35, 60, 0.08);
+        }
+
+        .user-form-card h1 {
+            margin: 0 0 6px;
+        }
+
+        .form-description {
+            margin: 0 0 20px;
+            color: #64748b;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-field {
+            min-width: 0;
+        }
+
+        .form-field-full {
+            grid-column: 1 / -1;
+        }
+
+        .form-field label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 800;
+            font-size: 13px;
+        }
+
+        .user-form-control {
+            width: 100%;
+            min-height: 42px;
+            padding: 9px 11px;
+            border: 1px solid #bdcddd;
+            border-radius: 6px;
+            background: white;
+            box-sizing: border-box;
+        }
+
+        input[type="checkbox"].user-form-control {
+            width: auto;
+            min-height: auto;
+        }
+
+        .errorlist {
+            margin: 5px 0 0;
+            padding-left: 18px;
+            color: #b42318;
+            font-size: 13px;
+        }
+
+        .access-box {
+            grid-column: 1 / -1;
+            padding: 16px;
+            border: 1px solid #d7e2ec;
+            background: #f7fafc;
+            border-radius: 8px;
+        }
+
+        .access-box-title {
+            margin: 0 0 12px;
+            font-size: 14px;
+            font-weight: 800;
+            color: #123d6c;
+        }
+
+        .access-help {
+            margin: 8px 0 0;
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .contract-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 22px;
+        }
+
+        .cancel-button,
+        .save-button {
+            min-height: 42px;
+            padding: 9px 17px;
+            border-radius: 6px;
+            font-weight: 800;
+            text-decoration: none;
+            box-sizing: border-box;
+        }
+
+        .cancel-button {
+            border: 1px solid #aebdcc;
+            background: white;
+            color: #123d6c;
+        }
+
+        .save-button {
+            border: 1px solid #0868bf;
+            background: #0868bf;
+            color: white;
+            cursor: pointer;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 650px) {
+            .form-grid,
+            .contract-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-field-full {
+                grid-column: auto;
+            }
+
+            .access-box {
+                grid-column: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<main class="user-form-page">
+
+    <form
+        method="post"
+        class="user-form-card"
+    >
+        {% csrf_token %}
+
+        <h1>{{ titulo }}</h1>
+
+        <p class="form-description">
+            Define los datos, rol y tipo de acceso del usuario.
+        </p>
+
+        {{ formulario.non_field_errors }}
+
+        <div class="form-grid">
+
+            <div class="form-field">
+                <label>
+                    {{ formulario.first_name.label }}
+                </label>
+
+                {{ formulario.first_name }}
+                {{ formulario.first_name.errors }}
+            </div>
+
+            <div class="form-field">
+                <label>
+                    {{ formulario.last_name.label }}
+                </label>
+
+                {{ formulario.last_name }}
+                {{ formulario.last_name.errors }}
+            </div>
+
+            <div class="form-field">
+                <label>
+                    {{ formulario.username.label }}
+                </label>
+
+                {{ formulario.username }}
+                {{ formulario.username.errors }}
+            </div>
+
+            <div class="form-field">
+                <label>
+                    {{ formulario.email.label }}
+                </label>
+
+                {{ formulario.email }}
+                {{ formulario.email.errors }}
+            </div>
+
+            <div class="form-field">
+                <label>
+                    {{ formulario.rol.label }}
+                </label>
+
+                {{ formulario.rol }}
+                {{ formulario.rol.errors }}
+            </div>
+
+            <div class="form-field">
+                <label>
+                    {{ formulario.tipo_vinculo.label }}
+                </label>
+
+                {{ formulario.tipo_vinculo }}
+                {{ formulario.tipo_vinculo.errors }}
+            </div>
+
+
+            <div
+                id="contract-fields"
+                class="access-box"
+            >
+                <p class="access-box-title">
+                    Vigencia del contrato
+                </p>
+
+                <div class="contract-grid">
+
+                    <div class="form-field">
+                        <label>
+                            {{ formulario.fecha_inicio_contrato.label }}
+                        </label>
+
+                        {{ formulario.fecha_inicio_contrato }}
+                        {{ formulario.fecha_inicio_contrato.errors }}
+                    </div>
+
+                    <div class="form-field">
+                        <label>
+                            {{ formulario.fecha_fin_contrato.label }}
+                        </label>
+
+                        {{ formulario.fecha_fin_contrato }}
+                        {{ formulario.fecha_fin_contrato.errors }}
+                    </div>
+
+                </div>
+
+                <p class="access-help">
+                    Estas fechas solo se utilizan para usuarios con vínculo
+                    "Por contrato".
+                </p>
+            </div>
+
+
+            <div
+                id="intermittent-info"
+                class="access-box hidden"
+            >
+                <p class="access-box-title">
+                    Acceso intermitente
+                </p>
+
+                <p class="access-help">
+                    Este usuario solo podrá ingresar cuando tenga una parada
+                    asignada y se encuentre dentro del horario autorizado
+                    para esa parada.
+                </p>
+            </div>
+
+
+            <div class="form-field">
+                <label>
+                    {{ formulario.password1.label }}
+                </label>
+
+                {{ formulario.password1 }}
+                {{ formulario.password1.errors }}
+            </div>
+
+            <div class="form-field">
+                <label>
+                    {{ formulario.password2.label }}
+                </label>
+
+                {{ formulario.password2 }}
+                {{ formulario.password2.errors }}
+            </div>
+
+
+            <div class="form-field form-field-full">
+                <label>
+                    {{ formulario.is_active.label }}
+                </label>
+
+                {{ formulario.is_active }}
+                {{ formulario.is_active.errors }}
+            </div>
+
+        </div>
+
+        {% if es_edicion %}
+            <p
+                class="form-description"
+                style="margin-top: 18px;"
+            >
+                Deja las contraseñas vacías para mantener la actual.
+            </p>
+        {% endif %}
+
+        <div class="form-actions">
+
+            <a
+                class="cancel-button"
+                href="{% url 'usuarios_lista' %}"
+            >
+                Cancelar
+            </a>
+
+            <button
+                class="save-button"
+                type="submit"
+            >
+                Guardar usuario
+            </button>
+
+        </div>
+
+    </form>
+
+</main>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const tipoVinculo = document.getElementById(
+            "id_tipo_vinculo"
+        );
+
+        const contractFields = document.getElementById(
+            "contract-fields"
+        );
+
+        const intermittentInfo = document.getElementById(
+            "intermittent-info"
+        );
+
+        function actualizarCamposVinculo() {
+
+            if (!tipoVinculo) {
+                return;
+            }
+
+            const valor = tipoVinculo.value;
+
+            contractFields.classList.add("hidden");
+            intermittentInfo.classList.add("hidden");
+
+            if (valor === "CONTRATO") {
+                contractFields.classList.remove("hidden");
+            }
+
+            if (valor === "INTERMITENTE") {
+                intermittentInfo.classList.remove("hidden");
+            }
+        }
+
+        tipoVinculo.addEventListener(
+            "change",
+            actualizarCamposVinculo
+        );
+
+        actualizarCamposVinculo();
+    });
+</script>
+
+</body>
+</html>

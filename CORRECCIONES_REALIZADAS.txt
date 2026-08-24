@@ -1,0 +1,24 @@
+CORRECCIONES REALIZADAS
+
+1. Se reconstruyó inspecciones/views.py para corregir el error de indentación.
+2. formulario_faja ahora mantiene todo el GET/POST dentro de la función.
+3. Se definió puede_editar antes de usarlo.
+4. El formset guarda cada medición y activa Medicion.save(), que calcula mínimo,
+   promedio, desgaste, porcentaje de desgaste y porcentaje residual.
+5. La vista previa consulta directamente las mediciones guardadas, separando
+   EMPALME y TRAMOS y ordenándolas por orden e id.
+6. Se normalizó templates/Inspecciones a templates/inspecciones para que también
+   funcione al desplegar en Linux/Railway.
+7. El reporte usa default_if_none para mostrar correctamente valores 0.
+8. Se añadió requirements.txt con Django y Pillow.
+
+PARA EJECUTAR EN WINDOWS
+
+1. Abrir una terminal en la carpeta del proyecto.
+2. Activar el entorno virtual:
+   .venv\Scripts\activate
+3. Instalar dependencias si fuera necesario:
+   pip install -r requirements.txt
+4. Ejecutar:
+   python manage.py check
+   python manage.py runserver

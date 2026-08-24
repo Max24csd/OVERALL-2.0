@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Paradas de Filtros</title>
+    <style>
+        body{font-family:Arial,sans-serif;background:#f3f7fb;color:#10223e;margin:0}
+        .page{max-width:1100px;margin:auto;padding:30px}
+        .page-actions{display:flex;justify-content:flex-end;margin-bottom:10px}
+        .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+        .card{background:#fff;border:1px solid #d5e0eb;border-radius:14px;padding:18px}
+        .card h3{margin:0 0 8px}
+        .meta{color:#64748b;font-size:13px;line-height:1.6}
+        .btn{display:inline-block;margin-top:14px;background:#075cad;color:#fff;
+            text-decoration:none;padding:10px 14px;border-radius:8px;font-weight:800}
+        .btn-soft{margin-top:0;background:#fff;color:#08213f;border:1px solid #d5e0eb}
+    </style>
+</head>
+<body>
+<div class="page">
+    <div class="page-actions">
+        <a class="btn btn-soft" href="{% url 'dashboard' %}">
+            ← Dashboard
+        </a>
+    </div>
+    <h1>Paradas disponibles · Filtros</h1>
+    {% if rol == "Administrador" %}
+        <p>
+            <a class="btn" href="{% url 'filtros_mm:nueva_parada' %}">
+                + Nueva parada de Filtros
+            </a>
+        </p>
+    {% endif %}
+    <p>Usuario: <strong>{{ request.user.get_full_name|default:request.user.username }}</strong> · {{ rol }}</p>
+
+    <div class="grid">
+        {% for parada in paradas %}
+            <article class="card">
+                <h3>{{ parada.nombre }}</h3>
+                <div class="meta">
+                    Inicio: {{ parada.fecha_inicio|date:"d/m/Y" }}<br>
+                    Fin: {{ parada.fecha_fin|date:"d/m/Y" }}<br>
+                    Estado: {{ parada.get_estado_display|default:parada.estado }}
+                </div>
+                <a class="btn"
+                    href="{% url 'filtros_mm:inicio' parada.id %}">
+                    Abrir Filtros
+                </a>
+            </article>
+        {% empty %}
+            <p>No tienes paradas asignadas vigentes.</p>
+        {% endfor %}
+    </div>
+</div>
+</body>
+</html>

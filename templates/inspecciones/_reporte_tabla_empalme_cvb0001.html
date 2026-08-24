@@ -1,0 +1,7 @@
+<section class="report-section {{ extra_class }}">
+  <div class="section-bar">EMPALME {{ nombre_empalme }} – Bastidor {{ bastidor }} – {{ lado }}</div>
+  <div class="table-scroll"><table class="report-measure"><thead><tr><th>Empalme</th><th>Bastidor</th><th>Lado</th><th>Posición</th><th>Nominal</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th><th>G</th><th>Mín.</th><th>Prom.</th><th>Desgaste</th><th>% desgaste</th><th>% residual</th></tr></thead><tbody>
+    {% for fila in filas %}<tr><td class="zone">{{ nombre_empalme }}</td><td>{{ fila.bastidor }}</td><td>{{ fila.lado }}</td><td>{{ fila.posicion }}</td><td>{{ fila.espesor_nominal|default:"-" }}</td><td>{{ fila.a|default:"-" }}</td><td>{{ fila.b|default:"-" }}</td><td>{{ fila.c|default:"-" }}</td><td>{{ fila.d|default:"-" }}</td><td>{{ fila.e|default:"-" }}</td><td>{{ fila.f|default:"-" }}</td><td>{{ fila.g|default:"-" }}</td><td class="result">{{ fila.minimo|default:"-" }}</td><td class="result">{{ fila.promedio|default:"-" }}</td><td class="result">{{ fila.desgaste|default:"-" }}</td><td class="result">{{ fila.porcentaje_desgaste|default:"-" }}</td><td class="result">{{ fila.porcentaje_residual|default:"-" }}</td></tr>{% empty %}<tr><td colspan="17">No existen mediciones para el empalme {{ nombre_empalme }}.</td></tr>{% endfor %}
+  </tbody></table></div>
+  <p class="automatic-summary automatic-text">{{ resumen.texto }}</p>
+</section>

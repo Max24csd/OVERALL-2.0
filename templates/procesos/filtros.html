@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Filtros</title>
+  <style>
+    :root{--navy:#08213f;--blue:#0b66b2;--bg:#f3f7fb;--card:#fff;--line:#d6e1ec;--muted:#64748b;--soft:#f8fafc}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--navy)}
+    .page{max-width:1250px;margin:auto;padding:30px}
+    .top{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:22px}
+    .top h1{margin:0 0 6px;font-size:29px}
+    .top p{margin:0;color:var(--muted)}
+    .back{background:#fff;border:1px solid var(--line);padding:10px 14px;border-radius:8px;color:var(--navy);text-decoration:none;font-weight:900}
+    .hero{background:#fff;border:1px solid var(--line);border-radius:15px;padding:18px;margin-bottom:24px}
+    .hero-row{display:flex;justify-content:space-between;align-items:center;gap:15px}
+    .hero-meta{display:flex;flex-wrap:wrap;gap:18px;color:var(--muted);font-size:12px;margin-top:7px}
+    .section-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin:25px 0 12px}
+    .section-head h2{margin:0;font-size:21px}
+    .section-head span{font-size:12px;color:var(--muted)}
+    .equipment{background:#fff;border:1px solid var(--line);border-radius:15px;padding:15px;margin-bottom:15px}
+    .equipment h3{margin:0 0 12px;color:#075cad}
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .report{border:1px solid var(--line);border-radius:11px;padding:13px;background:var(--soft)}
+    .report strong{display:block;font-size:14px;margin-bottom:7px}
+    .meta{font-size:10px;line-height:1.6;color:var(--muted)}
+    .badge{display:inline-block;margin-top:8px;padding:4px 7px;border-radius:999px;background:#e8f3fd;color:#075cad;font-size:9px;font-weight:900}
+    .actions{margin-top:11px}
+    .open{display:inline-flex;background:#075cad;color:#fff;padding:8px 11px;border-radius:7px;text-decoration:none;font-size:11px;font-weight:900}
+    .history-stop{background:#fff;border:1px solid var(--line);border-radius:15px;padding:16px;margin-bottom:14px}
+    .history-stop summary{cursor:pointer;font-weight:900}
+    .history-meta{margin:7px 0 13px;color:var(--muted);font-size:11px}
+    .empty{padding:18px;background:#fff;border:1px dashed var(--line);border-radius:12px;color:var(--muted)}
+    @media(max-width:850px){.grid{grid-template-columns:1fr}.page{padding:20px 14px}}
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <div class="top">
+    <div>
+      <h1>Filtros</h1>
+      <p>Inspección actual e histórico del proceso.</p>
+    </div>
+
+    <a class="back" href="{% url 'dashboard' %}">
+      ← Procesos
+    </a>
+  </div>
+
+
+  {% if parada_actual %}
+    <section class="hero">
+      <div class="hero-row">
+        <strong>{{ parada_actual.nombre }}</strong>
+
+        {% if rol == "Administrador" %}
+          <a class="open" href="{% url 'filtros_mm:nueva_parada' %}">
+            + Nueva parada
+          </a>
+        {% endif %}
+      </div>
+
+      <div class="hero-meta">
+        <span>Inicio: {{ parada_actual.fecha_inicio|date:"d/m/Y" }}</span>
+
+        {% if parada_actual.fecha_fin %}
+          <span>Fin: {{ parada_actual.fecha_fin|date:"d/m/Y" }}</span>
+        {% endif %}
+
+        <span>{{ total_actuales }} reportes visibles</span>
+      </div>
+    </section>
+  {% endif %}
+
+
+  <div class="section-head">
+    <h2>Inspección actual</h2>
+    <span>{{ total_actuales }} reportes</span>
+  </div>
+
+  {% for grupo in actuales_por_tag %}
+    <section class="equipment">
+      <h3>{{ grupo.tag }}</h3>
+
+      <div class="grid">
+        {% for reporte in grupo.reportes %}
+          <article class="report">
+            <strong>{{ reporte.componente }}</strong>
+
+            <div class="meta">
+              {{ reporte.codigo_reporte }}<br>
+              Técnica: {{ reporte.tecnica }}<br>
+              Familia: {{ reporte.familia }}
+            </div>
+
+            <span class="badge">
+              {{ reporte.get_estado_display }}
+            </span>
+
+            <div class="actions">
+              {% if reporte.familia == "CARRILERIA" or reporte.familia == "FAJA_POLEAS" %}
+                <a
+                  class="open"
+                  href="{% url 'filtros_mm:formulario_reporte' parada_actual.id reporte.codigo_catalogo %}"
+                >
+                  Abrir
+                </a>
+              {% else %}
+                <span class="meta">
+                  Próxima familia
+                </span>
+              {% endif %}
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+  {% empty %}
+    <div class="empty">
+      No hay una parada actual de Filtros disponible para este usuario.
+    </div>
+  {% endfor %}
+
+
+  <div class="section-head">
+    <h2>Histórico</h2>
+    <span>{{ paradas_historicas|length }} paradas anteriores</span>
+  </div>
+
+  {% for bloque in paradas_historicas %}
+    <details class="history-stop">
+      <summary>
+        {{ bloque.parada.nombre }}
+        · {{ bloque.parada.fecha_inicio|date:"d/m/Y" }}
+        · {{ bloque.total }} reportes
+      </summary>
+
+      <div class="history-meta">
+        {% if bloque.parada.fecha_fin %}
+          Hasta {{ bloque.parada.fecha_fin|date:"d/m/Y" }}
+        {% endif %}
+      </div>
+
+      {% for grupo in bloque.grupos %}
+        <section class="equipment">
+          <h3>{{ grupo.tag }}</h3>
+
+          <div class="grid">
+            {% for reporte in grupo.reportes %}
+              <article class="report">
+                <strong>{{ reporte.componente }}</strong>
+
+                <div class="meta">
+                  {{ reporte.codigo_reporte }}<br>
+                  {{ reporte.tecnica }}
+                </div>
+
+                <span class="badge">
+                  Histórico
+                </span>
+              </article>
+            {% endfor %}
+          </div>
+        </section>
+      {% endfor %}
+    </details>
+  {% empty %}
+    <div class="empty">
+      Todavía no existen paradas históricas de Filtros.
+    </div>
+  {% endfor %}
+
+</div>
+</body>
+</html>

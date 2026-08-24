@@ -1,0 +1,125 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <title>Iniciar sesión | Overall Solutions</title>
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/app.css' %}"
+    >
+</head>
+
+<body class="login-body">
+
+    <main class="login-layout">
+
+        <section class="login-brand-panel">
+
+            <div class="brand-badge">
+                OS
+            </div>
+
+            <p class="brand-eyebrow">
+                Overall Solutions
+            </p>
+
+            <h1>
+                Gestión digital de inspecciones de Chancado
+            </h1>
+
+            <p>
+                Registra mediciones, evidencias, revisiones y
+                reportes técnicos para las fajas CVB0001,
+                CVB0002 y CVB0003.
+            </p>
+
+            <div class="login-feature-list">
+                <span>✓ Inspecciones de Faja</span>
+                <span>✓ Inspecciones de Poleas</span>
+                <span>✓ Inspecciones Life Shaft</span>
+                <span>✓ Flujo por roles</span>
+            </div>
+
+        </section>
+
+        <section class="login-form-panel">
+
+            <form method="post" class="login-card">
+
+                {% csrf_token %}
+
+                <div class="login-title">
+                    <span>Acceso seguro</span>
+                    <h2>Iniciar sesión</h2>
+                    <p>
+                        Ingresa tus credenciales para continuar.
+                    </p>
+                </div>
+
+                {% if form.errors %}
+                    <div class="alert alert-error">
+                        Usuario o contraseña incorrectos.
+                    </div>
+                {% endif %}
+
+                <label for="{{ form.username.id_for_label }}">
+                    Usuario
+                </label>
+
+                <input
+                    type="text"
+                    name="username"
+                    id="{{ form.username.id_for_label }}"
+                    autocomplete="username"
+                    required
+                    autofocus
+                    placeholder="Escribe tu usuario"
+                >
+
+                <label for="{{ form.password.id_for_label }}">
+                    Contraseña
+                </label>
+
+                <input
+                    type="password"
+                    name="password"
+                    id="{{ form.password.id_for_label }}"
+                    autocomplete="current-password"
+                    required
+                    placeholder="Escribe tu contraseña"
+                >
+
+                {% if next %}
+                    <input
+                        type="hidden"
+                        name="next"
+                        value="{{ next }}"
+                    >
+                {% endif %}
+
+                <button type="submit" class="primary-button">
+                    Ingresar al sistema
+                </button>
+
+                <p class="login-help">
+                    Contacta al administrador si no cuentas
+                    con acceso.
+                </p>
+
+            </form>
+
+        </section>
+
+    </main>
+
+</body>
+</html>

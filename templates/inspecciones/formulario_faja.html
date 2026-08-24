@@ -1,0 +1,526 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <title>
+        {{ inspeccion.faja.tag }} | Formulario de Faja
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/app.css' %}"
+    >
+</head>
+
+<body class="app-body">
+
+<header class="topbar">
+
+    <div class="topbar-brand">
+        <div class="brand-badge brand-badge-small">
+            OS
+        </div>
+
+        <div>
+            <strong>Overall Solutions</strong>
+            <span>Formulario de Faja / Top Cover</span>
+        </div>
+    </div>
+
+    <div class="topbar-user">
+        <a
+            class="secondary-button link-button"
+            href="{% url 'dashboard' %}"
+        >
+            Volver
+        </a>
+    </div>
+
+</header>
+
+<main class="form-page-container">
+
+    {% for message in messages %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <section class="document-heading">
+
+        <div>
+            <span class="section-eyebrow">
+                Formulario digital
+            </span>
+
+            <h1>
+                Top Cover y empalmes —
+                {{ inspeccion.faja.nombre }}
+            </h1>
+
+            <p>
+                {{ inspeccion.faja.tag }} ·
+                {{ inspeccion.codigo_reporte }}
+            </p>
+        </div>
+
+        <a
+            class="secondary-button link-button"
+            href="{% url 'reporte_faja' inspeccion.id %}"
+            target="_blank"
+        >
+            Vista previa
+        </a>
+
+    </section>
+
+    <form method="post" class="inspection-document">
+
+        {% csrf_token %}
+
+        {{ mediciones_formset.management_form }}
+
+        <section class="form-section">
+
+            <h2>Datos generales</h2>
+
+            <div class="general-data-grid">
+
+                <div class="static-field">
+                    <span>Planta</span>
+                    <strong>{{ inspeccion.planta }}</strong>
+                </div>
+
+                <div class="static-field">
+                    <span>Proceso</span>
+                    <strong>{{ inspeccion.proceso }}</strong>
+                </div>
+
+                <div class="static-field">
+                    <span>Equipo</span>
+                    <strong>{{ inspeccion.faja.nombre }}</strong>
+                </div>
+
+                <div class="static-field">
+                    <span>TAG</span>
+                    <strong>{{ inspeccion.faja.tag }}</strong>
+                </div>
+
+                <div class="form-field">
+                    <label>
+                        Fecha de inspección
+                    </label>
+
+                    {{ formulario.fecha_inspeccion }}
+                </div>
+
+                <div class="form-field">
+                    <label>
+                        Fecha de reporte
+                    </label>
+
+                    {{ formulario.fecha_reporte }}
+                </div>
+
+                <div class="form-field">
+                    <label>
+                        Condición general
+                    </label>
+
+                    {{ formulario.condicion_general }}
+                </div>
+
+                <div class="form-field">
+                    <label>
+                        Condición del equipo
+                    </label>
+
+                    {{ formulario.condicion_equipo }}
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="form-section">
+
+            <h2>Información técnica</h2>
+
+            <div class="text-area-grid">
+
+                <div class="form-field">
+                    <label>Circunstancias</label>
+                    {{ formulario.circunstancias }}
+                </div>
+
+                <div class="form-field">
+                    <label>Antecedentes</label>
+                    {{ formulario.antecedentes }}
+                </div>
+
+                <div class="form-field">
+                    <label>Observaciones</label>
+                    {{ formulario.observaciones }}
+                </div>
+
+                <div class="form-field">
+                    <label>Recomendaciones</label>
+                    {{ formulario.recomendaciones }}
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="measurement-section">
+
+            <h2>
+                Datos de medición de espesores en empalme E-01
+            </h2>
+
+            <div class="table-scroll">
+
+                <table class="measurement-table">
+
+                    <thead>
+                        <tr>
+                            <th>Empalme</th>
+                            <th>Bastidor</th>
+                            <th>Posición</th>
+                            <th>Nominal</th>
+                            <th>A</th>
+                            <th>B</th>
+                            <th>C</th>
+                            <th>D</th>
+                            <th>E</th>
+                            <th>F</th>
+                            <th>G</th>
+                            <th>Mínimo</th>
+                            <th>Promedio</th>
+                            <th>Desgaste</th>
+                            <th>% desgaste</th>
+                            <th>% residual</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                    {% for medicion_form in empalmes %}
+
+                        <tr class="measurement-row">
+
+                            {{ medicion_form.id }}
+
+                            {{ medicion_form.seccion }}
+                            {{ medicion_form.punto }}
+                            {{ medicion_form.bastidor }}
+                            {{ medicion_form.lado }}
+                            {{ medicion_form.posicion }}
+                            {{ medicion_form.orden }}
+
+                            <td>
+                                {{ medicion_form.instance.seccion }}
+                            </td>
+
+                            <td>
+                                {{ medicion_form.instance.bastidor }}
+                            </td>
+
+                            <td>
+                                {{ medicion_form.instance.posicion }}
+                            </td>
+
+                            <td>
+                                {{ medicion_form.espesor_nominal }}
+                            </td>
+
+                            <td>{{ medicion_form.a }}</td>
+                            <td>{{ medicion_form.b }}</td>
+                            <td>{{ medicion_form.c }}</td>
+                            <td>{{ medicion_form.d }}</td>
+                            <td>{{ medicion_form.e }}</td>
+                            <td>{{ medicion_form.f }}</td>
+                            <td>{{ medicion_form.g }}</td>
+
+                            <td class="result-minimum">
+                                {{ medicion_form.instance.minimo|default:"-" }}
+                            </td>
+
+                            <td class="result-average">
+                                {{ medicion_form.instance.promedio|default:"-" }}
+                            </td>
+
+                            <td class="result-wear">
+                                {{ medicion_form.instance.desgaste|default:"-" }}
+                            </td>
+
+                            <td class="result-wear-percentage">
+                                {{ medicion_form.instance.porcentaje_desgaste|default:"-" }}
+                            </td>
+
+                            <td class="result-residual-percentage">
+                                {{ medicion_form.instance.porcentaje_residual|default:"-" }}
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+        <section class="measurement-section">
+
+            <h2>
+                Distribución de puntos de medición — Tramos 200–80
+            </h2>
+
+            <div class="table-scroll">
+
+                <table class="measurement-table">
+
+                    <thead>
+                        <tr>
+                            <th>Medición</th>
+                            <th>Bastidor</th>
+                            <th>Nominal</th>
+                            <th>A</th>
+                            <th>B</th>
+                            <th>C</th>
+                            <th>D</th>
+                            <th>E</th>
+                            <th>F</th>
+                            <th>G</th>
+                            <th>Mínimo</th>
+                            <th>Promedio</th>
+                            <th>Desgaste</th>
+                            <th>% desgaste</th>
+                            <th>% residual</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                    {% for medicion_form in tramos %}
+
+                        <tr class="measurement-row">
+
+                            {{ medicion_form.id }}
+
+                            {{ medicion_form.seccion }}
+                            {{ medicion_form.punto }}
+                            {{ medicion_form.bastidor }}
+                            {{ medicion_form.lado }}
+                            {{ medicion_form.posicion }}
+                            {{ medicion_form.orden }}
+
+                            <td>
+                                {{ medicion_form.instance.punto }}
+                            </td>
+
+                            <td>
+                                {{ medicion_form.instance.bastidor }}
+                            </td>
+
+                            <td>
+                                {{ medicion_form.espesor_nominal }}
+                            </td>
+
+                            <td>{{ medicion_form.a }}</td>
+                            <td>{{ medicion_form.b }}</td>
+                            <td>{{ medicion_form.c }}</td>
+                            <td>{{ medicion_form.d }}</td>
+                            <td>{{ medicion_form.e }}</td>
+                            <td>{{ medicion_form.f }}</td>
+                            <td>{{ medicion_form.g }}</td>
+
+                            <td class="result-minimum">
+                                {{ medicion_form.instance.minimo|default:"-" }}
+                            </td>
+
+                            <td class="result-average">
+                                {{ medicion_form.instance.promedio|default:"-" }}
+                            </td>
+
+                            <td class="result-wear">
+                                {{ medicion_form.instance.desgaste|default:"-" }}
+                            </td>
+
+                            <td class="result-wear-percentage">
+                                {{ medicion_form.instance.porcentaje_desgaste|default:"-" }}
+                            </td>
+
+                            <td class="result-residual-percentage">
+                                {{ medicion_form.instance.porcentaje_residual|default:"-" }}
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+        <div class="form-actions">
+
+            <a
+                class="secondary-button link-button"
+                href="{% url 'dashboard' %}"
+            >
+                Volver
+            </a>
+
+            {% if puede_editar %}
+                <button
+                    class="primary-button"
+                    type="submit"
+                >
+                    Guardar borrador
+                </button>
+            {% endif %}
+
+            <a
+                class="secondary-button link-button"
+                href="{% url 'reporte_faja' inspeccion.id %}"
+                target="_blank"
+            >
+                Vista previa
+            </a>
+
+        </div>
+
+    </form>
+
+</main>
+
+<script>
+(() => {
+    const parseNumber = value => {
+        if (!value) return null;
+
+        const parsed = Number(
+            String(value).replace(",", ".")
+        );
+
+        return Number.isFinite(parsed)
+            ? parsed
+            : null;
+    };
+
+    const formatNumber = value => {
+        if (value === null || !Number.isFinite(value)) {
+            return "-";
+        }
+
+        return value.toFixed(2);
+    };
+
+    const calculateRow = row => {
+        const values = Array.from(
+            row.querySelectorAll(".value-input")
+        )
+            .map(input => parseNumber(input.value))
+            .filter(value => value !== null);
+
+        const nominalInput =
+            row.querySelector(".nominal-input");
+
+        const nominal = parseNumber(
+            nominalInput?.value
+        );
+
+        if (!values.length) {
+            row.querySelector(".result-minimum").textContent = "-";
+            row.querySelector(".result-average").textContent = "-";
+            row.querySelector(".result-wear").textContent = "-";
+            row.querySelector(".result-wear-percentage").textContent = "-";
+            row.querySelector(".result-residual-percentage").textContent = "-";
+            return;
+        }
+
+        const minimum = Math.min(...values);
+
+        const average =
+            values.reduce(
+                (total, value) => total + value,
+                0
+            ) / values.length;
+
+        let wear = null;
+        let wearPercentage = null;
+        let residualPercentage = null;
+
+        if (nominal !== null && nominal > 0) {
+            wear = nominal - minimum;
+
+            wearPercentage =
+                wear / nominal * 100;
+
+            residualPercentage =
+                minimum / nominal * 100;
+        }
+
+        row.querySelector(
+            ".result-minimum"
+        ).textContent = formatNumber(minimum);
+
+        row.querySelector(
+            ".result-average"
+        ).textContent = formatNumber(average);
+
+        row.querySelector(
+            ".result-wear"
+        ).textContent = formatNumber(wear);
+
+        row.querySelector(
+            ".result-wear-percentage"
+        ).textContent = formatNumber(
+            wearPercentage
+        );
+
+        row.querySelector(
+            ".result-residual-percentage"
+        ).textContent = formatNumber(
+            residualPercentage
+        );
+    };
+
+    document
+        .querySelectorAll(".measurement-row")
+        .forEach(row => {
+            row
+                .querySelectorAll(
+                    ".value-input, .nominal-input"
+                )
+                .forEach(input => {
+                    input.addEventListener(
+                        "input",
+                        () => calculateRow(row)
+                    );
+                });
+
+            calculateRow(row);
+        });
+})();
+</script>
+
+</body>
+</html>

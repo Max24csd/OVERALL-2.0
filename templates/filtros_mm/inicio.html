@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Parada de Filtros</title>
+
+    <style>
+        :root{
+            --bg:#f3f7fb;
+            --card:#ffffff;
+            --line:#d6e1ec;
+            --navy:#0a2545;
+            --blue:#0b66b2;
+            --blue-hover:#09589a;
+            --muted:#64748b;
+            --soft:#f8fafc;
+            --disabled:#94a3b8;
+        }
+
+        *{
+            box-sizing:border-box;
+        }
+
+        body{
+            margin:0;
+            background:var(--bg);
+            color:var(--navy);
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        .page{
+            max-width:1250px;
+            margin:0 auto;
+            padding:30px 26px 50px;
+        }
+
+        .top{
+            display:flex;
+            align-items:flex-start;
+            justify-content:space-between;
+            gap:20px;
+            margin-bottom:24px;
+        }
+
+        .eyebrow{
+            font-size:11px;
+            font-weight:900;
+            color:var(--blue);
+            text-transform:uppercase;
+            letter-spacing:.06em;
+            margin-bottom:5px;
+        }
+
+        h1{
+            margin:0;
+            font-size:29px;
+        }
+
+        .subtitle{
+            margin:7px 0 0;
+            color:var(--muted);
+            font-size:13px;
+        }
+
+        .back{
+            text-decoration:none;
+            color:var(--navy);
+            border:1px solid var(--line);
+            background:white;
+            padding:10px 14px;
+            border-radius:9px;
+            font-weight:800;
+            font-size:13px;
+        }
+
+        .summary{
+            display:grid;
+            grid-template-columns:repeat(4, minmax(0,1fr));
+            gap:12px;
+            margin-bottom:22px;
+        }
+
+        .summary-card{
+            background:white;
+            border:1px solid var(--line);
+            border-radius:12px;
+            padding:13px 15px;
+        }
+
+        .summary-label{
+            font-size:10px;
+            color:var(--muted);
+            font-weight:900;
+            text-transform:uppercase;
+            margin-bottom:4px;
+        }
+
+        .summary-value{
+            font-size:14px;
+            font-weight:900;
+            color:var(--navy);
+        }
+
+        .section-title{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            margin:26px 0 12px;
+        }
+
+        .section-title h2{
+            margin:0;
+            font-size:18px;
+        }
+
+        .section-title span{
+            color:var(--muted);
+            font-size:12px;
+        }
+
+        .grid{
+            display:grid;
+            grid-template-columns:repeat(3, minmax(0, 1fr));
+            gap:15px;
+        }
+
+        .card{
+            min-width:0;
+            background:var(--card);
+            border:1px solid var(--line);
+            border-radius:14px;
+            padding:16px;
+            box-shadow:0 6px 20px rgba(15,35,62,.04);
+
+            display:flex;
+            flex-direction:column;
+            min-height:220px;
+        }
+
+        .card.disabled{
+            opacity:.58;
+            background:#f8fafc;
+        }
+
+        .tag{
+            color:var(--blue);
+            font-size:11px;
+            font-weight:900;
+            margin-bottom:6px;
+        }
+
+        .card h3{
+            margin:0 0 12px;
+            font-size:18px;
+            color:var(--navy);
+        }
+
+        .meta{
+            font-size:12px;
+            color:var(--muted);
+            line-height:1.7;
+            margin-bottom:14px;
+        }
+
+        .meta strong{
+            color:#42566e;
+        }
+
+        .status{
+            display:inline-flex;
+            align-items:center;
+            width:max-content;
+            max-width:100%;
+            padding:5px 8px;
+            border-radius:999px;
+            background:#eef6ff;
+            color:var(--blue);
+            font-size:10px;
+            font-weight:900;
+            margin-bottom:13px;
+        }
+
+        .actions{
+            margin-top:auto;
+        }
+
+        .open{
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+
+            background:var(--blue);
+            color:white;
+            text-decoration:none;
+
+            min-height:39px;
+            padding:0 13px;
+
+            border-radius:8px;
+            font-size:12px;
+            font-weight:900;
+        }
+
+        .open:hover{
+            background:var(--blue-hover);
+        }
+
+        .coming{
+            display:inline-flex;
+            min-height:39px;
+            align-items:center;
+            color:var(--disabled);
+            font-size:12px;
+            font-weight:800;
+        }
+
+        @media(max-width:1000px){
+            .grid{
+                grid-template-columns:repeat(2, minmax(0,1fr));
+            }
+
+            .summary{
+                grid-template-columns:repeat(2, minmax(0,1fr));
+            }
+        }
+
+        @media(max-width:650px){
+            .page{
+                padding:20px 14px 40px;
+            }
+
+            .top{
+                flex-direction:column;
+            }
+
+            .grid,
+            .summary{
+                grid-template-columns:1fr;
+            }
+
+            .back{
+                width:100%;
+                text-align:center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="page">
+
+    <div class="top">
+
+        <div>
+            <div class="eyebrow">
+                Proceso · Filtros
+            </div>
+
+            <h1>
+                {{ parada.nombre }}
+            </h1>
+
+            <p class="subtitle">
+                Catálogo de reportes programados para la parada.
+            </p>
+        </div>
+
+        <a
+            class="back"
+            href="{% url 'filtros_mm:lista_paradas' %}"
+        >
+            ← Volver a paradas
+        </a>
+
+    </div>
+
+
+    <div class="summary">
+
+        <div class="summary-card">
+            <div class="summary-label">
+                Planta
+            </div>
+
+            <div class="summary-value">
+                {{ parada.planta }}
+            </div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-label">
+                Inicio
+            </div>
+
+            <div class="summary-value">
+                {{ parada.fecha_inicio|date:"d/m/Y" }}
+            </div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-label">
+                Fin
+            </div>
+
+            <div class="summary-value">
+                {% if parada.fecha_fin %}
+                    {{ parada.fecha_fin|date:"d/m/Y" }}
+                {% else %}
+                    —
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-label">
+                Estado
+            </div>
+
+            <div class="summary-value">
+                {{ parada.get_estado_display }}
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="section-title">
+        <h2>Reportes de inspección</h2>
+        <span>{{ reportes|length }} reportes programados</span>
+    </div>
+
+
+    <div class="grid">
+
+        {% for item in reportes %}
+
+            <article
+                class="card {% if item.familia != 'CARRILERIA' and item.familia != 'FAJA_POLEAS' %}disabled{% endif %}"
+            >
+
+                <div class="tag">
+                    {{ item.tag }} · {{ item.codigo_reporte }}
+                </div>
+
+                <h3>
+                    {{ item.componente }}
+                </h3>
+
+                <div class="meta">
+
+                    <strong>Área:</strong>
+                    {{ item.area }}
+
+                    <br>
+
+                    <strong>Técnica:</strong>
+                    {{ item.tecnica }}
+
+                    <br>
+
+                    <strong>Familia:</strong>
+                    {{ item.familia }}
+
+                </div>
+
+
+                {% if item.familia == "CARRILERIA" or item.familia == "FAJA_POLEAS" %}
+
+                    <div class="status">
+                        Habilitado
+                    </div>
+
+                    <div class="actions">
+
+                        <a
+                            class="open"
+                            href="{% url 'filtros_mm:formulario_reporte' parada.id item.codigo %}"
+                        >
+                            Abrir formulario
+                        </a>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="status">
+                        Próximamente
+                    </div>
+
+                    <div class="actions">
+                        <span class="coming">
+                            Familia todavía no habilitada
+                        </span>
+                    </div>
+
+                {% endif %}
+
+            </article>
+
+        {% empty %}
+
+            <p>
+                No hay reportes configurados para esta parada.
+            </p>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+</body>
+</html>

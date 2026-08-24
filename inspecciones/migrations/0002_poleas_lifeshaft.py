@@ -1,0 +1,120 @@
+from django.conf import settings
+from django.db import migrations, models
+import django.db.models.deletion
+
+
+class Migration(migrations.Migration):
+    dependencies = [
+        ("inspecciones", "0001_initial"),
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+    ]
+
+    operations = [
+        migrations.CreateModel(
+            name="PoleaInspeccion",
+            fields=[
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("numero", models.PositiveSmallIntegerField()),
+                ("nombre", models.CharField(max_length=100)),
+                ("tag", models.CharField(blank=True, max_length=60)),
+                ("ubicacion", models.CharField(blank=True, max_length=120)),
+                ("componente", models.CharField(default="Lagging de polea", max_length=120)),
+                ("material", models.CharField(blank=True, max_length=100)),
+                ("espesor_nominal", models.DecimalField(blank=True, decimal_places=2, max_digits=8, null=True)),
+                ("condicion", models.CharField(choices=[("NORMAL","Normal"),("PRECAUCION","Precaución"),("CRITICO","Crítico"),("NO_MEDIDO","No medido")], default="NO_MEDIDO", max_length=20)),
+                ("observacion_visual", models.TextField(blank=True)),
+                ("observacion_medicion", models.TextField(blank=True)),
+                ("recomendaciones", models.TextField(blank=True)),
+                ("marca_equipo", models.CharField(default="OLYMPUS", max_length=80)),
+                ("modelo_equipo", models.CharField(default="EPOCH 6LT", max_length=80)),
+                ("frecuencia_mhz", models.CharField(default="5 MHz", max_length=30)),
+                ("rango_mm", models.CharField(blank=True, max_length=30)),
+                ("metodo_empleado", models.CharField(default="Pulso - eco", max_length=80)),
+                ("componente_calibracion", models.CharField(blank=True, max_length=100)),
+                ("acoplante", models.CharField(default="Echo gel", max_length=60)),
+                ("rectificacion", models.CharField(default="Full", max_length=50)),
+                ("velocidad_ms", models.CharField(default="6079", max_length=30)),
+                ("retardo_us", models.CharField(default="1.53", max_length=30)),
+                ("tipo_scan", models.CharField(default="A Scan", max_length=50)),
+                ("orden", models.PositiveIntegerField(default=0)),
+                ("creada_en", models.DateTimeField(auto_now_add=True)),
+                ("actualizada_en", models.DateTimeField(auto_now=True)),
+                ("inspeccion", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name="poleas_inspeccionadas", to="inspecciones.inspeccion")),
+            ],
+            options={"ordering":["orden","numero"]},
+        ),
+        migrations.CreateModel(
+            name="LifeShaftInspeccion",
+            fields=[
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("numero", models.PositiveSmallIntegerField()),
+                ("nombre", models.CharField(max_length=100)),
+                ("tag", models.CharField(blank=True, max_length=60)),
+                ("ubicacion", models.CharField(blank=True, max_length=120)),
+                ("condicion", models.CharField(choices=[("NORMAL","Normal"),("PRECAUCION","Precaución"),("CRITICO","Crítico"),("NO_MEDIDO","No medido")], default="NO_MEDIDO", max_length=20)),
+                ("observacion_visual", models.TextField(blank=True)),
+                ("observacion_medicion", models.TextField(blank=True)),
+                ("recomendaciones", models.TextField(blank=True)),
+                ("marca_equipo", models.CharField(default="OLYMPUS", max_length=80)),
+                ("tipo_haz", models.CharField(default="COMPLETA", max_length=50)),
+                ("frecuencia_mhz", models.CharField(default="5 MHz", max_length=30)),
+                ("ancho_banda", models.CharField(default="0.2-10 MHz", max_length=40)),
+                ("amortiguamiento", models.CharField(default="50", max_length=30)),
+                ("velocidad_ms", models.CharField(default="6079", max_length=30)),
+                ("retardo_us", models.CharField(default="1.53", max_length=30)),
+                ("orden", models.PositiveIntegerField(default=0)),
+                ("creada_en", models.DateTimeField(auto_now_add=True)),
+                ("actualizada_en", models.DateTimeField(auto_now=True)),
+                ("inspeccion", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name="life_shafts", to="inspecciones.inspeccion")),
+            ],
+            options={"ordering":["orden","numero"]},
+        ),
+        migrations.CreateModel(
+            name="MedicionPolea",
+            fields=[
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("punto", models.PositiveSmallIntegerField()), ("posicion", models.CharField(blank=True,max_length=100)),
+                *[(x,models.DecimalField(blank=True,decimal_places=2,max_digits=8,null=True)) for x in "abcdefg"],
+                ("minimo",models.DecimalField(blank=True,decimal_places=2,max_digits=8,null=True)),
+                ("promedio",models.DecimalField(blank=True,decimal_places=2,max_digits=8,null=True)),
+                ("observacion",models.TextField(blank=True)), ("orden",models.PositiveIntegerField(default=0)),
+                ("polea",models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,related_name="mediciones",to="inspecciones.poleainspeccion")),
+            ], options={"ordering":["orden","punto"]},
+        ),
+        migrations.CreateModel(
+            name="MedicionLifeShaft",
+            fields=[
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("punto", models.PositiveSmallIntegerField()), ("ubicacion",models.CharField(default="PUNTOS SENTIDO RADIAL",max_length=100)),
+                *[(x,models.DecimalField(blank=True,decimal_places=2,max_digits=8,null=True)) for x in "abcdefg"],
+                ("promedio",models.DecimalField(blank=True,decimal_places=2,max_digits=8,null=True)),
+                ("minimo",models.DecimalField(blank=True,decimal_places=2,max_digits=8,null=True)),
+                ("observacion",models.TextField(blank=True)), ("orden",models.PositiveIntegerField(default=0)),
+                ("life_shaft",models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,related_name="mediciones",to="inspecciones.lifeshaftinspeccion")),
+            ], options={"ordering":["orden","punto"]},
+        ),
+        migrations.CreateModel(
+            name="FotoPolea",
+            fields=[
+                ("id",models.BigAutoField(auto_created=True,primary_key=True,serialize=False,verbose_name="ID")),
+                ("imagen",models.ImageField(upload_to="inspecciones/poleas/")), ("codigo_dano",models.CharField(blank=True,max_length=50)),
+                ("descripcion",models.TextField(blank=True)), ("creada_en",models.DateTimeField(auto_now_add=True)),
+                ("polea",models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,related_name="fotografias",to="inspecciones.poleainspeccion")),
+                ("subida_por",models.ForeignKey(on_delete=django.db.models.deletion.PROTECT,related_name="fotos_poleas_subidas",to=settings.AUTH_USER_MODEL)),
+            ], options={"ordering":["creada_en"]},
+        ),
+        migrations.CreateModel(
+            name="FotoLifeShaft",
+            fields=[
+                ("id",models.BigAutoField(auto_created=True,primary_key=True,serialize=False,verbose_name="ID")),
+                ("imagen",models.ImageField(upload_to="inspecciones/life_shaft/")), ("codigo_dano",models.CharField(blank=True,max_length=50)),
+                ("descripcion",models.TextField(blank=True)), ("creada_en",models.DateTimeField(auto_now_add=True)),
+                ("life_shaft",models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,related_name="fotografias",to="inspecciones.lifeshaftinspeccion")),
+                ("subida_por",models.ForeignKey(on_delete=django.db.models.deletion.PROTECT,related_name="fotos_lifeshaft_subidas",to=settings.AUTH_USER_MODEL)),
+            ], options={"ordering":["creada_en"]},
+        ),
+        migrations.AddConstraint(model_name="poleainspeccion",constraint=models.UniqueConstraint(fields=("inspeccion","numero"),name="polea_unica_por_inspeccion")),
+        migrations.AddConstraint(model_name="lifeshaftinspeccion",constraint=models.UniqueConstraint(fields=("inspeccion","numero"),name="lifeshaft_unico_por_inspeccion")),
+        migrations.AddConstraint(model_name="medicionpolea",constraint=models.UniqueConstraint(fields=("polea","punto"),name="punto_unico_por_polea")),
+        migrations.AddConstraint(model_name="medicionlifeshaft",constraint=models.UniqueConstraint(fields=("life_shaft","punto"),name="punto_unico_por_lifeshaft")),
+    ]

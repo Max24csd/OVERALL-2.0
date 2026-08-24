@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Procesos de inspección | Overall Solutions</title>
+
+  <style>
+    :root{
+      --navy:#08213f;
+      --blue:#0b66b2;
+      --blue-hover:#09589a;
+      --bg:#f3f7fb;
+      --card:#ffffff;
+      --line:#d6e1ec;
+      --muted:#64748b;
+      --soft:#f8fafc;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family:Arial,Helvetica,sans-serif;
+      background:var(--bg);
+      color:var(--navy);
+    }
+
+    .shell{
+      min-height:100vh;
+      display:grid;
+      grid-template-columns:220px minmax(0,1fr);
+    }
+
+    .sidebar{
+      background:#fff;
+      border-right:1px solid var(--line);
+      padding:26px 18px;
+    }
+
+    .role{
+      display:block;
+      margin-bottom:22px;
+      font-size:15px;
+      font-weight:900;
+    }
+
+    .nav-link,
+    .nav-disabled{
+      display:block;
+      margin-bottom:6px;
+      padding:10px 12px;
+      border-radius:9px;
+      font-size:13px;
+      font-weight:800;
+    }
+
+    .nav-link{
+      color:#18334f;
+      text-decoration:none;
+    }
+
+    .nav-link.current{
+      background:#e4f0fb;
+      color:#075cad;
+    }
+
+    .nav-disabled{
+      color:#94a3b8;
+    }
+
+    .logout-form{
+      margin:18px 0 0;
+    }
+
+    .logout-button{
+      width:100%;
+      border:1px solid var(--line);
+      background:#fff;
+      color:#9f1239;
+      cursor:pointer;
+      text-align:left;
+      font-family:inherit;
+    }
+
+    .logout-button:hover{
+      background:#fff1f2;
+      border-color:#fecdd3;
+    }
+
+    .main{
+      width:100%;
+      max-width:1180px;
+      margin:0 auto;
+      padding:42px 34px;
+    }
+
+    .eyebrow{
+      margin-bottom:7px;
+      color:var(--blue);
+      font-size:11px;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+
+    h1{
+      margin:0;
+      font-size:32px;
+    }
+
+    .subtitle{
+      margin:8px 0 30px;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .process-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:22px;
+    }
+
+    .process-card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:24px;
+      min-height:340px;
+      box-shadow:0 10px 30px rgba(15,35,62,.05);
+      display:flex;
+      flex-direction:column;
+    }
+
+    .process-card-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .badge{
+      display:inline-flex;
+      padding:6px 9px;
+      border-radius:999px;
+      background:#eef4fa;
+      color:#52667d;
+      font-size:10px;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+    }
+
+    .count{
+      color:var(--muted);
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .process-card h2{
+      margin:0 0 8px;
+      font-size:27px;
+    }
+
+    .description{
+      margin:0 0 20px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.6;
+    }
+
+    .latest{
+      margin-bottom:20px;
+      padding:15px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:var(--soft);
+    }
+
+    .latest-label{
+      display:block;
+      margin-bottom:6px;
+      color:var(--muted);
+      font-size:9px;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.05em;
+    }
+
+    .latest strong{
+      display:block;
+      margin-bottom:5px;
+      font-size:15px;
+    }
+
+    .latest small{
+      color:var(--muted);
+      font-size:11px;
+      line-height:1.5;
+    }
+
+    .actions{
+      margin-top:auto;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:43px;
+      padding:0 18px;
+      border-radius:9px;
+      background:var(--blue);
+      color:#fff;
+      text-decoration:none;
+      font-size:13px;
+      font-weight:900;
+    }
+
+    .btn:hover{background:var(--blue-hover)}
+
+    @media(max-width:850px){
+      .shell{grid-template-columns:1fr}
+      .sidebar{
+        border-right:0;
+        border-bottom:1px solid var(--line);
+      }
+      .process-grid{grid-template-columns:1fr}
+      .main{padding:26px 16px}
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="shell">
+
+  <aside class="sidebar">
+
+    <span class="role">{{ rol }}</span>
+
+    <a class="nav-link current" href="{% url 'dashboard' %}">
+      Dashboard
+    </a>
+
+    {% if rol == "Administrador" %}
+      <a class="nav-link" href="{% url 'nueva_parada' %}">
+        + Nueva parada Chancado
+      </a>
+
+      <a class="nav-link" href="{% url 'filtros_mm:nueva_parada' %}">
+        + Nueva parada Filtros
+      </a>
+
+      <a class="nav-link" href="{% url 'usuarios_lista' %}">
+        Usuarios
+      </a>
+    {% endif %}
+
+    <a class="nav-link" href="{% url 'historial_inspecciones' %}">
+      Historial global
+    </a>
+
+    <span class="nav-disabled">
+      Configuración · Próximamente
+    </span>
+    <form class="logout-form" method="post" action="{% url 'logout' %}">
+      {% csrf_token %}
+      <button class="nav-link logout-button" type="submit">
+        Salir
+      </button>
+    </form>
+
+  </aside>
+
+
+  <main class="main">
+
+    <div class="eyebrow">
+      Overall Solutions · Las Bambas
+    </div>
+
+    <h1>Procesos de inspección</h1>
+
+    <p class="subtitle">
+      Selecciona un proceso para consultar la inspección actual y su histórico.
+    </p>
+
+
+    <div class="process-grid">
+
+      <!-- =====================================================
+           CHANCADO
+      ====================================================== -->
+      <article class="process-card">
+
+        <div class="process-card-top">
+          <span class="badge">Chancado</span>
+
+          <span class="count">
+            {{ inspecciones|length }} reportes actuales
+          </span>
+        </div>
+
+        <h2>Chancado</h2>
+
+        <p class="description">
+          Faja / Top Cover, Poleas y Life Shaft de CVB001,
+          CVB003 y CVB004.
+        </p>
+
+        <div class="latest">
+          <span class="latest-label">
+            Última inspección / parada
+          </span>
+
+          {% if parada_actual %}
+            <strong>{{ parada_actual.nombre }}</strong>
+
+            <small>
+              {{ parada_actual.fecha_inicio|date:"d/m/Y" }}
+
+              {% if parada_actual.fecha_fin %}
+                · {{ parada_actual.fecha_fin|date:"d/m/Y" }}
+              {% endif %}
+            </small>
+          {% else %}
+            <strong>Sin parada disponible</strong>
+            <small>No hay inspección actual visible.</small>
+          {% endif %}
+        </div>
+
+        <div class="actions">
+          <a class="btn" href="{% url 'proceso_chancado' %}">
+            Ver Chancado
+          </a>
+        </div>
+
+      </article>
+
+
+      <!-- =====================================================
+           FILTROS
+      ====================================================== -->
+      <article class="process-card">
+
+        <div class="process-card-top">
+          <span class="badge">Filtros</span>
+
+          <span class="count">
+            {{ reportes_filtros_total }} reportes actuales
+          </span>
+        </div>
+
+        <h2>Filtros</h2>
+
+        <p class="description">
+          Carrilería, Skirting, Tuberías y reportes de Faja / Poleas.
+        </p>
+
+        <div class="latest">
+          <span class="latest-label">
+            Última inspección / parada
+          </span>
+
+          {% if parada_filtros_actual %}
+            <strong>{{ parada_filtros_actual.nombre }}</strong>
+
+            <small>
+              {{ parada_filtros_actual.fecha_inicio|date:"d/m/Y" }}
+
+              {% if parada_filtros_actual.fecha_fin %}
+                · {{ parada_filtros_actual.fecha_fin|date:"d/m/Y" }}
+              {% endif %}
+            </small>
+          {% else %}
+            <strong>Sin parada disponible</strong>
+            <small>No hay parada actual visible.</small>
+          {% endif %}
+        </div>
+
+        <div class="actions">
+          <a class="btn" href="{% url 'proceso_filtros' %}">
+            Ver Filtros
+          </a>
+        </div>
+
+      </article>
+
+    </div>
+
+  </main>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,17 @@
+__pycache__/
+.vscode/
+*.py[cod]
+*.sqlite3
+*.sqlite3.bak*
+.env
+staticfiles/
+media/
+outputs/
+tmp/
+backups/
+/bool
+/list
+/None
+/str
+/20260804-VTUT-CVB0004-LIFE-SHAFT
+*.bak*

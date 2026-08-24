@@ -1,0 +1,214 @@
+<article class="history-card">
+
+    <div class="history-card-top">
+
+        <div>
+            <div class="history-card-tag">
+                {{ inspeccion.faja.tag }}
+            </div>
+
+            <h3 class="history-card-title">
+                {{ inspeccion.get_tipo_display }}
+            </h3>
+        </div>
+
+        {% if inspeccion.condicion_general == "NORMAL" %}
+            <span class="condition-badge condition-normal">
+                <span class="condition-dot"></span>
+                NORMAL
+            </span>
+
+        {% elif inspeccion.condicion_general == "PRECAUCION" %}
+            <span class="condition-badge condition-precaucion">
+                <span class="condition-dot"></span>
+                PRECAUCIÓN
+            </span>
+
+        {% elif inspeccion.condicion_general == "TOLERABLE" %}
+            <span class="condition-badge condition-tolerable">
+                <span class="condition-dot"></span>
+                TOLERABLE
+            </span>
+
+        {% elif inspeccion.condicion_general == "CRITICO" %}
+            <span class="condition-badge condition-critico">
+                <span class="condition-dot"></span>
+                CRÍTICO
+            </span>
+
+        {% else %}
+            <span class="condition-badge condition-no-medido">
+                <span class="condition-dot"></span>
+                {% if inspeccion.condicion_general %}
+                    {{ inspeccion.get_condicion_general_display|upper }}
+                {% else %}
+                    NO MEDIDO
+                {% endif %}
+            </span>
+        {% endif %}
+
+    </div>
+
+    <div class="history-card-code-label">
+        CÓDIGO
+    </div>
+
+    <div class="history-card-code">
+        {{ inspeccion.codigo_reporte }}
+    </div>
+
+    <div class="history-card-data">
+
+        <div>
+            <span class="history-card-label">FECHA TÉCNICA</span>
+            <strong>
+                {% if inspeccion.fecha_inspeccion %}
+                    {{ inspeccion.fecha_inspeccion|date:"d/m/Y" }}
+                {% elif inspeccion.fecha_programada %}
+                    {{ inspeccion.fecha_programada|date:"d/m/Y" }}
+                {% else %}
+                    Sin fecha técnica
+                {% endif %}
+            </strong>
+        </div>
+
+        <div>
+            <span class="history-card-label">CLASIFICACIÓN</span>
+            <strong>Histórico oficial</strong>
+        </div>
+
+        <div>
+            <span class="history-card-label">INSPECTOR</span>
+            <strong>
+                {% if inspeccion.inspector %}
+                    {% if inspeccion.inspector.get_full_name %}
+                        {{ inspeccion.inspector.get_full_name }}
+                    {% else %}
+                        {{ inspeccion.inspector.username }}
+                    {% endif %}
+                {% else %}
+                    No registrado
+                {% endif %}
+            </strong>
+        </div>
+
+        <div>
+            <span class="history-card-label">SUPERVISOR</span>
+            <strong>
+                {% if inspeccion.supervisor %}
+                    {% if inspeccion.supervisor.get_full_name %}
+                        {{ inspeccion.supervisor.get_full_name }}
+                    {% else %}
+                        {{ inspeccion.supervisor.username }}
+                    {% endif %}
+                {% else %}
+                    No registrado
+                {% endif %}
+            </strong>
+        </div>
+
+    </div>
+
+    <div class="history-card-counts">
+        <span>{{ inspeccion.total_mediciones }} mediciones</span>
+        <span>{{ inspeccion.total_fotos }} fotos</span>
+    </div>
+
+    <div class="history-card-actions">
+
+        {% if inspeccion.tipo == "FAJA" %}
+            <a class="history-action history-action-primary"
+                href="{% url 'reporte_faja' inspeccion.id %}"
+                target="_blank"
+                rel="noopener">
+                Ver reporte
+            </a>
+
+        {% elif inspeccion.tipo == "POLEAS" %}
+            <a class="history-action history-action-primary"
+                href="{% url 'reporte_poleas' inspeccion.id %}"
+                target="_blank"
+                rel="noopener">
+                Ver reporte
+            </a>
+
+        {% elif inspeccion.tipo == "LIFE_SHAFT" %}
+            <a class="history-action history-action-primary"
+                href="{% url 'reporte_life_shaft' inspeccion.id %}"
+                target="_blank"
+                rel="noopener">
+                Ver reporte
+            </a>
+        {% endif %}
+
+
+        {% if inspeccion.faja.tag == "CVB0001" %}
+
+            {% if inspeccion.tipo == "FAJA" %}
+                <a class="history-action history-action-excel"
+                    href="{% url 'exportar_excel_faja_cvb0001' inspeccion.id %}">
+                    Descargar Excel
+                </a>
+
+            {% elif inspeccion.tipo == "POLEAS" %}
+                <a class="history-action history-action-excel"
+                    href="{% url 'exportar_excel_poleas_cvb0001' inspeccion.id %}">
+                    Descargar Excel
+                </a>
+
+            {% elif inspeccion.tipo == "LIFE_SHAFT" %}
+                <a class="history-action history-action-excel"
+                    href="{% url 'exportar_excel_life_shaft_cvb0001' inspeccion.id %}">
+                    Descargar Excel
+                </a>
+            {% endif %}
+
+
+        {% elif inspeccion.faja.tag == "CVB0003" %}
+
+            {% if inspeccion.tipo == "FAJA" %}
+                <a class="history-action history-action-excel"
+                    href="{% url 'exportar_excel_faja_cvb0003' inspeccion.id %}">
+                    Descargar Excel
+                </a>
+
+            {% elif inspeccion.tipo == "POLEAS" %}
+                <a class="history-action history-action-excel"
+                    href="{% url 'exportar_excel_poleas_cvb0003' inspeccion.id %}">
+                    Descargar Excel
+                </a>
+
+            {% elif inspeccion.tipo == "LIFE_SHAFT" %}
+                <a class="history-action history-action-excel"
+                    href="{% url 'exportar_excel_life_shaft_cvb0003' inspeccion.id %}">
+                    Descargar Excel
+                </a>
+            {% endif %}
+
+
+        {% elif inspeccion.faja.tag == "CVB0004" %}
+
+            {% if inspeccion.tipo == "FAJA" %}
+                <a class="history-action history-action-excel"
+                    href="{% url 'exportar_excel_faja_cvb0004' inspeccion.id %}">
+                    Descargar Excel
+                </a>
+
+            {% elif inspeccion.tipo == "POLEAS" %}
+                <a class="history-action history-action-excel"
+                   href="{% url 'exportar_excel_poleas_cvb0004' inspeccion.id %}">
+                    Descargar Excel
+                </a>
+
+            {% elif inspeccion.tipo == "LIFE_SHAFT" %}
+                <a class="history-action history-action-excel"
+                    href="{% url 'exportar_excel_life_shaft_cvb0004' inspeccion.id %}">
+                    Descargar Excel
+                </a>
+            {% endif %}
+
+        {% endif %}
+
+    </div>
+
+</article>

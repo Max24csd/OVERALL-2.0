@@ -1,0 +1,27 @@
+<section class="measurement-card">
+  <div class="section-bar">DATOS DE LA MEDICIÓN DE ESPESORES POR UT EN {{ nombre_empalme }}</div>
+  <h2>{{ nombre_empalme }}{% if zona %} ({{ zona }}){% endif %} – Bastidor {{ bastidor }} – Lado {{ lado }}</h2>
+  <div class="table-scroll">
+    <table class="measure-table">
+      <thead>
+        <tr><th>Empalme</th><th>Bastidor</th><th>Lado</th><th>Posición</th><th>Espesor nominal</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th><th>G</th><th>Mínimo</th><th>Promedio</th><th>Desgaste</th><th>% desgaste</th><th>% residual</th></tr>
+      </thead>
+      <tbody>
+        {% for m in filas %}
+          <tr class="measurement-row">
+            {{ m.id }}{{ m.seccion }}{{ m.punto }}{{ m.bastidor }}{{ m.lado }}{{ m.posicion }}{{ m.orden }}
+            {% if forloop.first %}
+              <td class="green-cell" rowspan="{{ filas|length }}">{{ nombre_empalme }}{% if zona %}<br>({{ zona }}){% endif %}</td>
+              <td rowspan="{{ filas|length }}">{{ bastidor }}</td>
+              <td rowspan="{{ filas|length }}">{{ lado }}</td>
+            {% endif %}
+            <td>{{ m.instance.posicion }}</td><td>{{ m.espesor_nominal }}</td><td>{{ m.a }}</td><td>{{ m.b }}</td><td>{{ m.c }}</td><td>{{ m.d }}</td><td>{{ m.e }}</td><td>{{ m.f }}</td><td>{{ m.g }}</td><td class="readonly-result result-minimum">{{ m.instance.minimo|default:"-" }}</td><td class="readonly-result result-average">{{ m.instance.promedio|default:"-" }}</td><td class="readonly-result result-wear">{{ m.instance.desgaste|default:"-" }}</td><td class="readonly-result result-wear-percentage">{{ m.instance.porcentaje_desgaste|default:"-" }}</td><td class="readonly-result result-residual-percentage">{{ m.instance.porcentaje_residual|default:"-" }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="17">No existen filas de medición para {{ nombre_empalme }}.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="automatic-summary">{{ resumen.texto }}</p>
+</section>

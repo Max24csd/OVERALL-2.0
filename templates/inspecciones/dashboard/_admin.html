@@ -1,0 +1,84 @@
+<div class="quick-actions">
+
+    <a
+    class="primary-button link-button"
+    href="{% url 'nueva_parada' %}"
+>
+    + Nueva parada
+    </a>
+    {% if parada_actual %}
+    <a
+        href="{% url 'gestionar_asignaciones_parada' parada_actual.id %}"
+        class="primary-button link-button"
+    >
+        Gestionar responsables
+    </a>
+    {% endif %}
+
+    <a
+        class="secondary-button link-button"
+        href="{% url 'usuarios_lista' %}"
+    >
+        Usuarios
+    </a>
+
+    <a
+        class="secondary-button link-button"
+        href="{% url 'historial_inspecciones' %}"
+    >
+        Historial
+    </a>
+
+    <span class="secondary-button quick-disabled">
+        Configuración · Próximamente
+    </span>
+
+</div>
+
+
+<!-- ====================================================== -->
+<!-- INSPECCIÓN ACTUAL                                     -->
+<!-- ====================================================== -->
+
+<section
+    class="dashboard-section"
+    id="inspecciones"
+>
+
+    <header class="dashboard-section-header">
+
+        <div>
+            <h2>Inspección actual</h2>
+
+            <p>
+                Formularios activos correspondientes a la inspección actual.
+            </p>
+        </div>
+
+    </header>
+
+
+    <div class="inspection-grid">
+
+        {% for inspeccion in inspecciones_nuevas_cvb0003 %}
+
+            {% include "inspecciones/dashboard/_inspection_card.html" with inspeccion=inspeccion %}
+
+        {% empty %}
+
+            <div class="empty-state">
+
+                <h3>No hay una inspección actual</h3>
+
+                <p>
+                    Cuando se cree una nueva parada de Chancado,
+                    los reportes aparecerán en esta sección.
+                </p>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+</section>
