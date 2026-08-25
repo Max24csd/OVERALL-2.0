@@ -46,13 +46,33 @@
             color: #64748b;
         }
 
+        .heading-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .dashboard-button,
         .new-user-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             padding: 11px 18px;
             border-radius: 7px;
-            background: #0868bf;
-            color: white;
             font-weight: 800;
             text-decoration: none;
+        }
+
+        .dashboard-button {
+            border: 1px solid #c7d3df;
+            background: white;
+            color: #10233d;
+        }
+
+        .new-user-button {
+            background: #0868bf;
+            color: white;
         }
 
         .users-card {
@@ -163,12 +183,21 @@
             </p>
         </div>
 
-        <a
-            class="new-user-button"
-            href="{% url 'usuario_crear' %}"
-        >
-            + Crear usuario
-        </a>
+        <div class="heading-actions">
+            <a
+                class="dashboard-button"
+                href="{% url 'dashboard' %}"
+            >
+                ← Dashboard
+            </a>
+
+            <a
+                class="new-user-button"
+                href="{% url 'usuario_crear' %}"
+            >
+                + Crear usuario
+            </a>
+        </div>
     </header>
 
     <section class="users-card">
