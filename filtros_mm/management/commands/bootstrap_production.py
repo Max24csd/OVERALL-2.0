@@ -5,6 +5,8 @@ from django.contrib.auth.models import Group
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
+from inspecciones.models import Faja
+
 
 ROLES = (
     "Administrador",
@@ -16,7 +18,7 @@ ROLES = (
 
 
 class Command(BaseCommand):
-    help = "Crea roles base y, si hay variables de entorno, el administrador inicial."
+    help = "Crea roles, equipos base y, si hay variables de entorno, el admin inicial."
 
     @transaction.atomic
     def handle(self, *args, **options):
@@ -25,6 +27,8 @@ class Command(BaseCommand):
             grupos[role], created = Group.objects.get_or_create(name=role)
             status = "creado" if created else "existente"
             self.stdout.write(f"Rol {role}: {status}")
+
+        self.crear_equipos_chancado()
 
         username = os.environ.get("ADMIN_USERNAME")
         password = os.environ.get("ADMIN_PASSWORD")
@@ -66,3 +70,35 @@ class Command(BaseCommand):
                 f"Administrador {username}: {status}"
             )
         )
+
+    def crear_equipos_chancado(self):
+        equipos = [
+            {
+                "tag": "CVB0001",
+                "nombre": "Faja Overland 01",
+                "descripcion": "Faja principal del proceso de Chancado.",
+            },
+            {
+                "tag": "CVB0003",
+                "nombre": "Faja Overland 03",
+                "descripcion": "Faja del proceso de Chancado.",
+            },
+            {
+                "tag": "CVB0004",
+                "nombre": "Faja Overland 04",
+                "descripcion": "Faja del proceso de Chancado.",
+            },
+        ]
+
+        for equipo in equipos:
+            _faja, created = Faja.objects.update_or_create(
+                tag=equipo["tag"],
+                defaults={
+                    "nombre": equipo["nombre"],
+                    "proceso": "Chancado",
+                    "descripcion": equipo["descripcion"],
+                    "estado": Faja.Estado.ACTIVA,
+                },
+            )
+            status = "creado" if created else "actualizado"
+            self.stdout.write(f"Equipo {equipo['tag']}: {status}")
