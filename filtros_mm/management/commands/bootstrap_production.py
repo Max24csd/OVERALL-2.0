@@ -29,6 +29,7 @@ class Command(BaseCommand):
             self.stdout.write(f"Rol {role}: {status}")
 
         self.crear_equipos_chancado()
+        self.crear_equipos_molienda()
 
         username = os.environ.get("ADMIN_USERNAME")
         password = os.environ.get("ADMIN_PASSWORD")
@@ -96,6 +97,68 @@ class Command(BaseCommand):
                 defaults={
                     "nombre": equipo["nombre"],
                     "proceso": "Chancado",
+                    "descripcion": equipo["descripcion"],
+                    "estado": Faja.Estado.ACTIVA,
+                },
+            )
+            status = "creado" if created else "actualizado"
+            self.stdout.write(f"Equipo {equipo['tag']}: {status}")
+
+    def crear_equipos_molienda(self):
+        equipos = [
+            {
+                "tag": "CVB0006",
+                "nombre": "Faja 06",
+                "descripcion": "Faja 6 del proceso de Molienda.",
+            },
+            {
+                "tag": "CVB0007",
+                "nombre": "Faja 07",
+                "descripcion": "Faja 7 del proceso de Molienda.",
+            },
+            {
+                "tag": "CVB0010",
+                "nombre": "Faja 10",
+                "descripcion": "Faja 10 del proceso de Molienda.",
+            },
+            {
+                "tag": "CVB0010-ENTRANTE",
+                "nombre": "Faja 10 Entrante",
+                "descripcion": "Top Cover entrante de Faja 10 del proceso de Molienda.",
+            },
+            {
+                "tag": "CVB0010-SALIENTE",
+                "nombre": "Faja 10 Saliente",
+                "descripcion": "Top Cover saliente de Faja 10 del proceso de Molienda.",
+            },
+            {
+                "tag": "CVB0011",
+                "nombre": "Faja 11",
+                "descripcion": "Faja 11 del proceso de Molienda.",
+            },
+            {
+                "tag": "CVB0015",
+                "nombre": "Faja 15",
+                "descripcion": "Faja 15 del proceso de Molienda.",
+            },
+            {
+                "tag": "CVB0017",
+                "nombre": "Faja 17",
+                "descripcion": "Faja 17 del proceso de Molienda.",
+            },
+            {
+                "tag": "CVB0018",
+                "nombre": "Faja 18",
+                "descripcion": "Faja 18 del proceso de Molienda.",
+            },
+        ]
+
+        for equipo in equipos:
+            _faja, created = Faja.objects.update_or_create(
+                tag=equipo["tag"],
+                defaults={
+                    "nombre": equipo["nombre"],
+                    "proceso": "Molienda",
                     "descripcion": equipo["descripcion"],
                     "estado": Faja.Estado.ACTIVA,
                 },

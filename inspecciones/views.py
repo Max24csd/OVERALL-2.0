@@ -1,14 +1,30 @@
 from decimal import Decimal
+from io import BytesIO
+from pathlib import Path
 import re
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 from django.db import connection, models as django_models, transaction
 from django.db.models import Count, Q
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from openpyxl import load_workbook
+from openpyxl.drawing.image import Image as ExcelImage
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import (
+    Image as PdfImage,
+    Paragraph,
+    SimpleDocTemplate,
+    Spacer,
+    Table,
+    TableStyle,
+)
 
 from .forms import (
     CalibracionUTFajaCVB0003FormSet,
@@ -578,9 +594,16 @@ def _codigo_equipo_dashboard(inspeccion):
     tag = (getattr(inspeccion.faja, "tag", "") or "").upper()
     tag_normalizado = re.sub(r"[^A-Z0-9]", "", tag)
     equivalencias = (
+        (("CVB0010", "CVB010"), "CVB010"),
         (("CVB0001", "CVB001"), "CVB001"),
         (("CVB0003", "CVB003"), "CVB003"),
         (("CVB0004", "CVB004"), "CVB004"),
+        (("CVB0006", "CVB006"), "CVB006"),
+        (("CVB0007", "CVB007"), "CVB007"),
+        (("CVB0011", "CVB011"), "CVB011"),
+        (("CVB0015", "CVB015"), "CVB015"),
+        (("CVB0017", "CVB017"), "CVB017"),
+        (("CVB0018", "CVB018"), "CVB018"),
     )
     for variantes, codigo in equivalencias:
         if any(variante in tag_normalizado for variante in variantes):
@@ -1063,6 +1086,273 @@ def nueva_parada(request):
         {
             "form": form,
             "intermitente_form": intermitente_form,
+        },
+    )
+
+
+def _crear_accesos_parada(
+    *,
+    parada,
+    request,
+    fecha_inicio,
+    fecha_fin,
+    inspectores,
+    supervisores,
+    analistas,
+    cliente,
+    acceso_inicio,
+    acceso_fin,
+):
+    inicio_parada = timezone.make_aware(
+        timezone.datetime.combine(
+            fecha_inicio,
+            timezone.datetime.min.time(),
+        ),
+        timezone.get_current_timezone(),
+    )
+
+    fin_parada = timezone.make_aware(
+        timezone.datetime.combine(
+            fecha_fin,
+            timezone.datetime.max.time(),
+        ),
+        timezone.get_current_timezone(),
+    )
+
+    equipos_humanos = {
+        "Inspector": inspectores,
+        "Supervisor": supervisores,
+        "Analista": analistas,
+        "Cliente": [cliente],
+    }
+
+    for rol_acceso, usuarios_rol in equipos_humanos.items():
+        for usuario_acceso in usuarios_rol:
+            try:
+                perfil = usuario_acceso.perfil_sistema
+            except PerfilUsuario.DoesNotExist:
+                perfil = None
+
+            es_intermitente = (
+                perfil
+                and perfil.tipo_vinculo
+                == PerfilUsuario.TipoVinculo.INTERMITENTE
+            )
+
+            AccesoParada.objects.create(
+                parada=parada,
+                usuario=usuario_acceso,
+                rol=rol_acceso,
+                fecha_inicio=(
+                    acceso_inicio
+                    if es_intermitente
+                    else inicio_parada
+                ),
+                fecha_fin=(
+                    acceso_fin
+                    if es_intermitente
+                    else fin_parada
+                ),
+                activo=True,
+                creado_por=request.user,
+            )
+
+
+@login_required
+def nueva_parada_molienda(request):
+    rol = obtener_rol(request.user)
+
+    if rol != "Administrador":
+        return HttpResponseForbidden(
+            "Solo el Administrador puede crear una nueva parada."
+        )
+
+    form = NuevaParadaForm()
+    intermitente_form = CrearIntermitenteParadaForm()
+    contexto_base = {
+        "proceso_label": "Molienda",
+        "reportes_label": (
+            "Top Cover/Faja y Poleas para Faja 6, "
+            "Faja 7, Faja 10, Faja 11, Faja 15, Faja 17 y Faja 18."
+        ),
+        "volver_url": "dashboard",
+    }
+
+    if request.method == "POST":
+        accion = request.POST.get("accion", "crear_parada")
+
+        if accion == "crear_intermitente":
+            intermitente_form = CrearIntermitenteParadaForm(request.POST)
+
+            if intermitente_form.is_valid():
+                try:
+                    with transaction.atomic():
+                        usuario_nuevo = intermitente_form.crear_usuario()
+
+                    rol_nuevo = intermitente_form.cleaned_data[
+                        "rol_intermitente"
+                    ]
+
+                    campo_por_rol = {
+                        "Inspector": "inspectores",
+                        "Supervisor": "supervisores",
+                        "Analista": "analistas",
+                        "Cliente": "cliente",
+                    }
+                    campo_inicial = campo_por_rol[rol_nuevo]
+
+                    form = NuevaParadaForm(
+                        initial={
+                            campo_inicial: (
+                                usuario_nuevo.id
+                                if rol_nuevo == "Cliente"
+                                else [usuario_nuevo.id]
+                            ),
+                        }
+                    )
+
+                    messages.success(
+                        request,
+                        (
+                            f"Usuario intermitente "
+                            f"{usuario_nuevo.username} creado "
+                            f"correctamente como {rol_nuevo}. "
+                            "Ya aparece disponible en la seleccion."
+                        ),
+                    )
+                    intermitente_form = CrearIntermitenteParadaForm()
+                except Exception as error:
+                    messages.error(
+                        request,
+                        (
+                            "No se pudo crear el usuario "
+                            f"intermitente: {error}"
+                        ),
+                    )
+            else:
+                messages.error(
+                    request,
+                    "Revisa los datos del nuevo usuario intermitente.",
+                )
+
+        elif accion == "crear_parada":
+            form = NuevaParadaForm(request.POST)
+
+            if form.is_valid():
+                fecha_inicio = form.cleaned_data["fecha_inicio"]
+                fecha_fin = form.cleaned_data.get("fecha_fin") or fecha_inicio
+                inspectores = list(form.cleaned_data["inspectores"])
+                supervisores = list(form.cleaned_data["supervisores"])
+                analistas = list(form.cleaned_data["analistas"])
+                cliente = form.cleaned_data["cliente"]
+                inspector_principal = inspectores[0]
+                supervisor_principal = supervisores[0]
+                analista_principal = analistas[0]
+                acceso_inicio = form.cleaned_data.get("acceso_inicio")
+                acceso_fin = form.cleaned_data.get("acceso_fin")
+
+                configs_molienda = [
+                    ("CVB0006", ["CVB006", "CVB0006", "0240-CVB-006", "0240-CVB0006", "0310CVB0006"], [("FAJA", "FAJA"), ("POLEAS", "POLEAS")]),
+                    ("CVB0007", ["CVB007", "CVB0007", "0240-CVB-007", "0240-CVB0007", "0310CVB0007"], [("FAJA", "FAJA"), ("POLEAS", "POLEAS")]),
+                    ("CVB0010-ENTRANTE", ["CVB0010-ENTRANTE"], [("FAJA", "FAJA-ENTRANTE"), ("POLEAS", "POLEAS-ENTRANTE")]),
+                    ("CVB0010-SALIENTE", ["CVB0010-SALIENTE"], [("FAJA", "FAJA-SALIENTE"), ("POLEAS", "POLEAS-SALIENTE")]),
+                    ("CVB0011", ["CVB0011"], [("FAJA", "FAJA"), ("POLEAS", "POLEAS")]),
+                    ("CVB0015", ["CVB0015"], [("FAJA", "FAJA"), ("POLEAS", "POLEAS")]),
+                    ("CVB0017", ["CVB0017"], [("FAJA", "FAJA"), ("POLEAS", "POLEAS")]),
+                    ("CVB0018", ["CVB0018"], [("FAJA", "FAJA"), ("POLEAS", "POLEAS")]),
+                ]
+                equipos_molienda = []
+
+                for codigo_equipo, tags, reportes in configs_molienda:
+                    faja = Faja.objects.filter(
+                        tag__in=tags,
+                        estado=Faja.Estado.ACTIVA,
+                    ).first()
+
+                    if not faja:
+                        form.add_error(
+                            None,
+                            f"No se encontro el equipo activo {codigo_equipo}.",
+                        )
+                        continue
+
+                    equipos_molienda.append((codigo_equipo, faja, reportes))
+
+                if form.errors:
+                    return render(
+                        request,
+                        "inspecciones/nueva_parada.html",
+                        {
+                            "form": form,
+                            "intermitente_form": intermitente_form,
+                            **contexto_base,
+                        },
+                    )
+
+                with transaction.atomic():
+                    parada = form.save(commit=False)
+                    parada.planta = "Molienda"
+                    parada.estado = Parada.Estado.PROGRAMADA
+                    parada.creado_por = request.user
+                    parada.save()
+
+                    _crear_accesos_parada(
+                        parada=parada,
+                        request=request,
+                        fecha_inicio=fecha_inicio,
+                        fecha_fin=fecha_fin,
+                        inspectores=inspectores,
+                        supervisores=supervisores,
+                        analistas=analistas,
+                        cliente=cliente,
+                        acceso_inicio=acceso_inicio,
+                        acceso_fin=acceso_fin,
+                    )
+
+                    for codigo_equipo, faja, reportes in equipos_molienda:
+                        for tipo_codigo, sufijo in reportes:
+                            tipo = getattr(Inspeccion.Tipo, tipo_codigo)
+                            Inspeccion.objects.create(
+                                parada=parada,
+                                faja=faja,
+                                tipo=tipo,
+                                codigo_reporte=(
+                                    f"PARADA-{parada.id}-"
+                                    f"{codigo_equipo}-{sufijo}"
+                                ),
+                                fecha_programada=fecha_inicio,
+                                fecha_inspeccion=fecha_inicio,
+                                inspector=inspector_principal,
+                                supervisor=supervisor_principal,
+                                analista=analista_principal,
+                                cliente=cliente,
+                                estado=Inspeccion.Estado.BORRADOR,
+                                planta="Molienda",
+                                proceso="Transporte de concentrado",
+                                etapa="Operaciones",
+                                condicion_equipo="En uso",
+                                creado_por=request.user,
+                            )
+
+                messages.success(
+                    request,
+                    (
+                        "Parada de Molienda creada correctamente. "
+                        "Se generaron los reportes de Molienda: "
+                        "Faja/Top Cover y Poleas."
+                    ),
+                )
+                return redirect("dashboard")
+
+            messages.error(request, "Revisa los datos de la nueva parada.")
+
+    return render(
+        request,
+        "inspecciones/nueva_parada.html",
+        {
+            "form": form,
+            "intermitente_form": intermitente_form,
+            **contexto_base,
         },
     )
 
@@ -1935,6 +2225,40 @@ def dashboard(request):
         reportes_filtros_total = (
             parada_filtros_actual.reportes_filtros.count()
         )
+
+    parada_molienda_actual = None
+
+    if rol == "Administrador":
+        parada_molienda_actual = (
+            Parada.objects
+            .filter(planta__iexact="Molienda")
+            .order_by("-fecha_inicio", "-id")
+            .first()
+        )
+    else:
+        accesos_molienda = (
+            AccesoParada.objects
+            .select_related("parada")
+            .filter(
+                usuario_id=request.user.id,
+                rol=rol,
+                activo=True,
+                parada__planta__iexact="Molienda",
+            )
+            .order_by("-parada__fecha_inicio", "-parada_id")
+        )
+
+        for acceso in accesos_molienda:
+            if acceso.esta_vigente():
+                parada_molienda_actual = acceso.parada
+                break
+
+    inspecciones_molienda_total = 0
+
+    if parada_molienda_actual:
+        inspecciones_molienda_total = (
+            parada_molienda_actual.inspecciones.count()
+        )
     # ==========================================================
     # CLIENTE: ÚLTIMA PARADA HISTÓRICA OFICIAL (SOLO LECTURA)
     # ==========================================================
@@ -2016,6 +2340,8 @@ def dashboard(request):
             "parada_actual": parada_actual,
             "parada_filtros_actual": parada_filtros_actual,
             "reportes_filtros_total": reportes_filtros_total,
+            "parada_molienda_actual": parada_molienda_actual,
+            "inspecciones_molienda_total": inspecciones_molienda_total,
             "historial_cliente_por_equipo": (
                 historial_cliente_por_equipo
             ),
@@ -2250,6 +2576,43 @@ def crear_estructura_poleas(inspeccion):
         cantidad_poleas = 9
         prefijo_tag = "CVB0003-P"
         condicion_inicial = Inspeccion.Condicion.NORMAL
+    elif tag_faja in [
+        "CVB0006",
+        "CVB006",
+        "0240-CVB-006",
+        "0240-CVB0006",
+        "0310CVB0006",
+        "CVB0007",
+        "CVB007",
+        "0240-CVB-007",
+        "0240-CVB0007",
+        "0310CVB0007",
+        "CVB0010",
+        "CVB010",
+        "CVB0010-ENTRANTE",
+        "CVB0010-SALIENTE",
+        "0320-CVB-0010",
+        "0320CVB0010",
+    ]:
+        cantidad_poleas = 8
+        prefijo_tag = f"{tag_faja.replace('-', '')}-P"
+        condicion_inicial = "No medido"
+    elif tag_faja == "CVB0011":
+        cantidad_poleas = 7
+        prefijo_tag = "CVB0011-P"
+        condicion_inicial = "No medido"
+    elif tag_faja == "CVB0015":
+        cantidad_poleas = 5
+        prefijo_tag = "CVB0015-P"
+        condicion_inicial = "No medido"
+    elif tag_faja == "CVB0017":
+        cantidad_poleas = 2
+        prefijo_tag = "CVB0017-P"
+        condicion_inicial = "No medido"
+    elif tag_faja == "CVB0018":
+        cantidad_poleas = 5
+        prefijo_tag = "CVB0018-P"
+        condicion_inicial = "No medido"
     else:
         cantidad_poleas = 5
         prefijo_tag = "CVB0001-P"
@@ -3735,6 +4098,242 @@ def formulario_faja_cvb0004(request, inspeccion):
             **permisos,
         },
     )
+def crear_estructura_faja_cvb0006_molienda(inspeccion):
+    if inspeccion.tipo != Inspeccion.Tipo.FAJA:
+        return
+
+    tag = (inspeccion.faja.tag or "").upper().strip()
+    if tag not in [
+        "CVB0006",
+        "CVB006",
+        "0240-CVB-006",
+        "0240-CVB0006",
+        "0310CVB0006",
+        "CVB0007",
+        "CVB007",
+        "0240-CVB-007",
+        "0240-CVB0007",
+        "0310CVB0007",
+        "CVB0010",
+        "CVB010",
+        "CVB0010-ENTRANTE",
+        "CVB0010-SALIENTE",
+        "0320-CVB-0010",
+        "0320CVB0010",
+        "CVB0011",
+        "CVB0015",
+        "CVB0017",
+        "CVB0018",
+    ]:
+        return
+
+    CalibracionUTFajaCVB0003.objects.get_or_create(
+        inspeccion=inspeccion,
+        numero=1,
+        defaults={
+            "marca_equipo": "OLYMPUS",
+            "modelo_equipo": "6LT PLUS",
+            "frecuencia_mhz": "1",
+            "rango_mm": "0.2 MHZ - 1.2 MHZ",
+            "metodo_empleado": "OS - UT - 0014",
+            "acoplante": "Echo gel",
+            "rectificacion": "Full",
+            "velocidad_ms": "19.37",
+            "retardo_us": "2.87",
+            "tipo_scan": "A Scan",
+        },
+    )
+
+    empalmes_config = [
+        ("EMPALME E-01", "DESPUES", 1),
+        ("EMPALME E-01", "EMPALME", 2),
+        ("EMPALME E-01", "ANTES", 3),
+        ("EMPALME E-02", "DESPUES", 101),
+        ("EMPALME E-02", "EMPALME", 102),
+        ("EMPALME E-02", "ANTES", 103),
+    ]
+
+    for zona, posicion, orden in empalmes_config:
+        MedicionEmpalmeCVB0003.objects.get_or_create(
+            inspeccion=inspeccion,
+            zona=zona,
+            posicion=posicion,
+            defaults={
+                "empalme": zona.replace("EMPALME ", ""),
+                "bastidor_lado": "0240-CVB-0006",
+                "espesor_nominal": Decimal("10.00"),
+                "orden": orden,
+            },
+        )
+
+    for numero in range(1, 8):
+        MedicionTramoCVB0003.objects.get_or_create(
+            inspeccion=inspeccion,
+            tipo=MedicionTramoCVB0003.Tipo.CARGA,
+            medicion=numero,
+            defaults={
+                "tramo": "TOP COVER",
+                "bastidor": str(numero),
+                "espesor_nominal": Decimal("10.00"),
+                "orden": numero,
+            },
+        )
+
+
+@transaction.atomic
+def formulario_faja_cvb0006_molienda(request, inspeccion):
+    crear_estructura_faja_cvb0006_molienda(inspeccion)
+
+    permisos = obtener_permisos_flujo(request.user, inspeccion)
+    puede_editar = permisos["puede_editar"]
+
+    empalmes_qs = inspeccion.empalmes_cvb0003.order_by("orden", "id")
+    top_cover_qs = inspeccion.tramos_cvb0003.filter(
+        tipo=MedicionTramoCVB0003.Tipo.CARGA,
+    ).order_by("orden", "id")
+
+    fotos_config = {
+        "fotos_e01_formset": ("EMPALMES", "fotos-e01"),
+        "fotos_top_cover_formset": ("CARGA", "fotos-top-cover"),
+        "fotos_e02_formset": ("RETORNO", "fotos-e02"),
+    }
+
+    formsets_fotos = {}
+    for nombre, (seccion, prefijo) in fotos_config.items():
+        kwargs = {
+            "instance": inspeccion,
+            "prefix": prefijo,
+            "queryset": inspeccion.fotografias_cvb0003.filter(
+                seccion=seccion
+            ),
+        }
+        if request.method == "POST":
+            kwargs.update({"data": request.POST, "files": request.FILES})
+        formsets_fotos[nombre] = FotoFajaCVB0003FormSet(**kwargs)
+
+    if request.method == "POST":
+        if not puede_editar:
+            return HttpResponseForbidden(
+                "La inspeccion no esta habilitada para edicion."
+            )
+
+        formulario = InspeccionForm(request.POST, instance=inspeccion)
+        calibracion_formset = CalibracionUTFajaCVB0003FormSet(
+            request.POST,
+            instance=inspeccion,
+            prefix="calibracion",
+        )
+        empalmes_formset = MedicionEmpalmeCVB0003FormSet(
+            request.POST,
+            instance=inspeccion,
+            prefix="empalmes",
+            queryset=empalmes_qs,
+        )
+        top_cover_formset = MedicionTramoCVB0003FormSet(
+            request.POST,
+            instance=inspeccion,
+            prefix="top-cover",
+            queryset=top_cover_qs,
+        )
+
+        formularios_validos = [
+            formulario.is_valid(),
+            calibracion_formset.is_valid(),
+            empalmes_formset.is_valid(),
+            top_cover_formset.is_valid(),
+            *[formset.is_valid() for formset in formsets_fotos.values()],
+        ]
+
+        if all(formularios_validos):
+            inspeccion_guardada = formulario.save()
+            calibracion_formset.save()
+            empalmes_formset.save()
+            top_cover_formset.save()
+
+            for nombre, (seccion, _prefijo) in fotos_config.items():
+                fotografias = formsets_fotos[nombre].save(commit=False)
+                for fotografia in fotografias:
+                    fotografia.inspeccion = inspeccion_guardada
+                    fotografia.seccion = seccion
+                    if not fotografia.subida_por_id:
+                        fotografia.subida_por = request.user
+                    fotografia.save()
+
+                for fotografia_eliminada in (
+                    formsets_fotos[nombre].deleted_objects
+                ):
+                    fotografia_eliminada.delete()
+
+            accion = request.POST.get("workflow_action", "guardar")
+            comentario_revision = request.POST.get(
+                "comentario_revision",
+                "",
+            ).strip()
+
+            if accion == "guardar":
+                messages.success(
+                    request,
+                    "Los cambios se guardaron correctamente.",
+                )
+            else:
+                correcto, mensaje = _aplicar_accion_flujo(
+                    request,
+                    inspeccion_guardada,
+                    accion,
+                    comentario_revision,
+                )
+                if correcto:
+                    messages.success(request, mensaje)
+                else:
+                    messages.error(request, mensaje)
+
+            return redirect("formulario_faja", inspeccion_id=inspeccion.id)
+
+        messages.error(
+            request,
+            "No se pudo guardar. Revisa los campos marcados.",
+        )
+    else:
+        formulario = InspeccionForm(instance=inspeccion)
+        calibracion_formset = CalibracionUTFajaCVB0003FormSet(
+            instance=inspeccion,
+            prefix="calibracion",
+        )
+        empalmes_formset = MedicionEmpalmeCVB0003FormSet(
+            instance=inspeccion,
+            prefix="empalmes",
+            queryset=empalmes_qs,
+        )
+        top_cover_formset = MedicionTramoCVB0003FormSet(
+            instance=inspeccion,
+            prefix="top-cover",
+            queryset=top_cover_qs,
+        )
+
+    return render(
+        request,
+        "inspecciones/formulario_faja_cvb0006_molienda.html",
+        {
+            "inspeccion": inspeccion,
+            "formulario": formulario,
+            "calibracion_formset": calibracion_formset,
+            "empalmes_formset": empalmes_formset,
+            "empalme_e01_forms": [
+                form for form in empalmes_formset
+                if form.instance.zona == "EMPALME E-01"
+            ],
+            "empalme_e02_forms": [
+                form for form in empalmes_formset
+                if form.instance.zona == "EMPALME E-02"
+            ],
+            "top_cover_formset": top_cover_formset,
+            "molienda_config": _molienda_config(inspeccion),
+            **formsets_fotos,
+            **permisos,
+        },
+    )
+
+
 @login_required
 @transaction.atomic
 def formulario_faja(request, inspeccion_id):
@@ -3822,6 +4421,37 @@ def formulario_faja(request, inspeccion_id):
         "0220-CVB0004",
     ]:
         return formulario_faja_cvb0004(
+            request,
+            inspeccion,
+        )
+
+    # =====================================================
+    # FORMULARIO ESPECIAL MOLIENDA CVB0006
+    # =====================================================
+
+    if tag_faja in [
+        "CVB0006",
+        "CVB006",
+        "0240-CVB-006",
+        "0240-CVB0006",
+        "0310CVB0006",
+        "CVB0007",
+        "CVB007",
+        "0240-CVB-007",
+        "0240-CVB0007",
+        "0310CVB0007",
+        "CVB0010",
+        "CVB010",
+        "CVB0010-ENTRANTE",
+        "CVB0010-SALIENTE",
+        "0320-CVB-0010",
+        "0320CVB0010",
+        "CVB0011",
+        "CVB0015",
+        "CVB0017",
+        "CVB0018",
+    ]:
+        return formulario_faja_cvb0006_molienda(
             request,
             inspeccion,
         )
@@ -4140,6 +4770,33 @@ def reporte_faja(request, inspeccion_id):
         inspeccion.faja.tag
         or ""
     ).upper().strip()
+
+    if tag_faja in [
+        "CVB0006",
+        "CVB006",
+        "0240-CVB-006",
+        "0240-CVB0006",
+        "0310CVB0006",
+        "CVB0007",
+        "CVB007",
+        "0240-CVB-007",
+        "0240-CVB0007",
+        "0310CVB0007",
+        "CVB0010",
+        "CVB010",
+        "CVB0010-ENTRANTE",
+        "CVB0010-SALIENTE",
+        "0320-CVB-0010",
+        "0320CVB0010",
+        "CVB0011",
+        "CVB0015",
+        "CVB0017",
+        "CVB0018",
+    ]:
+        return redirect(
+            "formulario_faja",
+            inspeccion_id=inspeccion.id,
+        )
 
     if tag_faja in [
         "CVB0001",
@@ -4507,6 +5164,415 @@ def exportar_excel_faja_cvb0001(request, inspeccion_id):
     return response
 
 
+def _nombre_usuario(usuario):
+    if not usuario:
+        return ""
+    return usuario.get_full_name() or usuario.username
+
+
+def _molienda_config(inspeccion):
+    tag = re.sub(r"[^A-Z0-9]", "", (inspeccion.faja.tag or "").upper())
+    if "CVB0010" in tag or "CVB010" in tag:
+        variante = "Saliente" if "SALIENTE" in tag else "Entrante"
+        return {
+            "codigo": "CVB0010",
+            "tag_largo": "0320-CVB-0010",
+            "faja": f"Faja 10 {variante}",
+            "static_key": "cvb0010",
+            "diagrama_faja": "inspecciones/faja/cvb0010/diagrama_ut_cvb0010.png",
+            "esquema_poleas": "inspecciones/faja/cvb0010/diagrama_ut_cvb0010.png",
+            "poleas_count": 8,
+            "poleas_ceramicas": {4},
+        }
+    if "CVB0007" in tag or "CVB007" in tag:
+        return {
+            "codigo": "CVB0007",
+            "tag_largo": "0240-CVB-0007",
+            "faja": "Faja 07",
+            "static_key": "cvb0007",
+            "diagrama_faja": "inspecciones/faja/cvb0007/diagrama_ut_cvb0007.png",
+            "esquema_poleas": "inspecciones/poleas/cvb0007/esquema_poleas_cvb0007.png",
+            "poleas_count": 8,
+            "poleas_ceramicas": {4},
+        }
+    if "CVB0018" in tag:
+        return {
+            "codigo": "CVB0018",
+            "tag_largo": "0320-CVB-0018",
+            "faja": "Faja 18",
+            "static_key": "cvb0018",
+            "diagrama_faja": "inspecciones/faja/cvb0018/diagrama_ut_cvb0018.png",
+            "esquema_poleas": "inspecciones/poleas/cvb0018/esquema_poleas_cvb0018.png",
+            "poleas_count": 5,
+            "poleas_ceramicas": {3, 4},
+        }
+    if "CVB0017" in tag:
+        return {
+            "codigo": "CVB0017",
+            "tag_largo": "0320-CVB-0017",
+            "faja": "Faja 17",
+            "static_key": "cvb0017",
+            "diagrama_faja": "inspecciones/faja/cvb0017/diagrama_ut_cvb0017.png",
+            "esquema_poleas": "inspecciones/poleas/cvb0017/esquema_poleas_cvb0017.png",
+            "poleas_count": 2,
+            "poleas_ceramicas": set(),
+        }
+    if "CVB0015" in tag:
+        return {
+            "codigo": "CVB0015",
+            "tag_largo": "0320-CVB-0015",
+            "faja": "Faja 15",
+            "static_key": "cvb0015",
+            "diagrama_faja": "inspecciones/faja/cvb0015/diagrama_ut_cvb0015.png",
+            "esquema_poleas": "inspecciones/poleas/cvb0015/esquema_poleas_cvb0015.png",
+            "poleas_count": 5,
+            "poleas_ceramicas": {1, 3, 5},
+        }
+    if "CVB0011" in tag:
+        return {
+            "codigo": "CVB0011",
+            "tag_largo": "0320-CVB-0011",
+            "faja": "Faja 11",
+            "static_key": "cvb0011",
+            "diagrama_faja": "inspecciones/faja/cvb0011/diagrama_ut_cvb0011.png",
+            "esquema_poleas": "inspecciones/poleas/cvb0011/esquema_poleas_cvb0011.png",
+            "poleas_count": 7,
+            "poleas_ceramicas": set(),
+        }
+    return {
+        "codigo": "CVB0006",
+        "tag_largo": "0240-CVB-0006",
+        "faja": "Faja 06",
+        "static_key": "cvb0006",
+        "diagrama_faja": "inspecciones/faja/cvb0006/diagrama_ut_cvb0006.png",
+        "esquema_poleas": "inspecciones/poleas/cvb0006/esquema_poleas_cvb0006.png",
+        "poleas_count": 8,
+        "poleas_ceramicas": {4},
+    }
+
+
+def _molienda_master_path(inspeccion):
+    masters = (
+        settings.BASE_DIR
+        / "inspecciones"
+        / "reportes"
+        / "molienda"
+    )
+    config = _molienda_config(inspeccion)
+    codigo = config["codigo"].lower()
+    masters = masters / codigo / "masters"
+    if codigo == "cvb0007":
+        if inspeccion.tipo == Inspeccion.Tipo.POLEAS:
+            return masters / "20260705-VTUT-0310CVB0007-REPORTE POLEAS FAJA 7.xlsx"
+        return masters / "20260630-VTUT-0310CVB0007-REPORTE DE TOP COVER FAJA 7.xlsx"
+    if codigo == "cvb0010":
+        if "SALIENTE" in (inspeccion.codigo_reporte or "").upper():
+            return masters / "20260602-VTUT-0320CVB0010-REPORTE DE TOP COVER FAJA 10 SALIENTE.xlsx"
+        return masters / "20260602-VTUT-0320CVB0010-REPORTE DE TOP COVER FAJA 10 ENTRANTE.xlsx"
+    if codigo == "cvb0011":
+        if inspeccion.tipo == Inspeccion.Tipo.POLEAS:
+            return masters / "202603630-VTUT-0320CVB0011-REPORTE POLEAS FAJA 11.xlsx"
+        return masters / "20260630-VTUT-0320CVB0011-REPORTE DE TOP COVER FAJA 11.xlsx"
+    if codigo == "cvb0015":
+        if inspeccion.tipo == Inspeccion.Tipo.POLEAS:
+            return masters / "20260630-VTUT-0320CVB0015-REPORTE POLEAS FAJA 15.xlsx"
+        return masters / "20260630-VTUT0310CVB0015-REPORTE TOP COVER FAJA 15.xlsx"
+    if codigo == "cvb0017":
+        if inspeccion.tipo == Inspeccion.Tipo.POLEAS:
+            return masters / "20260630-VTUT-0320CVB0017-REPORTE POLEAS FAJA 17.xlsx"
+        return masters / "20260630VTUT0310CVB0017-REPORTE DE TOP COVER FAJA 17.xlsx"
+    if codigo == "cvb0018":
+        if inspeccion.tipo == Inspeccion.Tipo.POLEAS:
+            return masters / "20260630-VTUT-0320CVB00018-REPORTE POLEAS FAJA 18.xlsx"
+        return masters / "20260630-VTUT-0320CVB0018-REPORTE DE TOP COVER FAJA 18.xlsx"
+    if inspeccion.tipo == Inspeccion.Tipo.FAJA:
+        return masters / "20260630-VTUT-0310CVB0006-REPORTE DE TOP COVER FAJA 6.xlsx"
+    return masters / "20260605-VTUT-0310CVB0006-REPORTE POLEAS FAJA 6.xlsx"
+
+
+def _response_xlsx(workbook, filename):
+    output = BytesIO()
+    workbook.save(output)
+    output.seek(0)
+    response = HttpResponse(
+        output.getvalue(),
+        content_type=(
+            "application/vnd.openxmlformats-officedocument."
+            "spreadsheetml.sheet"
+        ),
+    )
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
+
+
+def _llenar_cabecera_molienda(ws, inspeccion):
+    fecha_inspeccion = inspeccion.fecha_inspeccion or inspeccion.fecha_programada
+    fecha_reporte = inspeccion.fecha_reporte or fecha_inspeccion
+    config = _molienda_config(inspeccion)
+    valores = {
+        "J6": inspeccion.condicion_general or "",
+        "J9": "MOLIENDA",
+        "W9": "TRANSPORTE DE CONCENTRADO",
+        "J11": config["faja"].upper(),
+        "W11": config["tag_largo"],
+        "J13": inspeccion.etapa or "Operaciones",
+        "W13": inspeccion.condicion_equipo or "EN USO",
+        "J15": fecha_inspeccion,
+        "W15": fecha_reporte,
+        "J17": _nombre_usuario(inspeccion.inspector),
+        "W17": _nombre_usuario(inspeccion.supervisor),
+        "J19": _nombre_usuario(inspeccion.analista),
+        "W19": _nombre_usuario(inspeccion.analista),
+        "J22": inspeccion.circunstancias or "",
+        "J23": inspeccion.observaciones or "",
+        "J26": inspeccion.recomendaciones or "",
+    }
+    for celda, valor in valores.items():
+        _set_excel_value(ws, celda, valor)
+
+
+def _set_excel_value(ws, cell_ref, value):
+    target = ws[cell_ref]
+    for merged_range in ws.merged_cells.ranges:
+        if cell_ref in merged_range:
+            target = ws.cell(
+                row=merged_range.min_row,
+                column=merged_range.min_col,
+            )
+            break
+    target.value = value
+
+
+def _valores_ag(fila):
+    return [fila.a, fila.b, fila.c, fila.d, fila.e, fila.f, fila.g]
+
+
+def _escribir_ag(ws, row, start_col, fila):
+    for offset, valor in enumerate(_valores_ag(fila)):
+        ws.cell(row=row, column=start_col + offset, value=valor)
+
+
+def _filas_inicio_poleas(ws, poleas):
+    """Locate the first data row of each polea table in the master."""
+    numeros = {polea.numero for polea in poleas}
+    filas = {}
+    for row in ws.iter_rows():
+        for cell in row:
+            valor = str(cell.value or "").upper()
+            match = re.search(r"LAGGING DE LA POLEA\s*([0-9]+)", valor)
+            if match and int(match.group(1)) in numeros:
+                filas.setdefault(int(match.group(1)), cell.row + 4)
+    return filas
+
+
+def _ruta_foto_modelo(foto):
+    imagen = getattr(foto, "imagen", None)
+    if not imagen:
+        return None
+    try:
+        path = Path(imagen.path)
+    except (NotImplementedError, ValueError):
+        return None
+    return path if path.exists() else None
+
+
+def _limpiar_imagenes_desde_fila(ws, fila_minima):
+    ws._images = [
+        image for image in ws._images
+        if image.anchor._from.row + 1 < fila_minima
+    ]
+
+
+def _insertar_foto_excel(ws, foto, celda, ancho=300, alto=220):
+    ruta = _ruta_foto_modelo(foto)
+    if not ruta:
+        return
+    imagen = ExcelImage(str(ruta))
+    imagen.width = ancho
+    imagen.height = alto
+    ws.add_image(imagen, celda)
+
+
+@login_required
+def exportar_excel_molienda_cvb0006(request, inspeccion_id):
+    inspeccion = get_object_or_404(
+        Inspeccion.objects.select_related(
+            "faja",
+            "inspector",
+            "supervisor",
+            "analista",
+            "cliente",
+        ).prefetch_related(
+            "empalmes_cvb0003",
+            "tramos_cvb0003",
+            "poleas_inspeccionadas__mediciones",
+        ),
+        id=inspeccion_id,
+    )
+    if not usuario_puede_abrir_inspeccion(request.user, inspeccion):
+        return HttpResponseForbidden("No tienes permiso para descargar este reporte.")
+
+    tag = (inspeccion.faja.tag or "").upper().strip()
+    tags_molienda = {
+        "CVB0006",
+        "CVB006",
+        "0240-CVB-006",
+        "0240-CVB0006",
+        "0310CVB0006",
+        "CVB0007",
+        "CVB007",
+        "0240-CVB-007",
+        "0240-CVB0007",
+        "0310CVB0007",
+        "CVB0010",
+        "CVB010",
+        "CVB0010-ENTRANTE",
+        "CVB0010-SALIENTE",
+        "0320-CVB-0010",
+        "0320CVB0010",
+        "CVB0011",
+        "CVB0015",
+        "CVB0017",
+        "CVB0018",
+    }
+    if tag not in tags_molienda:
+        return HttpResponseForbidden("Esta descarga solo corresponde a Molienda.")
+
+    if inspeccion.tipo == Inspeccion.Tipo.FAJA:
+        crear_estructura_faja_cvb0006_molienda(inspeccion)
+        wb = load_workbook(_molienda_master_path(inspeccion))
+        ws = wb.active
+        _llenar_cabecera_molienda(ws, inspeccion)
+        _limpiar_imagenes_desde_fila(ws, 74)
+
+        e01 = list(inspeccion.empalmes_cvb0003.filter(zona="EMPALME E-01").order_by("orden"))
+        e02 = list(inspeccion.empalmes_cvb0003.filter(zona="EMPALME E-02").order_by("orden"))
+        top = list(inspeccion.tramos_cvb0003.filter(tipo=MedicionTramoCVB0003.Tipo.CARGA).order_by("orden"))
+
+        for row, fila in zip((56, 57, 58), e01):
+            _escribir_ag(ws, row, 7, fila)
+        for row, fila in zip((63, 64, 65), e02):
+            _escribir_ag(ws, row, 7, fila)
+        for row, fila in zip(range(60, 67), top):
+            _escribir_ag(ws, row, 31, fila)
+
+        fotos_e01 = list(inspeccion.fotografias_cvb0003.filter(seccion="EMPALMES").order_by("creada_en", "id")[:5])
+        fotos_top = list(inspeccion.fotografias_cvb0003.filter(seccion="CARGA").order_by("creada_en", "id")[:5])
+        fotos_e02 = list(inspeccion.fotografias_cvb0003.filter(seccion="RETORNO").order_by("creada_en", "id")[:5])
+        for foto, celda in zip(fotos_top, ["C74", "R74", "AG74", "C84", "R84"]):
+            _insertar_foto_excel(ws, foto, celda)
+        for foto, celda in zip(fotos_e01, ["F98", "R98", "AK98", "F108", "R108"]):
+            _insertar_foto_excel(ws, foto, celda)
+        for foto, celda in zip(fotos_e02, ["C124", "R124", "AG124", "C136", "R136"]):
+            _insertar_foto_excel(ws, foto, celda)
+
+        return _response_xlsx(wb, f"{inspeccion.codigo_reporte}_TOP_COVER.xlsx")
+
+    crear_estructura_poleas(inspeccion)
+    wb = load_workbook(_molienda_master_path(inspeccion))
+    ws = wb.active
+    _llenar_cabecera_molienda(ws, inspeccion)
+    _limpiar_imagenes_desde_fila(ws, 96)
+    poleas = list(
+        inspeccion.poleas_inspeccionadas.prefetch_related("mediciones").order_by("numero")
+    )
+    start_rows = _filas_inicio_poleas(ws, poleas)
+    for polea in poleas:
+        row0 = start_rows.get(polea.numero)
+        if not row0:
+            continue
+        for idx, medicion in enumerate(polea.mediciones.order_by("orden", "punto")[:3]):
+            _escribir_ag(ws, row0 + idx, 9, medicion)
+        foto = polea.fotografias.order_by("creada_en", "id").first()
+        if foto:
+            _insertar_foto_excel(ws, foto, f"AE{row0 + 9}", ancho=330, alto=220)
+
+    return _response_xlsx(wb, f"{inspeccion.codigo_reporte}_POLEAS.xlsx")
+
+
+@login_required
+def exportar_pdf_molienda_cvb0006(request, inspeccion_id):
+    inspeccion = get_object_or_404(
+        Inspeccion.objects.select_related(
+            "faja",
+            "inspector",
+            "supervisor",
+            "analista",
+            "cliente",
+        ).prefetch_related(
+            "empalmes_cvb0003",
+            "tramos_cvb0003",
+            "poleas_inspeccionadas__mediciones",
+        ),
+        id=inspeccion_id,
+    )
+    if not usuario_puede_abrir_inspeccion(request.user, inspeccion):
+        return HttpResponseForbidden("No tienes permiso para descargar este reporte.")
+
+    output = BytesIO()
+    doc = SimpleDocTemplate(
+        output,
+        pagesize=landscape(A4),
+        rightMargin=24,
+        leftMargin=24,
+        topMargin=24,
+        bottomMargin=24,
+    )
+    styles = getSampleStyleSheet()
+    config = _molienda_config(inspeccion)
+    story = [
+        Paragraph(f"REPORTE {inspeccion.codigo_reporte}", styles["Title"]),
+        Paragraph(
+            f"MOLIENDA - {config['tag_largo']} - {config['faja']}",
+            styles["Heading2"],
+        ),
+        Paragraph(
+            f"Inspector: {_nombre_usuario(inspeccion.inspector)} | "
+            f"Supervisor: {_nombre_usuario(inspeccion.supervisor)} | "
+            f"Analista: {_nombre_usuario(inspeccion.analista)}",
+            styles["Normal"],
+        ),
+        Spacer(1, 10),
+    ]
+    if inspeccion.tipo == Inspeccion.Tipo.POLEAS:
+        img_path = settings.BASE_DIR / "static" / config["esquema_poleas"]
+        story.append(PdfImage(str(img_path), width=760, height=245))
+        story.append(Spacer(1, 10))
+        for polea in inspeccion.poleas_inspeccionadas.order_by("numero"):
+            data = [["Punto", "A", "B", "C", "D", "E", "F", "G", "Prom", "Min"]]
+            for m in polea.mediciones.order_by("orden", "punto")[:3]:
+                data.append([m.punto, m.a, m.b, m.c, m.d, m.e, m.f, m.g, m.promedio, m.minimo])
+            story.append(Paragraph(f"Polea {polea.numero}", styles["Heading3"]))
+            story.append(Table(data, repeatRows=1))
+            story.append(Spacer(1, 8))
+    else:
+        img_path = settings.BASE_DIR / "static" / config["diagrama_faja"]
+        story.append(PdfImage(str(img_path), width=760, height=177))
+        story.append(Spacer(1, 10))
+        data = [["Seccion", "Punto", "A", "B", "C", "D", "E", "F", "G", "Prom", "Min"]]
+        filas = list(inspeccion.empalmes_cvb0003.order_by("orden")) + list(
+            inspeccion.tramos_cvb0003.filter(tipo=MedicionTramoCVB0003.Tipo.CARGA).order_by("orden")
+        )
+        for fila in filas:
+            punto = getattr(fila, "posicion", None) or getattr(fila, "medicion", "")
+            data.append([getattr(fila, "zona", "TOP COVER"), punto, fila.a, fila.b, fila.c, fila.d, fila.e, fila.f, fila.g, fila.promedio, fila.minimo])
+        story.append(Table(data, repeatRows=1))
+
+    for element in story:
+        if isinstance(element, Table):
+            element.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#087bbb")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("GRID", (0, 0), (-1, -1), 0.25, colors.black),
+                ("FONTSIZE", (0, 0), (-1, -1), 7),
+            ]))
+    doc.build(story)
+    output.seek(0)
+    response = HttpResponse(output.getvalue(), content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="{inspeccion.codigo_reporte}.pdf"'
+    return response
+
+
 @login_required
 def formulario_poleas(request, inspeccion_id):
     inspeccion = get_object_or_404(
@@ -4594,6 +5660,31 @@ def formulario_poleas(request, inspeccion_id):
         "0220-CVB0003",
     ]:
         numeros_poleas_ceramicas = {4, 5}
+    elif tag_faja in [
+        "CVB0006",
+        "CVB006",
+        "0240-CVB-006",
+        "0240-CVB0006",
+        "0310CVB0006",
+        "CVB0007",
+        "CVB007",
+        "0240-CVB-007",
+        "0240-CVB0007",
+        "0310CVB0007",
+        "CVB0010",
+        "CVB010",
+        "CVB0010-ENTRANTE",
+        "CVB0010-SALIENTE",
+        "0320-CVB-0010",
+        "0320CVB0010",
+    ]:
+        numeros_poleas_ceramicas = _molienda_config(inspeccion)[
+            "poleas_ceramicas"
+        ]
+    elif tag_faja in {"CVB0011", "CVB0015", "CVB0017", "CVB0018"}:
+        numeros_poleas_ceramicas = _molienda_config(inspeccion)[
+            "poleas_ceramicas"
+        ]
     else:
         numeros_poleas_ceramicas = set()
 
@@ -4904,6 +5995,31 @@ def formulario_poleas(request, inspeccion_id):
         template_name = (
             "inspecciones/formulario_poleas_cvb0003.html"
         )
+    elif tag_faja in [
+        "CVB0006",
+        "CVB006",
+        "0240-CVB-006",
+        "0240-CVB0006",
+        "0310CVB0006",
+        "CVB0007",
+        "CVB007",
+        "0240-CVB-007",
+        "0240-CVB0007",
+        "0310CVB0007",
+        "CVB0010",
+        "CVB010",
+        "CVB0010-ENTRANTE",
+        "CVB0010-SALIENTE",
+        "0320-CVB-0010",
+        "0320CVB0010",
+        "CVB0011",
+        "CVB0015",
+        "CVB0017",
+        "CVB0018",
+    ]:
+        template_name = (
+            "inspecciones/formulario_poleas_cvb0006_molienda.html"
+        )
     else:
         template_name = (
             "inspecciones/formulario_poleas.html"
@@ -4924,6 +6040,7 @@ def formulario_poleas(request, inspeccion_id):
             "numeros_poleas_ceramicas": (
                 numeros_poleas_ceramicas
             ),
+            "molienda_config": _molienda_config(inspeccion),
             **permisos,
             **_contexto_workflow_ui_cvb0003(inspeccion),
         },
@@ -4953,6 +6070,33 @@ def reporte_poleas(request, inspeccion_id):
     ):
         return HttpResponseForbidden(
             "No tienes permiso para ver este reporte."
+        )
+
+    if (inspeccion.faja.tag or "").upper().strip() in {
+        "CVB0006",
+        "CVB006",
+        "0240-CVB-006",
+        "0240-CVB0006",
+        "0310CVB0006",
+        "CVB0007",
+        "CVB007",
+        "0240-CVB-007",
+        "0240-CVB0007",
+        "0310CVB0007",
+        "CVB0010",
+        "CVB010",
+        "CVB0010-ENTRANTE",
+        "CVB0010-SALIENTE",
+        "0320-CVB-0010",
+        "0320CVB0010",
+        "CVB0011",
+        "CVB0015",
+        "CVB0017",
+        "CVB0018",
+    }:
+        return redirect(
+            "formulario_poleas",
+            inspeccion_id=inspeccion.id,
         )
 
     if (inspeccion.faja.tag or "").upper().strip() in {
@@ -5367,6 +6511,23 @@ def reporte_life_shaft(request, inspeccion_id):
     ):
         return HttpResponseForbidden(
             "No tienes permiso para ver este reporte."
+        )
+
+    if (inspeccion.faja.tag or "").upper().strip() in {
+        "CVB0006",
+        "CVB006",
+        "0240-CVB-006",
+        "0240-CVB0006",
+        "0310CVB0006",
+        "CVB0007",
+        "CVB007",
+        "0240-CVB-007",
+        "0240-CVB0007",
+        "0310CVB0007",
+    }:
+        return redirect(
+            "formulario_poleas",
+            inspeccion_id=inspeccion.id,
         )
 
     if (inspeccion.faja.tag or "").upper().strip() in {

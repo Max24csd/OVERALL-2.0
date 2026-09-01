@@ -253,7 +253,8 @@
         <h1>Nueva parada</h1>
 
         <p>
-            Programa una nueva parada de Chancado y asigna a todo el equipo.
+            Programa una nueva parada de {{ proceso_label|default:"Chancado" }}
+            y asigna a todo el equipo.
         </p>
     </header>
 
@@ -273,6 +274,9 @@
 
         <p class="section-description">
             Puedes seleccionar varios Inspectores, Supervisores y Analistas.
+            {% if reportes_label %}
+                Se generaran reportes de {{ reportes_label }}
+            {% endif %}
             El Cliente continúa siendo único.
         </p>
 

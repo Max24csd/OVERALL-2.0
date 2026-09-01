@@ -1,0 +1,167 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{ inspeccion.faja.tag }} | Top Cover Molienda</title>
+  <style>
+    :root{--navy:#09234a;--blue:#087bbb;--dark:#46566d;--line:#b9c9dc;--bg:#eef4fa;--soft:#f8fbff}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:#061f3f;font-family:Arial,Helvetica,sans-serif}
+    .page{max-width:1320px;margin:auto;padding:22px}
+    .top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:16px}
+    h1{margin:0;font-size:24px}
+    .muted{color:#58708d;font-size:13px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;border:1px solid #c9d8e8;border-radius:8px;padding:10px 14px;background:#fff;color:#06254a;text-decoration:none;font-weight:900}
+    .primary{background:#0b66b2;color:#fff;border-color:#0b66b2}
+    .card{background:#fff;border:1px solid #cbd9e8;border-radius:10px;padding:14px;margin-bottom:14px}
+    .bar{background:#45566d;color:#fff;text-align:center;font-weight:900;text-transform:uppercase;padding:8px;border-radius:5px;margin-bottom:10px}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid #111}
+    .cell{border:1px solid #111;padding:8px;background:#fff;min-height:42px}
+    .label{background:#112f66;color:#fff;font-weight:900;text-transform:uppercase;text-align:center}
+    .field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .field label{display:block;font-size:11px;font-weight:900;text-transform:uppercase;color:#43546c;margin-bottom:4px}
+    input,select,textarea{width:100%;border:1px solid var(--line);border-radius:5px;padding:7px;background:#fff}
+    textarea{min-height:70px}
+    .diagram{border:2px solid #0f2873;padding:4px;background:#fff}
+    .diagram img{display:block;width:100%;height:auto}
+    .section-title{background:#047cbd;color:#fff;text-align:center;font-weight:900;text-transform:uppercase;padding:7px;border:1px solid #111}
+    table{width:100%;border-collapse:collapse;background:#fff;font-size:12px}
+    th,td{border:1px solid #111;padding:4px;text-align:center}
+    th{background:#d9d9d9;font-weight:900}
+    .measure input{height:26px;padding:3px;text-align:center;border-radius:3px}
+    .calc{background:#eaf5ff;font-weight:900}
+    .danger{color:red}
+    .photos{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+    .photo{border:1px solid #cbd9e8;border-radius:8px;padding:8px;background:var(--soft)}
+    .photo img{width:100%;max-height:120px;object-fit:cover;border-radius:5px;margin-top:6px}
+    .actions{position:sticky;bottom:0;background:rgba(238,244,250,.95);padding:12px 0;display:flex;justify-content:flex-end;gap:10px}
+    @media(max-width:900px){.grid-2,.field-grid,.photos{grid-template-columns:1fr}.grid-4{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="page">
+  <div class="top">
+    <div>
+      <h1>{{ inspeccion.faja.tag }} - Top Cover {{ molienda_config.faja }}</h1>
+      <div class="muted">{{ inspeccion.codigo_reporte }} · Molienda · Transporte de concentrado</div>
+    </div>
+    <a class="btn" href="{% url 'proceso_molienda' %}">&larr; Volver a Molienda</a>
+  </div>
+
+  {% for message in messages %}
+    <div class="card">{{ message }}</div>
+  {% endfor %}
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ calibracion_formset.management_form }}
+    {{ empalmes_formset.management_form }}
+    {{ top_cover_formset.management_form }}
+    {{ fotos_e01_formset.management_form }}
+    {{ fotos_top_cover_formset.management_form }}
+    {{ fotos_e02_formset.management_form }}
+
+    <section class="card">
+      <div class="bar">Datos del equipo o componente</div>
+      <div class="grid-4">
+        <div class="cell label">Condicion</div>
+        <div class="cell">{{ formulario.condicion_general }}</div>
+        <div class="cell label">Tag</div>
+        <div class="cell">{{ molienda_config.tag_largo }}</div>
+        <div class="cell label">Planta</div>
+        <div class="cell">Molienda</div>
+        <div class="cell label">Proceso</div>
+        <div class="cell">Transporte de concentrado</div>
+        <div class="cell label">Equipo</div>
+        <div class="cell">{{ molienda_config.faja }}</div>
+        <div class="cell label">Fecha de inspeccion</div>
+        <div class="cell">{{ formulario.fecha_inspeccion }}</div>
+        <div class="cell label">Inspectores de campo</div>
+        <div class="cell">{{ inspeccion.inspector.get_full_name|default:inspeccion.inspector.username }}</div>
+        <div class="cell label">Supervisor de campo</div>
+        <div class="cell">{{ inspeccion.supervisor.get_full_name|default:inspeccion.supervisor.username }}</div>
+        <div class="cell label">Analista que elabora reporte</div>
+        <div class="cell">{{ inspeccion.analista.get_full_name|default:inspeccion.analista.username }}</div>
+        <div class="cell label">Analista que valida diagnostico</div>
+        <div class="cell">{{ inspeccion.analista.get_full_name|default:inspeccion.analista.username }}</div>
+      </div>
+    </section>
+
+    <section class="card diagram">
+      <div class="bar">Medicion de espesores por ultrasonido (UT) y dureza de la faja {{ molienda_config.tag_largo }}</div>
+      <img src="{% static molienda_config.diagrama_faja %}" alt="Diagrama UT {{ molienda_config.faja }}">
+    </section>
+
+    <section class="card">
+      <div class="grid-2">
+        <div>
+          <div class="section-title">Descripcion del proceso de inspeccion</div>
+          <div class="field-grid">
+            <div class="field"><label>Procedimiento</label>{{ formulario.circunstancias }}</div>
+            <div class="field"><label>Material inspeccionado</label><input value="CAUCHO" readonly></div>
+            <div class="field"><label>Componente inspeccionado</label><input value="TOP COVER DE LA {{ molienda_config.faja|upper }}" readonly></div>
+            <div class="field"><label>Observaciones</label>{{ formulario.observaciones }}</div>
+          </div>
+        </div>
+        <div>
+          <div class="section-title">Parametros de calibracion del equipo UT</div>
+          {% for cal in calibracion_formset %}
+            {{ cal.id }}
+            <div class="field-grid">
+              <div class="field"><label>Marca del equipo</label>{{ cal.marca_equipo }}</div>
+              <div class="field"><label>Modelo</label>{{ cal.modelo_equipo }}</div>
+              <div class="field"><label>Tipo de haz</label>{{ cal.tipo_scan }}</div>
+              <div class="field"><label>Ganancia (dB)</label><input name="ganancia_visual" value="30"></div>
+              <div class="field"><label>Frecuencia (MHz)</label>{{ cal.frecuencia_mhz }}</div>
+              <div class="field"><label>Velocidad (m/s)</label>{{ cal.velocidad_ms }}</div>
+              <div class="field"><label>Ancho de banda</label>{{ cal.rango_mm }}</div>
+              <div class="field"><label>Retardo (us)</label>{{ cal.retardo_us }}</div>
+              <div class="field"><label>Amortiguamiento</label><input name="amortiguamiento_visual" value="400"></div>
+              <div class="field"><label>Diametro (mm)</label><input name="diametro_visual" value="0.5&quot;"></div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="grid-2">
+        <div>
+          {% include "inspecciones/partials/_tabla_molienda_top_cover.html" with titulo="MEDICION DE ESPESORES DEL TOP COVER DEL EMPALME DE LA FAJA "|add:molienda_config.tag_largo filas=empalme_e01_forms tipo="empalme" %}
+          {% include "inspecciones/partials/_fotos_molienda.html" with titulo="Fotos del empalme E-01" formset=fotos_e01_formset %}
+          {% if molienda_config.codigo != "CVB0010" %}
+            {% include "inspecciones/partials/_tabla_molienda_top_cover.html" with titulo="MEDICION DE ESPESORES DEL TOP COVER DEL EMPALME E-02 DE LA FAJA "|add:molienda_config.tag_largo filas=empalme_e02_forms tipo="empalme" %}
+            {% include "inspecciones/partials/_fotos_molienda.html" with titulo="Fotos del empalme E-02" formset=fotos_e02_formset %}
+          {% endif %}
+        </div>
+        <div>
+          {% include "inspecciones/partials/_tabla_molienda_top_cover.html" with titulo="MEDICION DE ESPESORES DEL TOP COVER DE LA FAJA "|add:molienda_config.tag_largo filas=top_cover_formset tipo="top" %}
+          {% include "inspecciones/partials/_fotos_molienda.html" with titulo="Fotos del Top Cover" formset=fotos_top_cover_formset %}
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="field">
+        <label>Conclusiones y recomendaciones</label>
+        {{ formulario.recomendaciones }}
+      </div>
+    </section>
+
+    <div class="actions">
+      <a class="btn" href="{% url 'proceso_molienda' %}">Cancelar</a>
+      <a class="btn" href="{% url 'exportar_excel_molienda_cvb0006' inspeccion.id %}">Descargar Excel</a>
+      <a class="btn" href="{% url 'exportar_pdf_molienda_cvb0006' inspeccion.id %}">Descargar PDF</a>
+      {% if puede_editar %}
+        <button class="btn primary" type="submit" name="workflow_action" value="guardar">Guardar inspeccion</button>
+      {% endif %}
+    </div>
+  </form>
+</div>
+</body>
+</html>
+
+

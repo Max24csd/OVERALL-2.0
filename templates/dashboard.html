@@ -117,7 +117,7 @@
 
     .process-grid{
       display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
+      grid-template-columns:repeat(3,minmax(0,1fr));
       gap:22px;
     }
 
@@ -220,6 +220,10 @@
 
     .btn:hover{background:var(--blue-hover)}
 
+    @media(max-width:1150px){
+      .process-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+
     @media(max-width:850px){
       .shell{grid-template-columns:1fr}
       .sidebar{
@@ -251,6 +255,10 @@
 
       <a class="nav-link" href="{% url 'filtros_mm:nueva_parada' %}">
         + Nueva parada Filtros
+      </a>
+
+      <a class="nav-link" href="{% url 'nueva_parada_molienda' %}">
+        + Nueva parada Molienda
       </a>
 
       <a class="nav-link" href="{% url 'usuarios_lista' %}">
@@ -383,6 +391,54 @@
         <div class="actions">
           <a class="btn" href="{% url 'proceso_filtros' %}">
             Ver Filtros
+          </a>
+        </div>
+
+      </article>
+
+      <!-- =====================================================
+           MOLIENDA
+      ====================================================== -->
+      <article class="process-card">
+
+        <div class="process-card-top">
+          <span class="badge">Molienda</span>
+
+          <span class="count">
+            {{ inspecciones_molienda_total }} reportes actuales
+          </span>
+        </div>
+
+        <h2>Molienda</h2>
+
+        <p class="description">
+          Top Cover/Faja y Poleas de Faja 6, 7, 10, 11, 15, 17 y 18.
+        </p>
+
+        <div class="latest">
+          <span class="latest-label">
+            Ãšltima inspecciÃ³n / parada
+          </span>
+
+          {% if parada_molienda_actual %}
+            <strong>{{ parada_molienda_actual.nombre }}</strong>
+
+            <small>
+              {{ parada_molienda_actual.fecha_inicio|date:"d/m/Y" }}
+
+              {% if parada_molienda_actual.fecha_fin %}
+                Â· {{ parada_molienda_actual.fecha_fin|date:"d/m/Y" }}
+              {% endif %}
+            </small>
+          {% else %}
+            <strong>Sin parada disponible</strong>
+            <small>No hay parada actual visible.</small>
+          {% endif %}
+        </div>
+
+        <div class="actions">
+          <a class="btn" href="{% url 'proceso_molienda' %}">
+            Ver Molienda
           </a>
         </div>
 

@@ -42,6 +42,36 @@ def _agrupar_chancado_por_equipo(inspecciones):
     return resultado
 
 
+def _agrupar_molienda_por_equipo(inspecciones):
+    resultado = []
+
+    for codigo, nombre in (
+        ("CVB006", "Faja 6"),
+        ("CVB007", "Faja 7"),
+        ("CVB010", "Faja 10"),
+        ("CVB011", "Faja 11"),
+        ("CVB015", "Faja 15"),
+        ("CVB017", "Faja 17"),
+        ("CVB018", "Faja 18"),
+    ):
+        items = [
+            inspeccion
+            for inspeccion in inspecciones
+            if _codigo_equipo_dashboard(inspeccion) == codigo
+        ]
+
+        if items:
+            resultado.append(
+                {
+                    "codigo": codigo,
+                    "nombre": nombre,
+                    "inspecciones": _ordenar_inspecciones_dashboard(items),
+                }
+            )
+
+    return resultado
+
+
 def _filtrar_chancado_para_usuario(usuario, queryset):
     rol = obtener_rol(usuario)
 
@@ -53,6 +83,57 @@ def _filtrar_chancado_para_usuario(usuario, queryset):
         for inspeccion in queryset
         if usuario_puede_abrir_inspeccion(usuario, inspeccion)
     ]
+
+
+def _paradas_molienda_para_usuario(usuario):
+    rol = obtener_rol(usuario)
+
+    if rol == "Administrador":
+        return list(
+            Parada.objects
+            .filter(planta__iexact="Molienda")
+            .order_by("-fecha_inicio", "-id")
+        )
+
+    ids = (
+        AccesoParada.objects
+        .filter(
+            usuario_id=usuario.id,
+            rol=rol,
+            activo=True,
+            parada__planta__iexact="Molienda",
+        )
+        .values_list("parada_id", flat=True)
+        .distinct()
+    )
+
+    return list(
+        Parada.objects
+        .filter(id__in=ids)
+        .order_by("-fecha_inicio", "-id")
+    )
+
+
+def _inspecciones_molienda_para_usuario(usuario, parada):
+    if not parada:
+        return []
+
+    qs = (
+        Inspeccion.objects
+        .select_related(
+            "parada",
+            "faja",
+            "inspector",
+            "supervisor",
+            "analista",
+            "cliente",
+        )
+        .prefetch_related("historial")
+        .filter(parada=parada)
+        .order_by("faja__tag", "tipo", "id")
+    )
+
+    return _filtrar_chancado_para_usuario(usuario, qs)
 
 
 @login_required
@@ -127,6 +208,59 @@ def proceso_chancado(request):
             "historicos_por_equipo": _agrupar_chancado_por_equipo(historicos),
             "total_actuales": len(actuales),
             "total_historicos": len(historicos),
+        },
+    )
+
+
+@login_required
+def proceso_molienda(request):
+    """
+    Vista de presentacion del proceso Molienda.
+
+    La parada mas reciente se considera actual.
+    Las anteriores quedan como historico.
+    """
+    rol = obtener_rol(request.user)
+    paradas = _paradas_molienda_para_usuario(request.user)
+    parada_actual = paradas[0] if paradas else None
+    paradas_historicas = paradas[1:] if len(paradas) > 1 else []
+
+    actuales = _inspecciones_molienda_para_usuario(
+        request.user,
+        parada_actual,
+    )
+
+    for inspeccion in actuales:
+        _agregar_contadores_dashboard(inspeccion)
+
+    historicos = []
+
+    for parada in paradas_historicas:
+        reportes = _inspecciones_molienda_para_usuario(
+            request.user,
+            parada,
+        )
+
+        for inspeccion in reportes:
+            _agregar_contadores_dashboard(inspeccion)
+
+        historicos.append(
+            {
+                "parada": parada,
+                "total": len(reportes),
+                "grupos": _agrupar_molienda_por_equipo(reportes),
+            }
+        )
+
+    return render(
+        request,
+        "procesos/molienda.html",
+        {
+            "rol": rol,
+            "parada_actual": parada_actual,
+            "actuales_por_equipo": _agrupar_molienda_por_equipo(actuales),
+            "total_actuales": len(actuales),
+            "paradas_historicas": historicos,
         },
     )
 
