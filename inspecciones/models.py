@@ -590,6 +590,17 @@ class FotoInspeccion(models.Model):
         related_name="fotografias",
     )
 
+    # Clasifica las fotografias de los formularios historicos de Filtros.
+    seccion = models.CharField(
+        max_length=120,
+        blank=True,
+    )
+
+    titulo = models.CharField(
+        max_length=200,
+        blank=True,
+    )
+
     imagen = models.ImageField(
         upload_to=ruta_foto_inspeccion,
     )
