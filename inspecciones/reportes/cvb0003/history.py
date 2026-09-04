@@ -259,6 +259,52 @@ def historial_componente_visible(inspeccion, componente, fecha_tecnica, relacion
     return historial_componente(inspeccion, componente, fecha_tecnica, relacion)
 
 
+def historial_mediciones_genericas(inspeccion, mediciones_actuales, fecha_tecnica):
+    """Obtiene la ultima medida disponible para las filas genericas de Faja."""
+    def clave(medicion):
+        return (
+            medicion.seccion,
+            medicion.punto,
+            medicion.lado,
+            medicion.posicion,
+        )
+
+    pendientes = {clave(medicion): medicion for medicion in mediciones_actuales}
+    resultados = {}
+
+    for anterior in _inspecciones_anteriores(inspeccion, fecha_tecnica):
+        indice = {clave(medicion): medicion for medicion in anterior.mediciones.all()}
+        for identidad in list(pendientes):
+            previo = indice.get(identidad)
+            if previo is None:
+                continue
+            valores = {
+                campo: getattr(previo, campo)
+                for campo in CAMPOS_MEDICION
+                if getattr(previo, campo) is not None
+            }
+            if not valores:
+                continue
+            actual = pendientes.pop(identidad)
+            resultados[actual.pk] = {
+                "fecha": anterior.fecha_inspeccion,
+                "codigo": anterior.codigo_reporte,
+                "componente": " / ".join(str(valor) for valor in identidad if valor),
+                "tipo": "NORMAL",
+                "condicion": anterior.get_condicion_general_display(),
+                "observacion": previo.observacion,
+                "valores": valores,
+                "minimo": min(valores.values()),
+                "promedio": round(sum(valores.values()) / len(valores), 2),
+                "filas": [],
+                "fotografias": [],
+            }
+        if not pendientes:
+            break
+
+    return resultados
+
+
 def _clave_empalme(medicion):
     """
     Identidad técnica estable del empalme.

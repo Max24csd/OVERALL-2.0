@@ -25,6 +25,11 @@ from inspecciones.reportes.campaign_utils import (
     formsets_life_shaft_campana,
     guardar_formsets_campana,
 )
+from inspecciones.reportes.cvb0003.history import (
+    historial_componente_visible,
+    preparar_formset_historico,
+    validar_formset_historico,
+)
 
 from .life_shaft_excel import generar_excel_life_shaft_cvb0001
 from .text_utils import (
@@ -107,6 +112,10 @@ def formulario_life_shaft_cvb0001(request, inspeccion):
             request.POST or None, instance=shaft, prefix=f"mediciones-{shaft.id}"
         )
         campana = formsets_life_shaft_campana(request, shaft)
+        historial=historial_componente_visible(inspeccion,shaft,inspeccion.fecha_inspeccion,"life_shafts")
+        valores_historicos=historial["valores"] if historial else {}
+        preparar_formset_historico(mediciones,valores_historicos)
+        preparar_formset_historico(campana["FIN"],valores_historicos)
         fotos = FotoLifeShaftCVB0001FormSet(
             request.POST or None,
             request.FILES or None,
@@ -115,8 +124,8 @@ def formulario_life_shaft_cvb0001(request, inspeccion):
         )
         if request.method == "POST":
             shaft_valido = form_shaft.is_valid()
-            mediciones_validas = mediciones.is_valid() if shaft_valido and not es_campana(shaft) else True
-            campana_valida = formsets_campana_validos(shaft, campana) if shaft_valido else False
+            mediciones_validas = validar_formset_historico(mediciones,valores_historicos) if shaft_valido and not es_campana(shaft) else True
+            campana_valida = (formsets_campana_validos(shaft,campana) and validar_formset_historico(campana["FIN"],valores_historicos)) if shaft_valido else False
             fotos_validas = fotos.is_valid()
             todo_valido = todo_valido and shaft_valido and mediciones_validas and campana_valida and fotos_validas
         bloques.append(

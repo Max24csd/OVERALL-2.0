@@ -19,6 +19,11 @@ from inspecciones.reportes.campaign_utils import (
     formsets_polea_campana,
     guardar_formsets_campana,
 )
+from inspecciones.reportes.cvb0003.history import (
+    historial_componente_visible,
+    preparar_formset_historico,
+    validar_formset_historico,
+)
 
 from .poleas_excel import generar_excel_poleas_cvb0004
 from .utils import (
@@ -88,12 +93,19 @@ def formulario_poleas_cvb0004(request, inspeccion):
         form_polea = PoleaInspeccionForm(request.POST or None, instance=polea, prefix=f"polea-{polea.id}")
         mediciones = MedicionPoleaFormSet(request.POST or None, instance=polea, prefix=f"mediciones-{polea.id}")
         campana = formsets_polea_campana(request, polea)
+        historial = historial_componente_visible(
+            inspeccion, polea, inspeccion.fecha_inspeccion,
+            "poleas_inspeccionadas",
+        )
+        valores_historicos = historial["valores"] if historial else {}
+        preparar_formset_historico(mediciones, valores_historicos)
+        preparar_formset_historico(campana["FIN"], valores_historicos)
         fotos = FotoPoleaFormSet(request.POST or None, request.FILES or None, instance=polea, prefix=f"fotografias-{polea.id}")
         if request.method == "POST":
             polea_valida = form_polea.is_valid()
             fotos_validas = fotos.is_valid()
-            normales_validas = mediciones.is_valid() if polea_valida and not es_campana(polea) and polea.numero not in POLEAS_CERAMICAS else True
-            campana_valida = formsets_campana_validos(polea, campana) if polea_valida else False
+            normales_validas = validar_formset_historico(mediciones, valores_historicos) if polea_valida and not es_campana(polea) and polea.numero not in POLEAS_CERAMICAS else True
+            campana_valida = (formsets_campana_validos(polea, campana) and validar_formset_historico(campana["FIN"], valores_historicos)) if polea_valida else False
             todo_valido = todo_valido and polea_valida and fotos_validas and normales_validas and campana_valida
         bloques.append({"polea": polea, "formulario_polea": form_polea, "mediciones_formset": mediciones, "campana_inicio_formset": campana["INICIO"], "campana_fin_formset": campana["FIN"], "campana_formsets": (("INICIO", campana["INICIO"]), ("FIN", campana["FIN"])), "es_campana": es_campana(polea), "fotos_formset": fotos, "fotografias": list(polea.fotografias.order_by("creada_en", "id"))})
     if request.method == "POST":

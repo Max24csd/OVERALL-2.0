@@ -89,6 +89,7 @@ from .reportes.cvb0003.history import (
     clave_pk_form,
     historial_componente_visible,
     historial_faja,
+    historial_mediciones_genericas,
     modo_campana_seleccionado,
     preparar_formset_historico,
     validar_formset_historico,
@@ -3860,6 +3861,25 @@ def formulario_faja_cvb0004(request, inspeccion):
         )
     )
 
+    historial_empalmes = historial_faja(
+        inspeccion, inspeccion.fecha_inspeccion,
+        list(empalmes_formset.queryset), "empalme"
+    )
+    historial_carga = historial_faja(
+        inspeccion, inspeccion.fecha_inspeccion,
+        list(carga_formset.queryset), "tramo"
+    )
+    preparar_formset_historico(
+        empalmes_formset,
+        {pk: dato["valores"] for pk, dato in historial_empalmes.items()},
+        clave_pk_form,
+    )
+    preparar_formset_historico(
+        carga_formset,
+        {pk: dato["valores"] for pk, dato in historial_carga.items()},
+        clave_pk_form,
+    )
+
     # =====================================================
     # PROCESAR GUARDADO
     # =====================================================
@@ -3872,12 +3892,16 @@ def formulario_faja_cvb0004(request, inspeccion):
 
         formulario_valido = formulario.is_valid()
 
-        empalmes_validos = (
-            empalmes_formset.is_valid()
+        empalmes_validos = validar_formset_historico(
+            empalmes_formset,
+            {pk: dato["valores"] for pk, dato in historial_empalmes.items()},
+            clave_pk_form,
         )
 
-        carga_valida = (
-            carga_formset.is_valid()
+        carga_valida = validar_formset_historico(
+            carga_formset,
+            {pk: dato["valores"] for pk, dato in historial_carga.items()},
+            clave_pk_form,
         )
 
         fotos_empalmes_validas = (
@@ -4085,6 +4109,8 @@ def formulario_faja_cvb0004(request, inspeccion):
             "carga_formset": (
                 carga_formset
             ),
+            "historial_empalmes": list(historial_empalmes.values()),
+            "historial_carga": list(historial_carga.values()),
 
             # Fotografías
             "fotos_empalmes_formset": (
@@ -4211,6 +4237,41 @@ def formulario_faja_cvb0006_molienda(request, inspeccion):
             kwargs.update({"data": request.POST, "files": request.FILES})
         formsets_fotos[nombre] = FotoFajaCVB0003FormSet(**kwargs)
 
+    calibracion_formset = CalibracionUTFajaCVB0003FormSet(
+        request.POST or None,
+        instance=inspeccion,
+        prefix="calibracion",
+    )
+    empalmes_formset = MedicionEmpalmeCVB0003FormSet(
+        request.POST or None,
+        instance=inspeccion,
+        prefix="empalmes",
+        queryset=empalmes_qs,
+    )
+    top_cover_formset = MedicionTramoCVB0003FormSet(
+        request.POST or None,
+        instance=inspeccion,
+        prefix="top-cover",
+        queryset=top_cover_qs,
+    )
+    fecha_tecnica = inspeccion.fecha_inspeccion
+    historial_empalmes = historial_faja(
+        inspeccion, fecha_tecnica, list(empalmes_formset.queryset), "empalme"
+    )
+    historial_top_cover = historial_faja(
+        inspeccion, fecha_tecnica, list(top_cover_formset.queryset), "tramo"
+    )
+    preparar_formset_historico(
+        empalmes_formset,
+        {pk: dato["valores"] for pk, dato in historial_empalmes.items()},
+        clave_pk_form,
+    )
+    preparar_formset_historico(
+        top_cover_formset,
+        {pk: dato["valores"] for pk, dato in historial_top_cover.items()},
+        clave_pk_form,
+    )
+
     if request.method == "POST":
         if not puede_editar:
             return HttpResponseForbidden(
@@ -4218,29 +4279,19 @@ def formulario_faja_cvb0006_molienda(request, inspeccion):
             )
 
         formulario = InspeccionForm(request.POST, instance=inspeccion)
-        calibracion_formset = CalibracionUTFajaCVB0003FormSet(
-            request.POST,
-            instance=inspeccion,
-            prefix="calibracion",
-        )
-        empalmes_formset = MedicionEmpalmeCVB0003FormSet(
-            request.POST,
-            instance=inspeccion,
-            prefix="empalmes",
-            queryset=empalmes_qs,
-        )
-        top_cover_formset = MedicionTramoCVB0003FormSet(
-            request.POST,
-            instance=inspeccion,
-            prefix="top-cover",
-            queryset=top_cover_qs,
-        )
-
         formularios_validos = [
             formulario.is_valid(),
             calibracion_formset.is_valid(),
-            empalmes_formset.is_valid(),
-            top_cover_formset.is_valid(),
+            validar_formset_historico(
+                empalmes_formset,
+                {pk: dato["valores"] for pk, dato in historial_empalmes.items()},
+                clave_pk_form,
+            ),
+            validar_formset_historico(
+                top_cover_formset,
+                {pk: dato["valores"] for pk, dato in historial_top_cover.items()},
+                clave_pk_form,
+            ),
             *[formset.is_valid() for formset in formsets_fotos.values()],
         ]
 
@@ -4295,21 +4346,6 @@ def formulario_faja_cvb0006_molienda(request, inspeccion):
         )
     else:
         formulario = InspeccionForm(instance=inspeccion)
-        calibracion_formset = CalibracionUTFajaCVB0003FormSet(
-            instance=inspeccion,
-            prefix="calibracion",
-        )
-        empalmes_formset = MedicionEmpalmeCVB0003FormSet(
-            instance=inspeccion,
-            prefix="empalmes",
-            queryset=empalmes_qs,
-        )
-        top_cover_formset = MedicionTramoCVB0003FormSet(
-            instance=inspeccion,
-            prefix="top-cover",
-            queryset=top_cover_qs,
-        )
-
     return render(
         request,
         "inspecciones/formulario_faja_cvb0006_molienda.html",
@@ -4500,6 +4536,24 @@ def formulario_faja(request, inspeccion_id):
             argumentos.update({"data": request.POST, "files": request.FILES})
         formsets_fotos[nombre] = FotoInspeccionFormSet(**argumentos)
 
+    mediciones_formset = MedicionFormSet(
+        request.POST or None,
+        instance=inspeccion,
+        prefix="mediciones",
+    )
+    historial_mediciones = historial_mediciones_genericas(
+        inspeccion,
+        list(mediciones_formset.queryset),
+        inspeccion.fecha_inspeccion,
+    )
+    preparar_formset_historico(
+        mediciones_formset,
+        {
+            pk: dato["valores"]
+            for pk, dato in historial_mediciones.items()
+        },
+    )
+
     # =====================================================
     # PETICIÓN POST
     # =====================================================
@@ -4515,18 +4569,16 @@ def formulario_faja(request, inspeccion_id):
             instance=inspeccion,
         )
 
-        mediciones_formset = MedicionFormSet(
-            request.POST,
-            instance=inspeccion,
-            prefix="mediciones",
-        )
-
         formulario_valido = (
             formulario.is_valid()
         )
 
-        mediciones_validas = (
-            mediciones_formset.is_valid()
+        mediciones_validas = validar_formset_historico(
+            mediciones_formset,
+            {
+                pk: dato["valores"]
+                for pk, dato in historial_mediciones.items()
+            },
         )
 
         fotos_validas = all(
@@ -4629,11 +4681,6 @@ def formulario_faja(request, inspeccion_id):
             instance=inspeccion,
         )
 
-        mediciones_formset = MedicionFormSet(
-            instance=inspeccion,
-            prefix="mediciones",
-        )
-
     # =====================================================
     # SEPARAR EMPALMES Y TRAMOS
     # =====================================================
@@ -4686,6 +4733,7 @@ def formulario_faja(request, inspeccion_id):
         "empalme_e01": empalme_e01,
         "empalme_e02": empalme_e02,
         "tramos": tramos,
+        "historial_mediciones": list(historial_mediciones.values()),
         "resumen_e01": resumen_e01,
         "resumen_e02": resumen_e02,
         **formsets_fotos,
@@ -5753,19 +5801,14 @@ def formulario_poleas(request, inspeccion_id):
         )
         campana_formsets = formsets_polea_campana(request, polea)
 
-        historial = (
-            historial_componente_visible(
-                inspeccion, polea, fecha_tecnica, "poleas_inspeccionadas"
-            )
-            if es_cvb0003
-            else None
+        historial = historial_componente_visible(
+            inspeccion, polea, fecha_tecnica, "poleas_inspeccionadas"
         )
         valores_historicos = historial["valores"] if historial else {}
-        if es_cvb0003:
-            preparar_formset_historico(mediciones_formset, valores_historicos)
-            preparar_formset_historico(
-                campana_formsets["FIN"], valores_historicos
-            )
+        preparar_formset_historico(mediciones_formset, valores_historicos)
+        preparar_formset_historico(
+            campana_formsets["FIN"], valores_historicos
+        )
 
         fotos_formset = FotoPoleaFormSet(
             request.POST or None,
@@ -6283,19 +6326,14 @@ def formulario_life_shaft(request, inspeccion_id):
         )
         campana_formsets = formsets_life_shaft_campana(request, shaft)
 
-        historial = (
-            historial_componente_visible(
-                inspeccion, shaft, fecha_tecnica, "life_shafts"
-            )
-            if es_cvb0003
-            else None
+        historial = historial_componente_visible(
+            inspeccion, shaft, fecha_tecnica, "life_shafts"
         )
         valores_historicos = historial["valores"] if historial else {}
-        if es_cvb0003:
-            preparar_formset_historico(mediciones_formset, valores_historicos)
-            preparar_formset_historico(
-                campana_formsets["FIN"], valores_historicos
-            )
+        preparar_formset_historico(mediciones_formset, valores_historicos)
+        preparar_formset_historico(
+            campana_formsets["FIN"], valores_historicos
+        )
 
         if request.method == "POST":
             shaft_valido = formulario_shaft.is_valid()
